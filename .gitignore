@@ -2,3 +2,5 @@
 /.gradle/
 /compiler-plugin/build/
 /sample/build/
+/.idea/
+/build/
