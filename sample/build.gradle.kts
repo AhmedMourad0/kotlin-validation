@@ -1,9 +1,7 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    id("com.github.johnrengelman.shadow")
 }
 
 group = "dev.ahmedmourad.validation"
@@ -15,10 +13,18 @@ val jvmTargetVersion: String by project
 val kotlinTestVersion: String by project
 
 dependencies {
-    compileOnly(kotlin("stdlib"))
+    implementation(kotlin("stdlib"))
     compileOnly("io.arrow-kt:arrow-annotations:$arrowVersion")
 
-    api(project(path = ":compiler-plugin", configuration = "shadow"))
+    implementation(project(path = ":core"))
+    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-script-util:1.3.61") {
+        exclude("org.jetbrains.kotlin", "kotlin-stdlib")
+        exclude("org.jetbrains.kotlin", "kotlin-compiler")
+        exclude("org.jetbrains.kotlin", "kotlin-compiler-embeddable")
+    }
+    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.3.61")
+    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.3.61")
+    kotlinCompilerClasspath(project(":core"))
 
     testImplementation("io.kotlintest:kotlintest-runner-junit4:$kotlinTestVersion")
 }
@@ -31,11 +37,9 @@ tasks {
         freeCompilerArgs =
             listOf("-Xplugin=${project.rootDir}/compiler-plugin/build/libs/compiler-plugin-$validationVersion-all.jar")
     }
+    compileKotlin.dependsOn(":compiler-plugin:createValidationPlugin")
     compileTestKotlin.kotlinOptions {
         jvmTarget = jvmTargetVersion
-    }
-    named<ShadowJar>("shadowJar") {
-        configurations = listOf(project.configurations.compileOnly.get())
     }
     jar {
         manifest {
