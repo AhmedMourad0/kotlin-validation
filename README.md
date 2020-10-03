@@ -43,9 +43,9 @@ sealed class PasswordViolations {
 }
 
 //also generates top-level `validate` and other helper functions
+```
 
-/*...*/
-
+```kotlin
 interface HasV {
     val v: String
 }
