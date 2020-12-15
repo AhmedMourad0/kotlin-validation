@@ -8,5 +8,7 @@ import kotlin.contracts.ExperimentalContracts
 class ValidationPlugin : Meta {
     @ExperimentalContracts
     override fun intercept(ctx: CompilerContext): List<CliPlugin> =
-        listOf(helloWorld)
+        listOf(
+            kotlinValidation
+        )
 }
