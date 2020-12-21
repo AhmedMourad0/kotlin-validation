@@ -1,37 +1,46 @@
-package dev.ahmedmourad.validation.compiler.generators
+package dev.ahmedmourad.validation.compiler.files
 
 import arrow.meta.phases.CompilerContext
 import dev.ahmedmourad.validation.compiler.utils.*
-import dev.ahmedmourad.validation.compiler.descriptors.ViolationsDescriptor
+import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
+import dev.ahmedmourad.validation.compiler.verifier.DslVerifier
 import org.jetbrains.kotlin.cli.common.config.KotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.config.kotlinSourceRoots
 import java.io.File
 
-internal class FileManager(private val cc: CompilerContext) {
+internal class FileManager(
+    private val cc: CompilerContext,
+    private val verifier: DslVerifier
+) {
 
     private val sourceGenFolder by lazy { createSourceGenFolder() }
 
     internal val generatedFiles: List<File>
-        get() = sourceGenFolder?.let(::listOf) ?: emptyList()
+        get() = sourceGenFolder?.let(::listOf).orEmpty()
 
     internal fun createFile(
-        violationsDescriptor: ViolationsDescriptor
+        constraintsDescriptor: ConstraintsDescriptor,
+        imports: List<String>,
+        violationsText: String,
+        functionsText: List<String>
     ) {
 
-        val fileName = violationsDescriptor.constrainedSimpleName + OUTPUT_FILE_NAME_SUFFIX
-        val directory = File(sourceGenFolder, violationsDescriptor.packageAsPath + "/$OUTPUT_FOLDER")
+        val fileName = constraintsDescriptor.constrainedType.simpleName() + OUTPUT_FILE_NAME_SUFFIX
+        val directory = File(sourceGenFolder, constraintsDescriptor.packageAsPath + "/$OUTPUT_FOLDER")
         val file = File(directory, "$fileName.kt")
 
         if (!file.parentFile.exists() && !file.parentFile.mkdirs()) {
-            cc.reportError("Could not generate package directory: $file", null)
+            verifier.reportError("Could not generate package directory: $file", null)
             return
         }
 
         file.writeText(
             """
-        |package ${violationsDescriptor.packageName}.$OUTPUT_FOLDER
+        |package ${constraintsDescriptor.packageName}.$OUTPUT_FOLDER
         |
-        |${violationsDescriptor.text}
+        |${imports.joinToString("\n") { "import $it" }}
+        |
+        |${(listOf(violationsText) + functionsText).joinToString("\n\n")}
         |
         """.trimMargin()
         )
@@ -44,7 +53,7 @@ internal class FileManager(private val cc: CompilerContext) {
         fun kotlinValidationDir(parent: File): File? {
             val file = File(parent, "kotlin-validation")
             return if (!file.exists() && !file.mkdirs()) {
-                cc.reportError("Could not create source generation directory: $file", null)
+                verifier.reportError("Could not create source generation directory: $file", null)
             } else {
                 file
             }
@@ -64,7 +73,7 @@ internal class FileManager(private val cc: CompilerContext) {
             return kotlinValidationDir(it)
         }
 
-        return cc.reportError(
+        return verifier.reportError(
             "Could not create source generation directory: $oneSourceFile",
             null
         )

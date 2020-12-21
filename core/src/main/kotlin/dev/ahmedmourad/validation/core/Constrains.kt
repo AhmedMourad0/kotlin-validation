@@ -10,20 +10,23 @@ interface Constrains<T : Any> {
     val constraints: ConstraintsDescriptor<T>
 }
 
-data class ConstraintsDescriptor<T : Any> internal constructor(
-    private val constraints: List<Constraint<T>>
+class ConstraintsDescriptor<T : Any> internal constructor(
+    private val values: List<Constraint<T>>
+) : List<Constraint<T>> by values
+data class Constraint<T : Any> internal constructor(
+    val violation: String,
+    val validations: List<Validation<T>>,
+    val params: List<Parameter<T, *>>,
+    val validators: List<Validator<T, *>>
 )
-internal data class Constraint<T : Any>(
-    private val violation: String,
-    private val validations: List<Validation<*>>,
-    private val params: List<Parameter<T, *>>,
-    private val validators: List<Validator<T, *>>
+data class Parameter<T : Any, P> internal constructor(
+    val name: String,
+    val get: T.() -> P
 )
-internal data class Parameter<T : Any, P>(private val name: String, private val get: T.() -> P)
-internal data class Validation<X>(private val validate: X.() -> Boolean)
-internal data class Validator<T : Any, DT>(
-    private val property: KProperty1<T, DT>,
-    private val validations: List<Validation<DT>>
+data class Validation<X> internal constructor(val validate: X.() -> Boolean)
+data class Validator<T : Any, DT> internal constructor(
+    val property: KProperty1<T, DT>,
+    val validations: List<Validation<DT>>
 )
 
 @ValidationMarker
@@ -37,10 +40,10 @@ class ConstraintsBuilder<T : Any> internal constructor() {
 
 @ValidationMarker
 class ConstraintBuilder<T : Any> internal constructor(private val violation: String) {
-    private val validations: MutableList<Validation<*>> = mutableListOf()
+    private val validations: MutableList<Validation<T>> = mutableListOf()
     private val params: MutableList<Parameter<T, *>> = mutableListOf()
     private val validators: MutableList<Validator<T, *>> = mutableListOf()
-    internal fun <X> add(validation: Validation<X>) {
+    internal fun add(validation: Validation<T>) {
         validations.add(validation)
     }
     internal fun <P> add(param: Parameter<T, P>) {
@@ -65,11 +68,16 @@ class ValidatorBuilder<T : Any, DT> internal constructor(
 
 @Suppress("unused")
 // The receiver is needed to ensure dsl integrity
-fun <T : Any> Constrains<T>.constraints(description: ConstraintsBuilder<T>.() -> Unit): ConstraintsDescriptor<T> {
-    return ConstraintsBuilder<T>().apply(description).build()
+fun <T : Any> Constrains<T>.describe(
+    description: ConstraintsBuilder<T>.() -> Unit
+): Lazy<ConstraintsDescriptor<T>> {
+    return lazy { ConstraintsBuilder<T>().apply(description).build() }
 }
 
-fun <T : Any> ConstraintsBuilder<T>.constraint(violation: String, description: ConstraintBuilder<T>.() -> Unit) {
+fun <T : Any> ConstraintsBuilder<T>.constraint(
+    violation: String,
+    description: ConstraintBuilder<T>.() -> Unit
+) {
     this.add(ConstraintBuilder<T>(violation).apply(description).build())
 }
 
@@ -94,4 +102,17 @@ fun <T : Any, DT> ValidatorBuilder<T, DT>.validation(validate: DT.() -> Boolean)
 
 fun <T : Any> ValidatorBuilder<T, String>.minLength(min: Int) = validation {
     length >= min
+}
+
+sealed class Case<out V : Any, out T : Any> {
+    data class Illegal<V : Any>(val v: V) : Case<V, Nothing>()
+    data class Legal<T : Any>(val v: T) : Case<Nothing, T>()
+}
+
+fun <T : Any> T.legal(): Case<Nothing, T> {
+    return Case.Legal(this)
+}
+
+fun <V : Any> V.illegal(): Case<V, Nothing> {
+    return Case.Illegal(this)
 }
