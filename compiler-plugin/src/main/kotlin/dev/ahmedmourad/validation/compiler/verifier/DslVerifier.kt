@@ -10,10 +10,7 @@ import org.jetbrains.kotlin.cli.common.messages.MessageUtil
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.descriptors.ClassConstructorDescriptor
 import org.jetbrains.kotlin.js.translate.utils.finalElement
-import org.jetbrains.kotlin.psi.KtElement
-import org.jetbrains.kotlin.psi.KtExpression
-import org.jetbrains.kotlin.psi.KtFunctionLiteral
-import org.jetbrains.kotlin.psi.KtObjectDeclaration
+import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.isIdentifier
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.calls.callUtil.getParentCall
@@ -85,18 +82,40 @@ internal class DslVerifier(
         return params.distinctBy { it.name }
     }
 
-    //TODO: enforce only objects, companion objects and regular classes with companions
+    //TODO: sealed, interface, abstract, inline, empty constructor
+    //TODO: warn when no type parameters or value parameters
+    //TODO: type params of constrainer and constrained must match
     internal fun verifyConstrainerIsObjectOrRegularClassWithCompanion(
         describeCall: KtElement?
-    ): KtObjectDeclaration? {
-        return describeCall?.parent
+    ): KtClassOrObject? {
+
+        val constrainer = describeCall?.parent
             ?.parent
             ?.parent
-            ?.parent as? KtObjectDeclaration
-            ?: return reportError(
-                "Only objects and companion objects can implement Constrains",
-                describeCall?.parent?.parent?.parent?.finalElement
-            )
+            ?.parent as? KtClassOrObject
+
+        return when (constrainer) {
+
+            is KtObjectDeclaration -> constrainer
+
+            is KtClass -> {
+                if (constrainer.companionObjects.isEmpty()) {
+                    reportError(
+                        "A companion object must be provided in order to implement Constrains",
+                        constrainer.finalElement
+                    )
+                } else {
+                    constrainer
+                }
+            }
+
+            else -> {
+                reportError(
+                    "Only objects and regular classes with companion objects can implement Constrains",
+                    constrainer?.finalElement
+                )
+            }
+        }
     }
 
     internal fun verifyViolationName(nameExpression: KtExpression): Pair<String, KtExpression>? {
@@ -146,9 +165,9 @@ internal class DslVerifier(
         return constrainedClass.constructors
             .firstOrNull { it.isPrimary }
             ?: reportError(
-            "Only data classes and regular classes with primary constructors can be constrained",
-            constrainedTypePsi
-        )
+                "Only data classes and regular classes with primary constructors can be constrained",
+                constrainedTypePsi
+            )
 
     }
 

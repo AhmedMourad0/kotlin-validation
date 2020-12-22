@@ -31,7 +31,7 @@ internal class ConstraintsAnalyser(
 
                     FQ_NAME_CONSTRAINT_FUN -> {
                         val describeCall = getDescribeCall(resolvedCall) ?: return@mapNotNull null
-                        val constrainerObject = getConstrainerObject(describeCall) ?: return@mapNotNull null
+                        val constrainerObject = getConstrainerClassOrObject(describeCall) ?: return@mapNotNull null
                         val constrainedType = getConstrainedType(resolvedCall) ?: return@mapNotNull null
                         val constrainedTypePsi = getConstrainedTypePsi(resolvedCall) ?: return@mapNotNull null
                         val (violationName, violationNameExpression) = getViolationName(resolvedCall)
@@ -55,7 +55,7 @@ internal class ConstraintsAnalyser(
                     else -> null
                 }
             }.groupBy {
-                it.constrainerObject.fqName?.asString()
+                it.constrainerClassOrObject.fqName?.asString()
             }.let {
                 verifier.verifyNoDuplicateViolations(it)
             }.map { (_, violationsGroup) ->
@@ -66,7 +66,7 @@ internal class ConstraintsAnalyser(
                 ConstraintsDescriptor(
                     any.constrainedType,
                     any.constrainedTypePsi,
-                    any.constrainerObject,
+                    any.constrainerClassOrObject,
                     violationsGroup
                 )
             }
@@ -81,7 +81,7 @@ internal class ConstraintsAnalyser(
 
         return (describeFunctionLiteral?.getParentCall(bindingContext)
             ?.callElement
-            ?.containingNonLocalDeclaration() as? KtObjectDeclaration)
+            ?.containingNonLocalDeclaration() as? KtClassOrObject)
             ?.superTypeListEntries
             ?.firstOrNull {
                 bindingContext.get(BindingContext.TYPE, it.typeReference)
@@ -110,7 +110,7 @@ internal class ConstraintsAnalyser(
         return verifier.verifyConstraintIsCalledInsideDescribe(constraintResolvedCall)
     }
 
-    private fun getConstrainerObject(describeCall: KtElement?): KtObjectDeclaration? {
+    private fun getConstrainerClassOrObject(describeCall: KtElement?): KtClassOrObject? {
         return verifier.verifyConstrainerIsObjectOrRegularClassWithCompanion(describeCall)
     }
 
@@ -131,7 +131,7 @@ internal class ConstraintsAnalyser(
 
         fun extractParamEntry(statementResolvedCall: ResolvedCall<*>): Param? {
 
-            val paramType = statementResolvedCall.typeArguments.values.elementAtOrNull(1)
+            val paramType = statementResolvedCall.typeArguments.values.elementAtOrNull(0)
             val paramNameExpression = statementResolvedCall.call
                 .getValueArgumentsInParentheses()
                 .getOrNull(0)

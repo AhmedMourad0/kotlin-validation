@@ -8,7 +8,7 @@ import arrow.meta.phases.analysis.AnalysisHandler
 import arrow.meta.quotes.*
 import dev.ahmedmourad.validation.compiler.files.FileManager
 import dev.ahmedmourad.validation.compiler.analysers.ConstraintsAnalyser
-import dev.ahmedmourad.validation.compiler.generators.HelperFunctionsGenerator
+import dev.ahmedmourad.validation.compiler.generators.FunctionsGenerator
 import dev.ahmedmourad.validation.compiler.generators.ViolationsGenerator
 import dev.ahmedmourad.validation.compiler.verifier.DslVerifier
 import org.jetbrains.kotlin.analyzer.AnalysisResult
@@ -27,17 +27,17 @@ internal fun Meta.validationsAnalysisHandler(): AnalysisHandler = analysis(
         val verifier = DslVerifier(this, bindingTrace.bindingContext)
         val fileManager = FileManager(this, verifier)
         val violationsGenerator = ViolationsGenerator()
-        val helperFunctionsGenerator = HelperFunctionsGenerator(verifier)
+        val functionsGenerator = FunctionsGenerator(verifier)
 
         ConstraintsAnalyser(
             bindingTrace.bindingContext,
             verifier
         ).analyse().forEach { constraintsDescriptor ->
             val violationsText = violationsGenerator.generate(constraintsDescriptor)
-            val functionsText = helperFunctionsGenerator.generate(constraintsDescriptor).orEmpty()
+            val functionsText = functionsGenerator.generate(constraintsDescriptor).orEmpty()
             fileManager.createFile(
                 constraintsDescriptor = constraintsDescriptor,
-                imports = violationsGenerator.imports + helperFunctionsGenerator.imports,
+                imports = violationsGenerator.imports + functionsGenerator.imports,
                 violationsText = violationsText,
                 functionsText = functionsText
             )
