@@ -96,13 +96,22 @@ internal class ConstraintsAnalyser(
             )
     }
 
-    private fun getConstrainedType(resolvedCall: ResolvedCall<*>): KotlinType? {
-        return resolvedCall.typeArguments
-            .values
-            .elementAtOrNull(0)
+    private fun getConstrainedType(constraintResolvedCall: ResolvedCall<*>): KotlinType? {
+
+        val describeFunctionLiteral = constraintResolvedCall.call
+            .callElement
+            .parent
+            ?.parent as? KtFunctionLiteral
+
+        return describeFunctionLiteral?.getParentCall(bindingContext)
+            ?.callElement
+            ?.getResolvedCall(bindingContext)
+            ?.typeArguments
+            ?.values
+            ?.elementAtOrNull(0)
             ?: return verifier.reportError(
                 "Could not find the constrained type",
-                resolvedCall.call.callElement
+                constraintResolvedCall.call.callElement
             )
     }
 

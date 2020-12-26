@@ -13,9 +13,16 @@ import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.js.descriptorUtils.getJetTypeFqName
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtNamedDeclaration
+import org.jetbrains.kotlin.psi.KtUserType
+import org.jetbrains.kotlin.psi.psiUtil.getElementTextWithContext
+import org.jetbrains.kotlin.resolve.BindingContext
+import org.jetbrains.kotlin.resolve.bindingContextUtil.getAbbreviatedTypeOrType
+import org.jetbrains.kotlin.types.KotlinType
 
 internal class FunctionsGenerator(
-    private val verifier: DslVerifier
+    private val verifier: DslVerifier,
+    private val bindingContext: BindingContext
 ) {
 
     internal val imports: List<String> = listOf(
@@ -65,8 +72,10 @@ internal class FunctionsGenerator(
             .orEmpty()
 
         val typeParams = constraintsDescriptor.constrainerClassOrObject
-            .typeParameterList
-            ?.text
+            .typeParameters
+            .map { it.fqNameTotal(bindingContext) }
+            .takeIf(List<String>::isNotEmpty)
+            ?.joinToString(separator = ", ", prefix = "<", postfix = ">")
             ?.plus(" ")
             .orEmpty()
 
@@ -80,7 +89,7 @@ internal class FunctionsGenerator(
             ?.plus(typeArgs)
 
         val params = constrainedParams.joinToString(",\n\t") { param ->
-            param.name.asString() + ": " + param.type.getJetTypeFqName(true)
+            param.name.asString() + ": " + param.type.fqNameTotal()
         }
 
         val arguments = constrainedParams.joinToString(",\n") { param ->
@@ -116,8 +125,10 @@ internal class FunctionsGenerator(
             .orEmpty()
 
         val typeParams = constraintsDescriptor.constrainerClassOrObject
-            .typeParameterList
-            ?.text
+            .typeParameters
+            .map { it.fqNameTotal(bindingContext) }
+            .takeIf(List<String>::isNotEmpty)
+            ?.joinToString(separator = ", ", prefix = "<", postfix = ">")
             ?.plus(" ")
             .orEmpty()
 
@@ -133,7 +144,7 @@ internal class FunctionsGenerator(
         val violationsParent = constraintsDescriptor.violationsParentName
 
         val params = constrainedParams.joinToString(",\n\t") { param ->
-            param.name.asString() + ": " + param.type.getJetTypeFqName(true)
+            param.name.asString() + ": " + param.type.fqNameTotal()
         }
 
         val arguments = constrainedParams.joinToString(",\n\t\t\t") { param ->
@@ -144,11 +155,13 @@ internal class FunctionsGenerator(
             |fun $typeParams$constrainerFqName.validate(
             |    $params
             |): Case<List<$violationsParent>, $constrainedFqName> {
+            |
             |    val item = lazy {
             |        $constrainedFqName(
             |            $arguments
             |        )
             |    }
+            |    
             |    return findViolatedConstraints(item, v)
             |        .map { it.toViolation(item) }
             |        .takeIf(List<$violationsParent>::isNotEmpty)
@@ -171,8 +184,10 @@ internal class FunctionsGenerator(
             .orEmpty()
 
         val typeParams = constraintsDescriptor.constrainerClassOrObject
-            .typeParameterList
-            ?.text
+            .typeParameters
+            .map { it.fqNameTotal(bindingContext) }
+            .takeIf(List<String>::isNotEmpty)
+            ?.joinToString(separator = ", ", prefix = "<", postfix = ">")
             ?.plus(" ")
             .orEmpty()
 
@@ -186,13 +201,13 @@ internal class FunctionsGenerator(
             ?.plus(typeArgs)
 
         val params = constrainedParams.joinToString(",\n\t") { param ->
-            param.name.asString() + ": " + param.type.getJetTypeFqName(true)
+            param.name.asString() + ": " + param.type.fqNameTotal()
         }
 
         val validationCases = constrainedParams.joinToString("\n\n") { param ->
             """
                 |"${param.name.asString()}" -> { validation ->
-                |    (validation as Validation<${param.type.getJetTypeFqName(true)}>).validate(${param.name.asString()})
+                |    (validation as Validation<${param.type.fqNameTotal()}>).validate(${param.name.asString()})
                 |}
             """.trimMargin()
         }
@@ -252,11 +267,12 @@ internal class FunctionsGenerator(
             .orEmpty()
 
         val typeParams = constraintsDescriptor.constrainerClassOrObject
-            .typeParameterList
-            ?.text
+            .typeParameters
+            .map { it.fqNameTotal(bindingContext) }
+            .takeIf(List<String>::isNotEmpty)
+            ?.joinToString(separator = ", ", prefix = "<", postfix = ">")
             ?.plus(" ")
             .orEmpty()
-
         val constrainedFqName = constraintsDescriptor.constrainedType
             .getJetTypeFqName(false)
             .plus(typeArgs)
@@ -269,7 +285,7 @@ internal class FunctionsGenerator(
                 "$violationsParent.${violation.name}"
             } else {
                 val params = violation.params.mapIndexed { index, param ->
-                    "this.params[$index].get(item.value) as ${param.type.getJetTypeFqName(true)}"
+                    "this.params[$index].get(item.value) as ${param.type.fqNameTotal()}"
                 }.joinToString(",\n\t")
                 """
                 |$violationsParent.${violation.name}(
@@ -322,8 +338,10 @@ internal class FunctionsGenerator(
             .orEmpty()
 
         val typeParams = constraintsDescriptor.constrainerClassOrObject
-            .typeParameterList
-            ?.text
+            .typeParameters
+            .map { it.fqNameTotal(bindingContext) }
+            .takeIf(List<String>::isNotEmpty)
+            ?.joinToString(separator = ", ", prefix = "<", postfix = ">")
             ?.plus(" ")
             .orEmpty()
 

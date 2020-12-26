@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.compiler.generators
 
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
 import dev.ahmedmourad.validation.compiler.descriptors.Violation
-import org.jetbrains.kotlin.js.descriptorUtils.getJetTypeFqName
+import dev.ahmedmourad.validation.compiler.utils.fqNameTotal
 
 internal class ViolationsGenerator {
 
@@ -30,7 +30,7 @@ internal class ViolationsGenerator {
             "object ${violation.name} : $parentName()"
         } else {
             val params = violation.params.joinToString(",\n\t") { param ->
-                "val ${param.name}: ${param.type.getJetTypeFqName(true)}"
+                "val ${param.name}: ${param.type.fqNameTotal()}"
             }
             "data class ${violation.name}(\n\t$params\n) : $parentName()"
         }
