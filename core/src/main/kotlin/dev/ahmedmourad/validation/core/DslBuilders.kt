@@ -67,18 +67,30 @@ class ConstraintBuilder<T : Any> internal constructor(private val violation: Str
 }
 
 @ValidationMarker
-class ValidatorBuilder<T : Any, DT> internal constructor(
+class ValidatorBuilder<T, DT> internal constructor(
     private val property: KProperty1<T, DT>
 ) {
 
     private val validations: MutableList<Validation<DT>> = mutableListOf()
+    private val nestedValidators: MutableList<Validator<DT, *>> = mutableListOf()
 
     fun validation(validate: DT.() -> Boolean) {
         add(Validation(validate))
     }
 
+    fun <DT1> on(
+        property: KProperty1<DT, DT1>,
+        validator: ValidatorBuilder<DT, DT1>.() -> Unit
+    ) {
+        this.add(ValidatorBuilder(property).apply(validator).build())
+    }
+
     private fun add(validation: Validation<DT>) {
         validations.add(validation)
+    }
+
+    private fun <DT1> add(validator: Validator<DT, DT1>) {
+        nestedValidators.add(validator)
     }
 
     internal fun build(): Validator<T, DT> = Validator(property, validations)

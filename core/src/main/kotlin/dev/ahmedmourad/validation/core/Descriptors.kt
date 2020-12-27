@@ -20,7 +20,7 @@ data class Parameter<T : Any, P> internal constructor(
 
 data class Validation<X> internal constructor(val validate: X.() -> Boolean)
 
-data class Validator<T : Any, DT> internal constructor(
+data class Validator<T, DT> internal constructor(
     val property: KProperty1<T, DT>,
     val validations: List<Validation<DT>>
 )
