@@ -131,7 +131,7 @@ internal class FunctionsGenerator(
             param.name + ": " + param.type.deepFqName()
         }
 
-        val itemArgs = constrainedParams.joinToString(",\n") { param ->
+        val itemArgs = constrainedParams.joinToString(",\n\t\t\t") { param ->
             param.name
         }
 
