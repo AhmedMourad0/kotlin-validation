@@ -20,12 +20,14 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.lazy.descriptors.LazyClassDescriptor
 import org.jetbrains.kotlin.types.KotlinType
 
+//TODO: verify location based on annotations and not names to support adding
+// elements to extension functions as well
 internal class DslVerifier(
     private val cc: CompilerContext,
     private val bindingContext: BindingContext
 ) {
 
-    internal fun warnNoBooleanReturningExpressions() {
+    internal fun warnOnBooleanReturningExpressions() {
         //TODO
     }
 

@@ -9,7 +9,6 @@ import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_LEGAL_FUN
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_VALIDATION
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_VALIDATOR
 import dev.ahmedmourad.validation.compiler.verifier.DslVerifier
-import org.jetbrains.kotlin.codegen.kotlinType
 import org.jetbrains.kotlin.js.descriptorUtils.getJetTypeFqName
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.psi.KtClass
@@ -19,6 +18,7 @@ import org.jetbrains.kotlin.types.KotlinType
 
 private data class Param(val name: String, val type: KotlinType)
 
+//TODO: generate asValidation(paramName: String)
 internal class FunctionsGenerator(
     private val verifier: DslVerifier,
     private val bindingContext: BindingContext
@@ -46,7 +46,7 @@ internal class FunctionsGenerator(
         val constrainedParams = verifier.verifyConstrainedClassHasPrimaryConstructor(
             constrainedClass,
             constraintsDescriptor.constrainedTypePsi
-        )?.valueParameters ?.map {
+        )?.valueParameters?.map {
             Param(it.name.asString(), it.type)
         } ?: return null
         
@@ -59,30 +59,7 @@ internal class FunctionsGenerator(
                     ?.let { Param(param.nameAsSafeName.asString(), it) }
             }.orEmpty()
 
-        return listOfNotNull(
-            generateIsValid(constraintsDescriptor, constrainedParams, constrainerParams),
-            generateValidate(constraintsDescriptor, constrainedParams, constrainerParams),
-            generateFindViolatedConstraints(constraintsDescriptor, constrainedParams, constrainerParams),
-            generateToViolation(constraintsDescriptor),
-            generateCreate(constraintsDescriptor, constrainerParams)
-        )
-    }
-
-    private fun generateIsValid(
-        constraintsDescriptor: ConstraintsDescriptor,
-        constrainedParams: List<Param>,
-        constrainerParams: List<Param>
-    ): String {
-
-        val typeArgs = constraintsDescriptor.constrainerClassOrObject
-            .typeParameters
-            .map { it.nameAsSafeName.asString() }
-            .takeIf(List<String>::isNotEmpty)
-            ?.joinToString(", ")
-            ?.let { "<$it>" }
-            .orEmpty()
-
-        val typeParams = constraintsDescriptor.constrainerClassOrObject
+        val constrainerTypeParams = constraintsDescriptor.constrainerClassOrObject
             .typeParameters
             .map { it.deepFqName(bindingContext) }
             .takeIf(List<String>::isNotEmpty)
@@ -90,14 +67,65 @@ internal class FunctionsGenerator(
             ?.plus(" ")
             .orEmpty()
 
+        val constrainerTypeParamsAsTypeArgs = constraintsDescriptor.constrainerClassOrObject
+            .typeParameters
+            .map { it.nameAsSafeName.asString() }
+            .takeIf(List<String>::isNotEmpty)
+            ?.joinToString(", ")
+            ?.let { "<$it>" }
+            .orEmpty()
+
         val constrainedFqName = constraintsDescriptor.constrainedType
             .getJetTypeFqName(false)
-            .plus(typeArgs)
+            .plus(constrainerTypeParamsAsTypeArgs)
 
         val constrainerFqName = constraintsDescriptor.constrainerClassOrObject
             .fqName
             ?.asString()
-            ?.plus(typeArgs)
+            ?.plus(constrainerTypeParamsAsTypeArgs)
+
+        return listOfNotNull(
+            generateIsValid(
+                constrainedFqName = constrainedFqName,
+                constrainerFqName = constrainerFqName,
+                constrainedParams = constrainedParams,
+                constrainerParams = constrainerParams,
+                constrainerTypeParams = constrainerTypeParams
+            ),generateValidate(
+                constraintsDescriptor = constraintsDescriptor,
+                constrainedFqName = constrainedFqName,
+                constrainerFqName = constrainerFqName,
+                constrainedParams = constrainedParams,
+                constrainerParams = constrainerParams,
+                constrainerTypeParams = constrainerTypeParams
+            ),generateFindViolatedConstraints(
+                constraintsDescriptor = constraintsDescriptor,
+                constrainedFqName = constrainedFqName,
+                constrainerFqName = constrainerFqName,
+                constrainedParams = constrainedParams,
+                constrainerParams = constrainerParams,
+                constrainerTypeParams = constrainerTypeParams
+            ),generateToViolation(
+                constraintsDescriptor = constraintsDescriptor,
+                constrainedFqName = constrainedFqName,
+                constrainerTypeParams = constrainerTypeParams
+            ),generateCreate(
+                constraintsDescriptor = constraintsDescriptor,
+                constrainedFqName = constrainedFqName,
+                constrainerFqName = constrainerFqName,
+                constrainerParams = constrainerParams,
+                constrainerTypeParams = constrainerTypeParams
+            )
+        )
+    }
+
+    private fun generateIsValid(
+        constrainedFqName: String,
+        constrainerFqName: String?,
+        constrainedParams: List<Param>,
+        constrainerParams: List<Param>,
+        constrainerTypeParams: String
+    ): String {
 
         val params = (constrainedParams + constrainerParams).joinToString(",\n\t") { param ->
             param.name + ": " + param.type.deepFqName()
@@ -112,7 +140,7 @@ internal class FunctionsGenerator(
         }
 
         return """
-            |fun $typeParams$constrainerFqName.isValid(
+            |fun $constrainerTypeParams$constrainerFqName.isValid(
             |    $params
             |): Boolean {
             |
@@ -132,34 +160,12 @@ internal class FunctionsGenerator(
 
     private fun generateValidate(
         constraintsDescriptor: ConstraintsDescriptor,
+        constrainedFqName: String,
+        constrainerFqName: String?,
         constrainedParams: List<Param>,
-        constrainerParams: List<Param>
+        constrainerParams: List<Param>,
+        constrainerTypeParams: String
     ): String {
-
-        val typeArgs = constraintsDescriptor.constrainerClassOrObject
-            .typeParameters
-            .map { it.nameAsSafeName.asString() }
-            .takeIf(List<String>::isNotEmpty)
-            ?.joinToString(", ")
-            ?.let { "<$it>" }
-            .orEmpty()
-
-        val typeParams = constraintsDescriptor.constrainerClassOrObject
-            .typeParameters
-            .map { it.deepFqName(bindingContext) }
-            .takeIf(List<String>::isNotEmpty)
-            ?.joinToString(separator = ", ", prefix = "<", postfix = ">")
-            ?.plus(" ")
-            .orEmpty()
-
-        val constrainedFqName = constraintsDescriptor.constrainedType
-            .getJetTypeFqName(false)
-            .plus(typeArgs)
-
-        val constrainerFqName = constraintsDescriptor.constrainerClassOrObject
-            .fqName
-            ?.asString()
-            ?.plus(typeArgs)
 
         val violationsParent = constraintsDescriptor.violationsParentName
 
@@ -176,7 +182,7 @@ internal class FunctionsGenerator(
         }
 
         return """
-            |fun $typeParams$constrainerFqName.validate(
+            |fun $constrainerTypeParams$constrainerFqName.validate(
             |    $params
             |): Case<List<$violationsParent>, $constrainedFqName> {
             |
@@ -198,34 +204,12 @@ internal class FunctionsGenerator(
 
     private fun generateFindViolatedConstraints(
         constraintsDescriptor: ConstraintsDescriptor,
+        constrainedFqName: String,
+        constrainerFqName: String?,
         constrainedParams: List<Param>,
-        constrainerParams: List<Param>
+        constrainerParams: List<Param>,
+        constrainerTypeParams: String
     ): String? {
-
-        val typeArgs = constraintsDescriptor.constrainerClassOrObject
-            .typeParameters
-            .map { it.nameAsSafeName.asString() }
-            .takeIf(List<String>::isNotEmpty)
-            ?.joinToString(", ")
-            ?.let { "<$it>" }
-            .orEmpty()
-
-        val typeParams = constraintsDescriptor.constrainerClassOrObject
-            .typeParameters
-            .map { it.deepFqName(bindingContext) }
-            .takeIf(List<String>::isNotEmpty)
-            ?.joinToString(separator = ", ", prefix = "<", postfix = ">")
-            ?.plus(" ")
-            .orEmpty()
-
-        val constrainedFqName = constraintsDescriptor.constrainedType
-            .getJetTypeFqName(false)
-            .plus(typeArgs)
-
-        val constrainerFqName = constraintsDescriptor.constrainerClassOrObject
-            .fqName
-            ?.asString()
-            ?.plus(typeArgs)
 
         val params = (constrainedParams + constrainerParams).joinToString(",\n\t") { param ->
             param.name + ": " + param.type.deepFqName()
@@ -258,7 +242,7 @@ internal class FunctionsGenerator(
         }
 
         return """
-            |private fun $typeParams$constrainerFqName.findViolatedConstraints(
+            |private fun $constrainerTypeParams$constrainerFqName.findViolatedConstraints(
             |    item: kotlin.Lazy<$constrainedFqName>,
             |    $params
             |): List<Constraint<$constrainedFqName>> {
@@ -291,27 +275,10 @@ internal class FunctionsGenerator(
     }
 
     private fun generateToViolation(
-        constraintsDescriptor: ConstraintsDescriptor
+        constraintsDescriptor: ConstraintsDescriptor,
+        constrainedFqName: String,
+        constrainerTypeParams: String
     ): String {
-
-        val typeArgs = constraintsDescriptor.constrainerClassOrObject
-            .typeParameters
-            .map { it.nameAsSafeName.asString() }
-            .takeIf(List<String>::isNotEmpty)
-            ?.joinToString(", ")
-            ?.let { "<$it>" }
-            .orEmpty()
-
-        val typeParams = constraintsDescriptor.constrainerClassOrObject
-            .typeParameters
-            .map { it.deepFqName(bindingContext) }
-            .takeIf(List<String>::isNotEmpty)
-            ?.joinToString(separator = ", ", prefix = "<", postfix = ">")
-            ?.plus(" ")
-            .orEmpty()
-        val constrainedFqName = constraintsDescriptor.constrainedType
-            .getJetTypeFqName(false)
-            .plus(typeArgs)
 
         val violationsParent = constraintsDescriptor.violationsParentName
 
@@ -339,7 +306,7 @@ internal class FunctionsGenerator(
 
         return """
             |@Suppress("UNCHECKED_CAST")
-            |private fun ${typeParams}Constraint<$constrainedFqName>.toViolation(
+            |private fun ${constrainerTypeParams}Constraint<$constrainedFqName>.toViolation(
             |    item: kotlin.Lazy<$constrainedFqName>
             |): $violationsParent {
             |    return when (this.violation) {
@@ -356,40 +323,17 @@ internal class FunctionsGenerator(
         """.trimMargin()
     }
 
-    //TODO: pass extra parameters through constructors
     private fun generateCreate(
         constraintsDescriptor: ConstraintsDescriptor,
-        constrainerParams: List<Param>
+        constrainedFqName: String,
+        constrainerFqName: String?,
+        constrainerParams: List<Param>,
+        constrainerTypeParams: String
     ): String? {
 
         if (constraintsDescriptor.constrainerClassOrObject is KtObjectDeclaration) {
             return null
         }
-
-        val typeArgs = constraintsDescriptor.constrainerClassOrObject
-            .typeParameters
-            .map { it.nameAsSafeName.asString() }
-            .takeIf(List<String>::isNotEmpty)
-            ?.joinToString(", ")
-            ?.let { "<$it>" }
-            .orEmpty()
-
-        val typeParams = constraintsDescriptor.constrainerClassOrObject
-            .typeParameters
-            .map { it.deepFqName(bindingContext) }
-            .takeIf(List<String>::isNotEmpty)
-            ?.joinToString(separator = ", ", prefix = "<", postfix = ">")
-            ?.plus(" ")
-            .orEmpty()
-
-        val constrainedFqName = constraintsDescriptor.constrainedType
-            .getJetTypeFqName(false)
-            .plus(typeArgs)
-
-        val constrainerFqName = constraintsDescriptor.constrainerClassOrObject
-            .fqName
-            ?.asString()
-            ?.plus(typeArgs)
 
         val params = constrainerParams.takeIf(
             List<Param>::isNotEmpty
@@ -403,7 +347,7 @@ internal class FunctionsGenerator(
         )
 
         return """
-            |private fun ${typeParams}$constrainerFqName.create($params): ConstraintsDescriptor<$constrainedFqName> {
+            |private fun $constrainerTypeParams$constrainerFqName.create($params): ConstraintsDescriptor<$constrainedFqName> {
             |    return $constrainerFqName($constrainerArgs).constraints
             |}
         """.trimMargin()
