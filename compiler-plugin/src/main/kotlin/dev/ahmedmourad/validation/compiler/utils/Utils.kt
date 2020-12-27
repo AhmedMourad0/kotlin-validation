@@ -22,11 +22,11 @@ internal fun KotlinType.deepFqName(): String {
     val thisFqName = this.getJetTypeFqName(false)
 
     val children = this.arguments.map {
-        val variance = it.projectionKind.label
         if (it.isStarProjection) {
-            "$variance *"
+            "*"
         } else {
-            variance + " " + it.type.deepFqName()
+            val variance = it.projectionKind.label
+            "$variance ${it.type.deepFqName()}"
         }.trim()
     }
 
