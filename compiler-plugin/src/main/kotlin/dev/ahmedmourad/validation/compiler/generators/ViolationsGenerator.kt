@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.compiler.generators
 
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
 import dev.ahmedmourad.validation.compiler.descriptors.Violation
-import dev.ahmedmourad.validation.compiler.utils.fqNameTotal
+import dev.ahmedmourad.validation.compiler.utils.deepFqName
 
 internal class ViolationsGenerator {
 
@@ -30,7 +30,7 @@ internal class ViolationsGenerator {
             "object ${violation.name} : $parentName()"
         } else {
             val params = violation.params.joinToString(",\n\t") { param ->
-                "val ${param.name}: ${param.type.fqNameTotal()}"
+                "val ${param.name}: ${param.type.deepFqName()}"
             }
             "data class ${violation.name}(\n\t$params\n) : $parentName()"
         }

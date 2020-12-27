@@ -13,7 +13,7 @@ internal fun KotlinType.simpleName(): String? {
         .lastOrNull()
 }
 
-internal fun KotlinType.fqNameTotal(): String {
+internal fun KotlinType.deepFqName(): String {
 
     if (this.isTypeParameter()) {
         return this.toString()
@@ -26,7 +26,7 @@ internal fun KotlinType.fqNameTotal(): String {
         if (it.isStarProjection) {
             "$variance *"
         } else {
-            variance + " " + it.type.fqNameTotal()
+            variance + " " + it.type.deepFqName()
         }.trim()
     }
 
@@ -43,14 +43,14 @@ internal fun KotlinType.fqNameTotal(): String {
     }
 }
 
-internal fun KtTypeParameter.fqNameTotal(bindingContext: BindingContext): String {
+internal fun KtTypeParameter.deepFqName(bindingContext: BindingContext): String {
 
     val variance = this.variance.label
     val name = this.nameAsSafeName.asString()
     val bound = this.extendsBound
         ?.typeElement
         ?.getAbbreviatedTypeOrType(bindingContext)
-        ?.fqNameTotal()
+        ?.deepFqName()
 
     return if (bound == null) {
         "$variance $name"
