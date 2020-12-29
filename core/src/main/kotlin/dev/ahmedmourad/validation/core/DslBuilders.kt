@@ -19,11 +19,7 @@ class ConstraintsBuilder<T : Any> internal constructor() {
         violation: String,
         description: ConstraintBuilder<T>.() -> Unit
     ) {
-        this.add(ConstraintBuilder<T>(violation).apply(description).build())
-    }
-
-    private fun add(constraint: Constraint<T>) {
-        constraints.add(constraint)
+        constraints.add(ConstraintBuilder<T>(violation).apply(description).build())
     }
 
     internal fun build(): ConstraintsDescriptor<T> = ConstraintsDescriptor(constraints)
@@ -34,67 +30,80 @@ class ConstraintBuilder<T : Any> internal constructor(private val violation: Str
 
     private val validations: MutableList<Validation<T>> = mutableListOf()
     private val params: MutableList<Parameter<T, *>> = mutableListOf()
-    private val validators: MutableList<Validator<T, *>> = mutableListOf()
 
     fun <P> param(name: String, get: T.() -> P) {
-        this.add(Parameter(name, get))
+        params.add(Parameter(name, get))
     }
 
     fun script(validate: T.() -> Boolean) {
-        this.add(Validation(validate))
+        validations.add(Validation(validate))
     }
 
-    fun <DT> on(
+    fun <DT : Any> on(
         property: KProperty1<T, DT>,
-        validator: ValidatorBuilder<T, DT>.() -> Unit
-    ) {
-        this.add(ValidatorBuilder(property).apply(validator).build())
+        validator: ValidatorBuilder<DT>.() -> Unit
+    ) = script {
+        ValidatorBuilder<DT>().apply(validator).validate(property.get(this))
     }
 
-    private fun add(validation: Validation<T>) {
-        validations.add(validation)
+    fun <DT : Any> on(property: KProperty1<T, DT?>): NullableValidatorBuilder<T, DT> {
+        return NullableValidatorBuilder(property)
     }
 
-    private fun <P> add(param: Parameter<T, P>) {
-        params.add(param)
+    infix fun <DT : Any> NullableValidatorBuilder<T, DT>.ifExists(
+        validations: ValidatorBuilder<DT>.() -> Unit
+    ) = this@ConstraintBuilder.script {
+        val item = this@ifExists.property.get(this)
+        if (item != null) {
+            ValidatorBuilder<DT>().apply(validations).validate(item)
+        } else {
+            true
+        }
     }
 
-    private fun <DT> add(validator: Validator<T, DT>) {
-        validators.add(validator)
-    }
-
-    internal fun build(): Constraint<T> = Constraint(violation, validations, params, validators)
+    internal fun build(): Constraint<T> = Constraint(violation, validations, params)
 }
 
 @ValidationMarker
-class ValidatorBuilder<T, DT> internal constructor(
-    private val property: KProperty1<T, DT>
-) {
+class ValidatorBuilder<DT : Any> internal constructor() {
 
     private val validations: MutableList<Validation<DT>> = mutableListOf()
-    private val nestedValidators: MutableList<Validator<DT, *>> = mutableListOf()
 
     fun validation(validate: DT.() -> Boolean) {
-        add(Validation(validate))
+        validations.add(Validation(validate))
     }
 
-    fun <DT1> on(
+    fun <DT1 : Any> on(
         property: KProperty1<DT, DT1>,
-        validator: ValidatorBuilder<DT, DT1>.() -> Unit
-    ) {
-        this.add(ValidatorBuilder(property).apply(validator).build())
+        validator: ValidatorBuilder<DT1>.() -> Unit
+    ) = validation {
+        ValidatorBuilder<DT1>().apply(validator).validate(property.get(this))
     }
 
-    private fun add(validation: Validation<DT>) {
-        validations.add(validation)
+    fun <DT1 : Any> on(property: KProperty1<DT, DT1?>): NullableValidatorBuilder<DT, DT1> {
+        return NullableValidatorBuilder(property)
     }
 
-    private fun <DT1> add(validator: Validator<DT, DT1>) {
-        nestedValidators.add(validator)
+    infix fun <DT1 : Any> NullableValidatorBuilder<DT, DT1>.ifExists(
+        validations: ValidatorBuilder<DT1>.() -> Unit
+    ) = this@ValidatorBuilder.validation {
+        val item = this@ifExists.property.get(this)
+        if (item != null) {
+            ValidatorBuilder<DT1>().apply(validations).validate(item)
+        } else {
+            true
+        }
     }
 
-    internal fun build(): Validator<T, DT> = Validator(property, validations)
+    internal fun validate(item: DT): Boolean {
+        return validations.all { it.validate(item) }
+    }
 }
+
+@ValidationMarker
+class NullableValidatorBuilder<T : Any, DT : Any> internal constructor(
+    internal val property: KProperty1<T, DT?>
+)
 
 @Suppress("unused")
 // The receiver is needed to ensure dsl integrity
