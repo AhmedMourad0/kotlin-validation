@@ -1,6 +1,7 @@
 package dev.ahmedmourad.validation.compiler.verifier
 
 import arrow.meta.phases.CompilerContext
+import arrow.meta.quotes.ktClassOrObject
 import dev.ahmedmourad.validation.compiler.descriptors.Param
 import dev.ahmedmourad.validation.compiler.descriptors.Violation
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_CONSTRAINT_FUN
@@ -147,6 +148,8 @@ internal class DslVerifier(
                 "Only data classes and regular classes with primary constructors can be constrained",
                 constrainedTypePsi
             )
+
+        reportError(constrainedClass.ktClassOrObject()?.modifierList?.text.toString(), null)
 
         //TODO: sealed, objects, interfaces, inner
         if (!constrainedClass.isData && constrainedClass.isInline) {

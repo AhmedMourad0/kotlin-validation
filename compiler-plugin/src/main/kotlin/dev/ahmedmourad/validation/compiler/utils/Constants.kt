@@ -3,7 +3,6 @@ package dev.ahmedmourad.validation.compiler.utils
 internal const val FQ_NAME_CONSTRAINTS_DESCRIPTOR = "dev.ahmedmourad.validation.core.ConstraintsDescriptor"
 internal const val FQ_NAME_CONSTRAINS = "dev.ahmedmourad.validation.core.Constrains"
 internal const val FQ_NAME_CONSTRAINT = "dev.ahmedmourad.validation.core.Constraint"
-internal const val FQ_NAME_VALIDATOR = "dev.ahmedmourad.validation.core.Validator"
 internal const val FQ_NAME_VALIDATION = "dev.ahmedmourad.validation.core.Validation"
 internal const val FQ_NAME_CASE = "dev.ahmedmourad.validation.core.Case"
 

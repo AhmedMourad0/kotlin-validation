@@ -7,7 +7,6 @@ import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_CONSTRAINT
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_ILLEGAL_FUN
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_LEGAL_FUN
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_VALIDATION
-import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_VALIDATOR
 import dev.ahmedmourad.validation.compiler.verifier.DslVerifier
 import org.jetbrains.kotlin.js.descriptorUtils.getJetTypeFqName
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
@@ -30,7 +29,6 @@ internal class FunctionsGenerator(
         FQ_NAME_ILLEGAL_FUN,
         FQ_NAME_CONSTRAINT,
         FQ_NAME_VALIDATION,
-        FQ_NAME_VALIDATOR,
         FQ_NAME_CONSTRAINTS_DESCRIPTOR
     )
 
@@ -215,14 +213,6 @@ internal class FunctionsGenerator(
             param.name + ": " + param.type.deepFqName()
         }
 
-        val validationCases = constrainedParams.joinToString("\n\n") { param ->
-            """
-                |"${param.name}" -> { validation ->
-                |    (validation as Validation<${param.type.deepFqName()}>).validate(${param.name})
-                |}
-            """.trimMargin()
-        }
-
         val constraints = when (constraintsDescriptor.constrainerClassOrObject) {
 
             is KtObjectDeclaration -> "this.constraints"
@@ -246,28 +236,10 @@ internal class FunctionsGenerator(
             |    item: kotlin.Lazy<$constrainedFqName>,
             |    $params
             |): List<Constraint<$constrainedFqName>> {
-            |
-            |    fun Validator<$constrainedFqName, *>.preparedValidation(): (Validation<*>) -> kotlin.Boolean {
-            |        return when (val propertyName = this.property.name) {
-            |            
-            |            ${validationCases.replace("\n", "\n\t\t\t")}
-            |            
-            |            else -> {
-            |               throw kotlin.IllegalArgumentException(
-            |                   "`${"$"}propertyName` is not a property of this class"
-            |               )
-            |            }
-            |        }
-            |    }
             |    
             |    return $constraints.filterNot { constraint ->
             |        constraint.validations.all { validation ->
             |            validation.validate(item.value)
-            |        } && constraint.validators.all { validator ->
-            |            val preparedValidation = validator.preparedValidation()
-            |            validator.validations.all { validation ->
-            |                preparedValidation.invoke(validation)
-            |            }
             |        }
             |    }
             |}

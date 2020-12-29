@@ -1,7 +1,5 @@
 package dev.ahmedmourad.validation.core
 
-import kotlin.reflect.KProperty1
-
 class ConstraintsDescriptor<T : Any> internal constructor(
     private val values: List<Constraint<T>>
 ) : List<Constraint<T>> by values
@@ -9,8 +7,7 @@ class ConstraintsDescriptor<T : Any> internal constructor(
 data class Constraint<T : Any> internal constructor(
     val violation: String,
     val validations: List<Validation<T>>,
-    val params: List<Parameter<T, *>>,
-    val validators: List<Validator<T, *>>
+    val params: List<Parameter<T, *>>
 )
 
 data class Parameter<T : Any, P> internal constructor(
@@ -19,8 +16,3 @@ data class Parameter<T : Any, P> internal constructor(
 )
 
 data class Validation<X> internal constructor(val validate: X.() -> Boolean)
-
-data class Validator<T : Any, DT> internal constructor(
-    val property: KProperty1<T, DT>,
-    val validations: List<Validation<DT>>
-)
