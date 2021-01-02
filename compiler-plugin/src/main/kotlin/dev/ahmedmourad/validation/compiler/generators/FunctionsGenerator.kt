@@ -236,7 +236,6 @@ internal class FunctionsGenerator(
             |    item: kotlin.Lazy<$constrainedFqName>,
             |    $params
             |): List<Constraint<$constrainedFqName>> {
-            |    
             |    return $constraints.filterNot { constraint ->
             |        constraint.validations.all { validation ->
             |            validation.validate(item.value)
