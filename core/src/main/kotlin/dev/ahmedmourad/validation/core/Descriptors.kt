@@ -15,4 +15,4 @@ data class Parameter<T : Any, P> internal constructor(
     val get: T.() -> P
 )
 
-data class Validation<DT> internal constructor(val validate: DT.() -> Boolean)
+data class Validation<DT> internal constructor(val validate: (DT) -> Boolean)
