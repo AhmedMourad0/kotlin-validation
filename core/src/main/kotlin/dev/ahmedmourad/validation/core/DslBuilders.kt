@@ -42,8 +42,8 @@ class ConstraintBuilder<T : Any> internal constructor(private val violation: Str
     fun <DT : Any> on(
         property: KProperty1<T, DT>,
         validator: Validator<DT>.() -> Unit
-    ) = script {
-        Validator<DT>().apply(validator).validate(property.get(this))
+    ) = validation {
+        Validator<DT>().apply(validator).validateAll(property.get(it))
     }
 
     fun <DT : Any> on(property: KProperty1<T, DT?>): PropertyNullableValidator<T, DT> {
@@ -52,10 +52,10 @@ class ConstraintBuilder<T : Any> internal constructor(private val violation: Str
 
     infix fun <DT : Any> PropertyNullableValidator<T, DT>.ifExists(
         validations: Validator<DT>.() -> Unit
-    ) = this@ConstraintBuilder.script {
-        val item = this@ifExists.property.get(this)
+    ) = this@ConstraintBuilder.validation {
+        val item = this@ifExists.property.get(it)
         if (item != null) {
-            Validator<DT>().apply(validations).validate(item)
+            Validator<DT>().apply(validations).validateAll(item)
         } else {
             true
         }
@@ -63,10 +63,10 @@ class ConstraintBuilder<T : Any> internal constructor(private val violation: Str
 
     infix fun <DT : Any> PropertyNullableValidator<T, DT>.mustExist(
         validations: Validator<DT>.() -> Unit
-    ) = this@ConstraintBuilder.script {
-        val item = this@mustExist.property.get(this)
+    ) = this@ConstraintBuilder.validation {
+        val item = this@mustExist.property.get(it)
         if (item != null) {
-            Validator<DT>().apply(validations).validate(item)
+            Validator<DT>().apply(validations).validateAll(item)
         } else {
             false
         }
@@ -75,16 +75,16 @@ class ConstraintBuilder<T : Any> internal constructor(private val violation: Str
     internal fun build(): Constraint<T> = Constraint(violation, validations, params)
 }
 
-fun <T : Any> ConstraintBuilder<T>.script(validate: T.() -> Boolean) {
+fun <T : Any> ConstraintBuilder<T>.validation(validate: (T) -> Boolean) {
     add(Validation(validate))
 }
 
 @ValidationMarker
-class Validator<DT> internal constructor() {
+class Validator<DT> {
 
     private val validations: MutableList<Validation<DT>> = mutableListOf()
 
-    fun add(validation: Validation<DT>) {
+    internal fun add(validation: Validation<DT>) {
         validations.add(validation)
     }
 
@@ -92,19 +92,20 @@ class Validator<DT> internal constructor() {
         property: KProperty1<DT, DT1>,
         validator: Validator<DT1>.() -> Unit
     ) = validation {
-        Validator<DT1>().apply(validator).validate(property.get(this))
+        Validator<DT1>().apply(validator).validateAll(property.get(it))
     }
 
     fun <DT1 : Any> on(property: KProperty1<DT, DT1?>): PropertyNullableValidator<DT, DT1> {
         return PropertyNullableValidator(property)
     }
 
+
     infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.ifExists(
         validations: Validator<DT1>.() -> Unit
     ) = this@Validator.validation {
-        val item = this@ifExists.property.get(this)
+        val item = this@ifExists.property.get(it)
         if (item != null) {
-            Validator<DT1>().apply(validations).validate(item)
+            Validator<DT1>().apply(validations).validateAll(item)
         } else {
             true
         }
@@ -113,20 +114,48 @@ class Validator<DT> internal constructor() {
     infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.mustExist(
         validations: Validator<DT1>.() -> Unit
     ) = this@Validator.validation {
-        val item = this@mustExist.property.get(this)
+        val item = this@mustExist.property.get(it)
         if (item != null) {
-            Validator<DT1>().apply(validations).validate(item)
+            Validator<DT1>().apply(validations).validateAll(item)
         } else {
             false
         }
     }
 
-    internal fun validate(item: DT): Boolean {
+    inline fun <reified DT1 : DT> ifIs(
+        crossinline validator: Validator<DT1>.() -> Unit
+    ) = validation {
+        if (it is DT1) {
+            Validator<DT1>().apply { validator() }.validateNone(it)
+        } else {
+            true
+        }
+    }
+
+    inline fun <reified DT1 : DT> mustBeA(
+        crossinline validator: Validator<DT1>.() -> Unit
+    ) = validation {
+        if (it is DT1) {
+            Validator<DT1>().apply { validator() }.validateNone(it)
+        } else {
+            false
+        }
+    }
+
+    fun validateNone(item: DT): Boolean {
+        return validations.none { it.validate(item) }
+    }
+
+    fun validateAny(item: DT): Boolean {
+        return validations.any { it.validate(item) }
+    }
+
+    fun validateAll(item: DT): Boolean {
         return validations.all { it.validate(item) }
     }
 }
 
-fun <DT> Validator<DT>.validation(validate: DT.() -> Boolean) {
+fun <DT> Validator<DT>.validation(validate: (DT) -> Boolean) {
     add(Validation(validate))
 }
 
