@@ -3,8 +3,8 @@ package dev.ahmedmourad.validation.core
 fun <DT : Any> Validator<DT?>.ifExists(
     validations: Validator<DT>.() -> Unit
 ) = this@ifExists.validation {
-    if (this@validation != null) {
-        Validator<DT>().apply(validations).validate(this@validation)
+    if (it != null) {
+        Validator<DT>().apply(validations).validateAll(it)
     } else {
         true
     }
@@ -13,8 +13,8 @@ fun <DT : Any> Validator<DT?>.ifExists(
 fun <DT : Any> Validator<DT?>.mustExist(
     validations: Validator<DT>.() -> Unit
 ) = this@mustExist.validation {
-    if (this@validation != null) {
-        Validator<DT>().apply(validations).validate(this@validation)
+    if (it != null) {
+        Validator<DT>().apply(validations).validateAll(it)
     } else {
         false
     }
