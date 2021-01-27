@@ -7,112 +7,138 @@ fun main() {
 
 }
 
-
 data class Rand<T : List<*>>(val v: List<T>?)
-data class Nested(val x: String, val y: String?)
-data class Password(val v: String, val n: Nested?) {
-    companion object : Constrains<Password> {
+data class Nested(val x: String, val y: String?) {
+    companion object : Constrains<Nested> {
+        override val constraints by describe {
+            constraint("LALALA") {
+
+            }
+        }
+    }
+}
+
+interface X
+class Y : X
+
+data class Model(val v: String, val n: Nested?, val l1: Array<Nested>, val l2: List<Nested?>, val x: X) {
+    companion object : Constrains<Model> {
         override val constraints by describe {
             constraint(violation = "TooShort") {
                 param("min") { 7 }
                 param("max") { Rand(emptyList()) }
                 param("len") { 56.567 }
-                on(Password::n) ifExists {
+                on(Model::n) ifExists {
                     on(Nested::x) {
-                        maxLength { 7 }
+                        maxLength { 14 }
                         minLength(7)
                     }
                     on(Nested::y) ifExists {
-                        maxLength { 7 }
+                        maxLength { 14 }
                         minLength(7)
+                        startsWithChar { '3' }
+                        isEqualTo("")
+                        startsWith { "" }
                     }
                     validation {
-                        this.x.length == this.y?.length
+                        it.x.length == it.y?.length
                     }
                 }
-                on(Password::v) ifExists {
-                    maxLength { it.toInt() }
-                    minLength(7)
-                    //it's not final whether the params will be a lambda or a value, probably will provide both options
-                    /* or */
-                    validation {
-                        length in 7..15
+                on(Model::x) {
+                    enforceAll {
+
+                    }
+                    enforceAtLeastOne {
+
+                    }
+                    enforceNone {
+
                     }
                 }
-                on(Password::v) {
+                on(Model::x) {
+                    ifIs<Y> {
+
+                    }
+                    mustBeA<Y> {
+
+                    }
+                }
+                on(Model::l1) {
+                    all {
+                        on(Nested::y) ifExists {
+
+                        }
+                        on(Nested::x) {
+
+                        }
+                    }
+                    any {
+                        //...
+                    }
+                    none {
+                        //...
+                    }
+                }
+                on(Model::l2) {
+                    all {
+                        ifExists {
+                            on(Nested::y) ifExists {
+
+                            }
+                            on(Nested::x) {
+
+                            }
+                        }
+                    }
+                }
+                on(Model::v) {
                     on(String::length) {
                         min(7)
                         max(14)
                     }
+                    maxLength { it.toInt() }
+                    minLength(7)
+                    validation { it.length in 7..15 }
                 }
                 /* or */
-                script { //script operates on all properties of the data class
-                    v.length in 7..15
+                validation { //validations can also operates on all properties of the data class
+                    it.v.length in 7..15
                 }
             }
-            val x = "aaa"
             constraint(violation = "ContainsNoDigits") {
                 //...
             }
-//            constraint(violation = "ContainsNoDigits$z") {
-//                //...
-//            }
-//            constraint(violation = "ContainsNoDigits + " /*+ this@Companion.*/) {
-//                //...
-//            }
-//            constraint(violation = "ContainsNoDigits + " + "x") {
-//                //...
-//            }
         }
     }
 }
 
 //Custom validations
-fun ValidatorBuilder<Int>.min(min: Int) = validation {
-    this >= min
-}
-//Custom validations
-fun ValidatorBuilder<Int>.max(max: Int) = validation {
-    this <= max
+fun <T : List<*>> Validator<List<T>>.customValidation() = validation {
+    it.size > 5
 }
 
-
-
+//Dealing with type parameters or extra parameters
 class RandConstrainer<T : List<*>>(val x: String, val m: T, val c: List<T>, d: Int) : Constrains<Rand<T>> {
     override val constraints by describe {
         constraint("ad") {
-
+            on(Rand<T>::v) ifExists {
+                customValidation()
+            }
         }
     }
     companion object
 }
 
-//Custom validations
-fun ValidatorBuilder<String>.maxLength(max: (String) -> Int) = validation {
-    length <= max(this)
-}
-
-interface HasV {
-    val v: String
-}
-
 //Custom scripts
-//an interface is not mandatory, but it makes sense
-fun <T : HasV> ConstraintBuilder<T>.customScript() = script {
-    v.length > 44
+fun ConstraintBuilder<VSauce>.customScript() = validation {
+    it.v.length > 44
 }
 
-//Or for a specific class
-fun ConstraintBuilder<VSauce>.customScriptWithoutInterface() = script {
-    v.length > 44
-}
-
-data class VSauce(override val v: String) : HasV {
+data class VSauce(val v: String) {
     companion object : Constrains<VSauce> {
         override val constraints by describe {
             constraint(violation = "ShortV") {
                 customScript()
-                customScriptWithoutInterface()
             }
         }
     }
