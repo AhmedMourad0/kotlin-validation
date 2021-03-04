@@ -1,4 +1,7 @@
-package dev.ahmedmourad.validation.core
+package dev.ahmedmourad.validation.core.validations
+
+import dev.ahmedmourad.validation.core.Validator
+import dev.ahmedmourad.validation.core.validation
 
 inline fun Validator<Long>.isDivisibleBy(
     crossinline other: (Long) -> Long
@@ -24,7 +27,7 @@ fun Validator<Long>.isOdd() = validation {
     it % 2 != 0L
 }
 
-fun Validator<Long>.isPositive(orZero: Boolean = false) = validation {
+fun Validator<Long>.isPositive(orZero: Boolean) = validation {
     if (orZero) {
         it >= 0
     } else {
@@ -32,7 +35,7 @@ fun Validator<Long>.isPositive(orZero: Boolean = false) = validation {
     }
 }
 
-fun Validator<Long>.isNegative(orZero: Boolean = false) = validation {
+fun Validator<Long>.isNegative(orZero: Boolean) = validation {
     if (orZero) {
         it <= 0
     } else {

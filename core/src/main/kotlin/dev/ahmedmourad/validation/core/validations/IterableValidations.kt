@@ -1,4 +1,7 @@
-package dev.ahmedmourad.validation.core
+package dev.ahmedmourad.validation.core.validations
+
+import dev.ahmedmourad.validation.core.Validator
+import dev.ahmedmourad.validation.core.validation
 
 inline fun <DT> Validator<out Iterable<DT>>.all(
     crossinline itemValidator: Validator<DT>.() -> Unit
@@ -132,7 +135,7 @@ inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.startsWith(
 
 fun <DT> Validator<out Iterable<DT>>.startsWith(
     element: DT
-): Unit = startsWith { element }
+) = startsWith { element }
 
 inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.endsWith(
     crossinline element: (DTI) -> DT

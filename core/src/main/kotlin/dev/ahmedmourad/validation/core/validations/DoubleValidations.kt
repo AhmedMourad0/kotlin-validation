@@ -1,4 +1,7 @@
-package dev.ahmedmourad.validation.core
+package dev.ahmedmourad.validation.core.validations
+
+import dev.ahmedmourad.validation.core.Validator
+import dev.ahmedmourad.validation.core.validation
 
 inline fun Validator<Double>.isDivisibleBy(
     crossinline other: (Double) -> Double
@@ -16,7 +19,7 @@ inline fun Validator<Double>.isNotDivisibleBy(
 
 fun Validator<Double>.isNotDivisibleBy(other: Double) = isNotDivisibleBy { other }
 
-fun Validator<Double>.isPositive(orZero: Boolean = false) = validation {
+fun Validator<Double>.isPositive(orZero: Boolean) = validation {
     if (orZero) {
         it >= 0.0
     } else {
@@ -24,7 +27,7 @@ fun Validator<Double>.isPositive(orZero: Boolean = false) = validation {
     }
 }
 
-fun Validator<Double>.isNegative(orZero: Boolean = false) = validation {
+fun Validator<Double>.isNegative(orZero: Boolean) = validation {
     if (orZero) {
         it <= 0.0
     } else {
@@ -38,4 +41,20 @@ fun Validator<Double>.isZero() = validation {
 
 fun Validator<Double>.isNotZero() = validation {
     it != 0.0
+}
+
+fun Validator<Double>.isNaN() = validation {
+    it.isNaN()
+}
+
+fun Validator<Double>.isNotNaN() = validation {
+    !it.isNaN()
+}
+
+fun Validator<Double>.isInfinite() = validation {
+    it.isInfinite()
+}
+
+fun Validator<Double>.isFinite() = validation {
+    it.isFinite()
 }

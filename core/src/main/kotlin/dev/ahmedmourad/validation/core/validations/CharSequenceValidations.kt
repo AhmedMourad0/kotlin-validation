@@ -1,4 +1,7 @@
-package dev.ahmedmourad.validation.core
+package dev.ahmedmourad.validation.core.validations
+
+import dev.ahmedmourad.validation.core.Validator
+import dev.ahmedmourad.validation.core.validation
 
 inline fun <DT : CharSequence> Validator<DT>.minLength(
     crossinline min: (DT) -> Int
@@ -96,7 +99,7 @@ inline fun <DT : CharSequence> Validator<DT>.startsWith(
 fun <DT : CharSequence> Validator<DT>.startsWith(
     ignoreCase: Boolean = false,
     prefix: CharSequence
-): Unit = startsWith(ignoreCase) { prefix }
+) = startsWith(ignoreCase) { prefix }
 
 inline fun <DT : CharSequence> Validator<DT>.startsWithChar(
     ignoreCase: Boolean = false,
@@ -154,3 +157,13 @@ inline fun <DT : CharSequence> Validator<DT>.hasSurrogatePairAt(
 }
 
 fun <DT : CharSequence> Validator<DT>.hasSurrogatePairAt(index: Int) = hasSurrogatePairAt { index }
+
+fun <DT : CharSequence> Validator<DT>.regionMatches(
+    thisOffset: Int,
+    other: DT,
+    otherOffset: Int,
+    length: Int,
+    ignoreCase: Boolean
+) = validation {
+    it.regionMatches(thisOffset, other, otherOffset, length, ignoreCase)
+}

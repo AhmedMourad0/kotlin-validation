@@ -1,4 +1,7 @@
-package dev.ahmedmourad.validation.core
+package dev.ahmedmourad.validation.core.validations
+
+import dev.ahmedmourad.validation.core.Validator
+import dev.ahmedmourad.validation.core.validation
 
 inline fun <DT> Validator<Array<DT>>.all(
     crossinline itemValidator: Validator<DT>.() -> Unit
@@ -241,7 +244,7 @@ fun <DT> Validator<Array<DT>>.contentNotEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: (Array<DT>) -> Array<DT>
-): Unit = validation { validated ->
+) = validation { validated ->
 
     val thisWithDistinct = if (ignoreDuplicates) validated.distinct() else validated.asList()
     val otherWithDistinct = if (ignoreDuplicates) other(validated).distinct() else other(validated).asList()
@@ -267,4 +270,4 @@ fun <DT> Validator<Array<DT>>.contentNotEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: Array<DT>
-): Unit = this.contentNotEquals(ignoreDuplicates, ignoreOrder) { other }
+) = this.contentNotEquals(ignoreDuplicates, ignoreOrder) { other }
