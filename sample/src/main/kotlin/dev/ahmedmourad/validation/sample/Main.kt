@@ -1,6 +1,8 @@
 package dev.ahmedmourad.validation.sample
 
 import dev.ahmedmourad.validation.core.*
+import dev.ahmedmourad.validation.core.validations.*
+
 //import dev.ahmedmourad.validation.sample.validations.*
 
 fun main() {
@@ -28,6 +30,10 @@ data class Model(val v: String, val n: Nested?, val l1: Array<Nested>, val l2: L
                 param("min") { 7 }
                 param("max") { Rand(emptyList()) }
                 param("len") { 56.567 }
+                include("nestedViolations", Model::n) {
+                    Nested.Companion
+                }
+
                 on(Model::n) ifExists {
                     on(Nested::x) {
                         maxLength { 14 }
@@ -118,7 +124,7 @@ fun <T : List<*>> Validator<List<T>>.customValidation() = validation {
 }
 
 //Dealing with type parameters or extra parameters
-class RandConstrainer<T : List<*>>(val x: String, val m: T, val c: List<T>, d: Int) : Constrains<Rand<T>> {
+class RandConstrainer<T : List<*>, M>(val x: String, val m: T, val c: List<T>, d: M) : Constrains<Rand<T>> {
     override val constraints by describe {
         constraint("ad") {
             on(Rand<T>::v) ifExists {
@@ -126,7 +132,6 @@ class RandConstrainer<T : List<*>>(val x: String, val m: T, val c: List<T>, d: I
             }
         }
     }
-    companion object
 }
 
 //Custom scripts
