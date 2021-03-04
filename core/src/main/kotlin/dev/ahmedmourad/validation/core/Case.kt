@@ -12,3 +12,17 @@ fun <T : Any> T.legal(): Case<Nothing, T> {
 fun <V : Any> V.illegal(): Case<V, Nothing> {
     return Case.Illegal(this)
 }
+
+fun <V : Any, T : Any> Case<V, T>.swap(): Case<T, V> {
+    return when (this) {
+        is Case.Illegal -> this.v.legal()
+        is Case.Legal -> this.v.illegal()
+    }
+}
+
+fun <V : Any, T : Any> Case<V, T>.orElse(substitute: () -> T): T {
+    return when (this) {
+        is Case.Illegal -> substitute()
+        is Case.Legal -> this.v
+    }
+}
