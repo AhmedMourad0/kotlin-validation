@@ -1,13 +1,16 @@
 package dev.ahmedmourad.validation.compiler.analysers
 
+import arrow.meta.quotes.ktFile
 import dev.ahmedmourad.validation.compiler.descriptors.Param
 import dev.ahmedmourad.validation.compiler.descriptors.Violation
 import dev.ahmedmourad.validation.compiler.utils.*
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
+import dev.ahmedmourad.validation.compiler.descriptors.IncludedConstraint
 import dev.ahmedmourad.validation.compiler.verifier.DslVerifier
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.js.descriptorUtils.getJetTypeFqName
 import org.jetbrains.kotlin.js.translate.utils.finalElement
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.calls.callUtil.getParentCall
@@ -16,6 +19,7 @@ import org.jetbrains.kotlin.resolve.calls.callUtil.getValueArgumentsInParenthese
 import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.types.KotlinType
+import org.jetbrains.kotlin.types.typeUtil.supertypes
 import org.jetbrains.kotlin.util.containingNonLocalDeclaration
 
 internal class ConstraintsAnalyser(
@@ -25,15 +29,18 @@ internal class ConstraintsAnalyser(
 
     internal fun analyse(): List<ConstraintsDescriptor> {
         return bindingContext.getSliceContents(BindingContext.RESOLVED_CALL)
+            .asSequence()
             .mapNotNull { (_, resolvedCall) ->
 
-                when (resolvedCall?.candidateDescriptor?.fqNameSafe?.asString()) {
+                when {
 
-                    FQ_NAME_CONSTRAINT_FUN -> {
+                    resolvedCall?.candidateDescriptor?.fqNameSafe?.asString() == FQ_NAME_CONSTRAINT_FUN -> {
                         val describeCall = getDescribeCall(resolvedCall) ?: return@mapNotNull null
                         val constrainerObject = getConstrainerClassOrObject(describeCall) ?: return@mapNotNull null
                         val constrainedType = getConstrainedType(resolvedCall) ?: return@mapNotNull null
                         val constrainedTypePsi = getConstrainedTypePsi(resolvedCall) ?: return@mapNotNull null
+                        verifier.verifyConstrainedClassType(constrainedType, constrainedTypePsi)
+                            ?: return@mapNotNull null
                         val (violationName, violationNameExpression) = getViolationName(resolvedCall)
                             ?: return@mapNotNull null
                         val params = getViolationParams(resolvedCall) ?: return@mapNotNull null
@@ -47,7 +54,7 @@ internal class ConstraintsAnalyser(
                         )
                     }
 
-                    FQ_NAME_PARAM_FUN -> {
+                    resolvedCall?.candidateDescriptor?.annotations?.hasAnnotation(FqName(FQ_NAME_PARAM_ANNOTATION)) == true -> {
                         verifier.verifyParamIsCalledInsideConstraint(resolvedCall)
                         null
                     }
@@ -64,6 +71,8 @@ internal class ConstraintsAnalyser(
 
                 val any = violationsGroup.first()
                 ConstraintsDescriptor(
+                    bindingContext,
+                    verifier,
                     any.constrainedType,
                     any.constrainedTypePsi,
                     any.constrainerClassOrObject,
@@ -120,7 +129,7 @@ internal class ConstraintsAnalyser(
     }
 
     private fun getConstrainerClassOrObject(describeCall: KtElement?): KtClassOrObject? {
-        return verifier.verifyConstrainerIsObjectOrRegularClassWithCompanion(describeCall)
+        return verifier.verifyConstrainerIsObjectOrRegularClass(describeCall)
     }
 
     private fun getViolationName(resolvedCall: ResolvedCall<*>): Pair<String, KtExpression>? {
@@ -138,38 +147,81 @@ internal class ConstraintsAnalyser(
 
     private fun getViolationParams(resolvedCall: ResolvedCall<*>): List<Param>? {
 
+        fun analyseParamType(statementResolvedCall: ResolvedCall<*>): Pair<IncludedConstraint?, String>? {
+
+            val (paramTypeParam, paramTypeArg) = statementResolvedCall.typeArguments
+                .asSequence()
+                .firstOrNull { (param, _) ->
+                    param.annotations.hasAnnotation(FqName(FQ_NAME_PARAM_TYPE_ANNOTATION))
+                } ?: return null
+
+            return if (paramTypeParam.annotations.hasAnnotation(FqName(FQ_NAME_INCLUSION_TYPE_ANNOTATION))) {
+
+                val constrainsSuperType = paramTypeArg?.supertypes()
+                    ?.firstOrNull { it.getJetTypeFqName(false) == FQ_NAME_CONSTRAINS }
+                    ?: return null
+
+                val constrainedType = constrainsSuperType.arguments
+                    .firstOrNull()
+                    ?.type
+                    ?: return null
+
+                val validationsFileFqName = paramTypeArg.constructor
+                    .declarationDescriptor
+                    ?.ktFile()
+                    ?.packageFqName
+                    ?.asString()
+                    ?.split(".")
+                    ?.takeIf(List<String>::isNotEmpty)
+                    ?.plus(OUTPUT_FOLDER)
+                    ?.joinToString(".")
+                    ?: return null
+
+                    IncludedConstraint(
+                        validationsFileFqName,
+                        constrainedType,
+                        paramTypeArg
+                    ) to "List<$validationsFileFqName.${constrainedType.simpleName()}$VIOLATIONS_SUPER_CLASS_SUFFIX>"
+
+            } else {
+                null to paramTypeArg.deepFqName()
+            }
+        }
+
         fun extractParamEntry(statementResolvedCall: ResolvedCall<*>): Param? {
 
-            val paramType = statementResolvedCall.typeArguments.values.elementAtOrNull(0)
-            val paramNameExpression = statementResolvedCall.call
-                .getValueArgumentsInParentheses()
-                .getOrNull(0)
-                ?.getArgumentExpression()
-
-            return when {
-
-                paramType == null -> verifier.reportError(
+            val (includedConstraint, paramTypeFqName) = analyseParamType(statementResolvedCall)
+                ?: return verifier.reportError(
                     "Unable to find `param` type",
                     statementResolvedCall.call.callElement
                 )
 
-                paramNameExpression == null -> verifier.reportError(
+            val nameIndex = statementResolvedCall.candidateDescriptor.valueParameters.firstOrNull {
+                it.annotations.hasAnnotation(FqName(FQ_NAME_PARAM_NAME_ANNOTATION))
+            }?.index ?: return verifier.reportError(
+                "Unable to find `param` name",
+                statementResolvedCall.call.callElement
+            )
+
+            val paramNameExpression = statementResolvedCall.call
+                .valueArguments
+                .elementAtOrNull(nameIndex)
+                ?.getArgumentExpression()
+                ?: return verifier.reportError(
                     "Unable to find `param` name",
                     statementResolvedCall.call.callElement
                 )
 
-                else -> {
-                    verifier.verifyParamName(paramNameExpression)
-                        ?.first
-                        ?.let { paramName ->
-                            Param(
-                                paramName,
-                                paramNameExpression,
-                                paramType
-                            )
-                        }
+            return verifier.verifyParamName(paramNameExpression)
+                ?.first
+                ?.let { paramName ->
+                    Param(
+                        paramName,
+                        paramNameExpression,
+                        paramTypeFqName,
+                        includedConstraint
+                    )
                 }
-            }
         }
 
         val params = resolvedCall.call
@@ -178,17 +230,17 @@ internal class ConstraintsAnalyser(
             ?.getLambdaExpression()
             ?.bodyExpression
             ?.statements
+            ?.asSequence()
             ?.mapNotNull {
                 it.getResolvedCall(bindingContext)
             }?.filter {
-                it.candidateDescriptor.fqNameSafe.asString() == FQ_NAME_PARAM_FUN
-            }?.mapNotNull { statementResolvedCall ->
-                extractParamEntry(statementResolvedCall)
-            } ?: return verifier.reportError(
-            "Unable to resolve violation param",
-            resolvedCall.call.callElement
-        )
+                it.candidateDescriptor.annotations.hasAnnotation(FqName(FQ_NAME_PARAM_ANNOTATION))
+            }?.mapNotNull(::extractParamEntry)
+            ?: return verifier.reportError(
+                "Unable to resolve violation param",
+                resolvedCall.call.callElement
+            )
 
-        return verifier.verifyNoDuplicateParams(params)
+        return verifier.verifyNoDuplicateParams(params).toList()
     }
 }

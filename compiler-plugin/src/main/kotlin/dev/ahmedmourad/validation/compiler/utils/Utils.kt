@@ -58,3 +58,12 @@ internal fun KtTypeParameter.deepFqName(bindingContext: BindingContext): String 
         "$variance $name : $bound"
     }.trim()
 }
+
+internal fun <T> List<T>.deepFlatMap(transform: (T) -> Iterable<T>): List<T> {
+    val oneLevelDeeper = this.flatMap(transform)
+    return if (oneLevelDeeper.isEmpty()) {
+        this
+    } else {
+        this + oneLevelDeeper.deepFlatMap(transform)
+    }
+}

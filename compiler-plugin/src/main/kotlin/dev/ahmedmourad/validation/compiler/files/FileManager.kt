@@ -3,6 +3,7 @@ package dev.ahmedmourad.validation.compiler.files
 import arrow.meta.phases.CompilerContext
 import dev.ahmedmourad.validation.compiler.utils.*
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
+import dev.ahmedmourad.validation.compiler.generators.Generator
 import dev.ahmedmourad.validation.compiler.verifier.DslVerifier
 import org.jetbrains.kotlin.cli.common.config.KotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.config.kotlinSourceRoots
@@ -20,9 +21,7 @@ internal class FileManager(
 
     internal fun createFile(
         constraintsDescriptor: ConstraintsDescriptor,
-        imports: List<String>,
-        violationsText: String,
-        functionsText: List<String>
+        vararg generators: Generator
     ) {
 
         val fileName = constraintsDescriptor.constrainedType.simpleName() + OUTPUT_FILE_NAME_SUFFIX
@@ -34,13 +33,12 @@ internal class FileManager(
             return
         }
 
-        file.writeText(
-            """
+        file.writeText("""
         |package ${constraintsDescriptor.packageName}.$OUTPUT_FOLDER
         |
-        |${imports.joinToString("\n") { "import $it" }}
+        |${generators.flatMap { it.imports(constraintsDescriptor) }.distinct().joinToString("\n") { "import $it" }}
         |
-        |${(listOf(violationsText) + functionsText).joinToString("\n\n")}
+        |${generators.flatMap { it.generate(constraintsDescriptor) }.joinToString("\n\n")}
         |
         """.trimMargin()
         )

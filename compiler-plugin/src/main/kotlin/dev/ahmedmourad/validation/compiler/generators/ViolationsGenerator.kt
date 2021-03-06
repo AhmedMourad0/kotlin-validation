@@ -4,17 +4,21 @@ import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
 import dev.ahmedmourad.validation.compiler.descriptors.Violation
 import dev.ahmedmourad.validation.compiler.utils.deepFqName
 
-internal class ViolationsGenerator {
+internal class ViolationsGenerator : Generator {
 
-    internal val imports: List<String> = emptyList()
+    override fun imports(constraintsDescriptor: ConstraintsDescriptor) = emptyList<String>()
 
-    internal fun generate(
+    override fun generate(
         constraintsDescriptor: ConstraintsDescriptor
-    ): String {
+    ): List<String> {
         val parentName = constraintsDescriptor.violationsParentName
         val violations = constraintsDescriptor.violations.joinToString("\n\t") {
             generateViolation(parentName, it).replace("\n", "\n\t")
         }
+        return listOf(generateViolationsParent(parentName, violations))
+    }
+
+    private fun generateViolationsParent(parentName: String, violations: String): String {
         return """
         |sealed class $parentName {
         |    $violations
@@ -30,7 +34,7 @@ internal class ViolationsGenerator {
             "object ${violation.name} : $parentName()"
         } else {
             val params = violation.params.joinToString(",\n\t") { param ->
-                "val ${param.name}: ${param.type.deepFqName()}"
+                "val ${param.name}: ${param.typeFqName}"
             }
             "data class ${violation.name}(\n\t$params\n) : $parentName()"
         }

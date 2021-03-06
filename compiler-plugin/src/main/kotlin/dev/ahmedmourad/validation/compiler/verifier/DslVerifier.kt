@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageUtil
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.descriptors.ClassConstructorDescriptor
+import org.jetbrains.kotlin.descriptors.ConstructorDescriptor
 import org.jetbrains.kotlin.js.translate.utils.finalElement
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.isIdentifier
@@ -28,17 +29,13 @@ internal class DslVerifier(
     private val bindingContext: BindingContext
 ) {
 
-    internal fun warnOnBooleanReturningExpressions() {
-        //TODO
-    }
-
     internal fun verifyParamIsCalledInsideConstraint(
         paramResolvedCall: ResolvedCall<*>
     ): KtElement? {
         return verifyParentBlockAs(
             paramResolvedCall,
             FQ_NAME_CONSTRAINT_FUN,
-            "`param` can only be called directly inside a `constraint` block"
+            "`${paramResolvedCall.candidateDescriptor.name.asString()}` can only be called directly inside a `constraint` block"
         )
     }
 
@@ -70,7 +67,7 @@ internal class DslVerifier(
         }
     }
 
-    internal fun verifyNoDuplicateParams(params: List<Param>): List<Param> {
+    internal fun verifyNoDuplicateParams(params: Sequence<Param>): Sequence<Param> {
         params.groupBy { it.name }.forEach { (name, entries) ->
             if (entries.size > 1) {
                 entries.forEach { entry ->
@@ -87,8 +84,7 @@ internal class DslVerifier(
 
     //TODO: sealed, interface, abstract, inline, empty constructor
     //TODO: warn when no type parameters or value parameters
-    //TODO: type params of constrainer and constrained must match
-    internal fun verifyConstrainerIsObjectOrRegularClassWithCompanion(
+    internal fun verifyConstrainerIsObjectOrRegularClass(
         describeCall: KtElement?
     ): KtClassOrObject? {
 
@@ -102,19 +98,12 @@ internal class DslVerifier(
             is KtObjectDeclaration -> constrainer
 
             is KtClass -> {
-                if (constrainer.companionObjects.isEmpty()) {
-                    reportError(
-                        "A companion object must be provided in order to implement Constrains",
-                        constrainer.finalElement
-                    )
-                } else {
-                    constrainer
-                }
+                constrainer
             }
 
             else -> {
                 reportError(
-                    "Only objects and regular classes with companion objects can implement Constrains",
+                    "Only objects and regular classes can implement Constrains",
                     constrainer?.finalElement
                 )
             }
@@ -125,7 +114,7 @@ internal class DslVerifier(
         return verifyValidIdentifier(
             nameExpression,
             "Illegal class identifier",
-            "`violation` name must be a String literal"
+            "Violation name must be a String literal"
         )
     }
 
@@ -133,7 +122,7 @@ internal class DslVerifier(
         return verifyValidIdentifier(
             nameExpression,
             "Illegal property identifier",
-            "`param` name must be a String literal"
+            "Param name must be a String literal"
         )
     }
 
@@ -166,14 +155,12 @@ internal class DslVerifier(
         constrainedClass: LazyClassDescriptor,
         constrainedTypePsi: PsiElement
     ): ClassConstructorDescriptor? {
-
         return constrainedClass.constructors
-            .firstOrNull { it.isPrimary }
+            .firstOrNull(ConstructorDescriptor::isPrimary)
             ?: reportError(
                 "Only data classes and regular classes with primary constructors can be constrained",
                 constrainedTypePsi
             )
-
     }
 
     private fun verifyValidIdentifier(
