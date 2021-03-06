@@ -27,7 +27,7 @@ data class Model(val v: String, val n: Nested?, val l1: Array<Nested>, val l2: L
     companion object : Constrains<Model> {
         override val constraints by describe {
             constraint(violation = "TooShort") {
-                param("min") { 7 }
+                param<Number>("min") { 7 }
                 param("max") { Rand(emptyList()) }
                 param("len") { 56.567 }
                 include("nestedViolations", Model::n) {
