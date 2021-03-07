@@ -190,9 +190,9 @@ internal class FunctionsGenerator(
                 val inclusionParamsVars = violation.inclusionParams.mapIndexed { index, param ->
                     """
                     |val ${param.name}Descriptor = this.includedConstraints[$index] as $FQ_NAME_INCLUDED_CONSTRAINTS<$constrainedFqName, ${param.includedConstraint!!.constrainedType.deepFqName()}, ${param.includedConstraint.constrainerType.deepFqName()}>
-                    |val ${param.name} = ${param.name}Descriptor.constrained(item.value)?.let { constrained ->
-                    |    ${param.name}Descriptor.constrainer(item.value).isValid { constrained }
-                    |} ?: true
+                    |val ${param.name} = ${param.name}Descriptor.isValid(item.value) {
+                    |    this.isValid { it }
+                    |}
                     """.trimMargin()
                 }.joinToString(separator = "\n\n")
 
@@ -254,12 +254,9 @@ internal class FunctionsGenerator(
                 val inclusionParamsVars = inclusionParamsList?.mapIndexed { index, param ->
                     """
                     |val ${param.name}Descriptor = this.includedConstraints[$index] as $FQ_NAME_INCLUDED_CONSTRAINTS<$constrainedFqName, ${param.includedConstraint!!.constrainedType.deepFqName()}, ${param.includedConstraint.constrainerType.deepFqName()}>
-                    |val ${param.name} = ${param.name}Descriptor.constrained(item.value)?.let { constrained ->
-                    |    ${param.name}Descriptor.constrainer(item.value)
-                    |    .validate { constrained }
-                    |    .swap()
-                    |    .orElse { emptyList() }
-                    |}.orEmpty()
+                    |val ${param.name} = ${param.name}Descriptor.findViolations(item.value) {
+                    |    this.validate { it }
+                    |}
                     """.trimMargin()
                 }?.joinToString(separator = "\n\n", prefix = "\n", postfix = "\n").orEmpty()
 
