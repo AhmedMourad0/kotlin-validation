@@ -48,6 +48,10 @@ internal class ValidationContextGenerator(
     private fun generateValidationContextImpl(
         constraintsDescriptor: ConstraintsDescriptor
     ): String {
-        return "private class ${constraintsDescriptor.validationContextImplName}${constraintsDescriptor.constrainerTypeParams}: ${constraintsDescriptor.validationContextName}${constraintsDescriptor.constrainerTypeParamsAsTypeArgs}"
+        return if (constraintsDescriptor.isValidationContextImplAClass) {
+            "private class ${constraintsDescriptor.validationContextImplName}${constraintsDescriptor.constrainerTypeParams}: ${constraintsDescriptor.validationContextName}${constraintsDescriptor.constrainerTypeParamsAsTypeArgs}"
+        } else {
+            "private object ${constraintsDescriptor.validationContextImplName} : ${constraintsDescriptor.validationContextName}"
+        }
     }
 }

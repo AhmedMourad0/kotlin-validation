@@ -92,13 +92,19 @@ internal class FunctionsGenerator(
         val validationContext = constraintsDescriptor.validationContextName
         val validationContextImpl = constraintsDescriptor.validationContextImplName
 
+        val validationContextInstantiation = if (constraintsDescriptor.isValidationContextImplAClass) {
+            "$validationContextImpl()"
+        } else {
+            validationContextImpl
+        }
+
         return """
             |fun $constrainerTypeParams$constrainerFqName.isValid(
             |    createItem: $validationContext${constraintsDescriptor.constrainerTypeParamsAsTypeArgs}.() -> $constrainedFqName
             |): Boolean {
             |
             |    val item = lazy {
-            |        createItem($validationContextImpl())
+            |        createItem($validationContextInstantiation)
             |    }
             |
             |    return findViolatedConstraints(item).isNotEmpty()
@@ -117,13 +123,19 @@ internal class FunctionsGenerator(
         val validationContext = constraintsDescriptor.validationContextName
         val validationContextImpl = constraintsDescriptor.validationContextImplName
 
+        val validationContextInstantiation = if (constraintsDescriptor.isValidationContextImplAClass) {
+            "$validationContextImpl()"
+        } else {
+            validationContextImpl
+        }
+
         return """
             |fun $constrainerTypeParams$constrainerFqName.validate(
             |    createItem: $validationContext${constraintsDescriptor.constrainerTypeParamsAsTypeArgs}.() -> $constrainedFqName
             |): Case<List<$violationsParent>, $constrainedFqName> {
             |
             |    val item = lazy {
-            |        createItem($validationContextImpl())
+            |        createItem($validationContextInstantiation)
             |    }
             |    
             |    return findViolatedConstraints(item).map { it.toViolation(item) }

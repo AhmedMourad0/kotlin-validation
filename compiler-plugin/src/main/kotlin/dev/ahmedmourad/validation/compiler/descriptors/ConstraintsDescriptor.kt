@@ -113,6 +113,7 @@ internal data class ConstraintsDescriptor constructor(
 
     val validationContextName by lazy { constrainedType.simpleName()!! + VALIDATION_CONTEXT_SUFFIX }
     val validationContextImplName by lazy { validationContextName + VALIDATION_CONTEXT_IMPL_SUFFIX }
+    val isValidationContextImplAClass by lazy { constrainerTypeParams.isNotBlank() }
 }
 
 internal data class Violation(
