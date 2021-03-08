@@ -5,7 +5,7 @@ A multiplatform, declarative, flexible and type-safe Kotlin validation framework
 Check the samples for current syntax.
 
 ## Features
-- Generating sealed classes that describe violations (No string matching)
+- Generating sealed classes that describe violations (no string matching)
 - Generating the `validate` and `isValid` functions per constrainer
 - Support for adding properties to different violations
 - Support for Generics
