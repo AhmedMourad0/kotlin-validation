@@ -4,6 +4,38 @@ A multiplatform, declarative, flexible and type-safe Kotlin validation framework
 ## Target Syntax
 Check the samples for current syntax.
 
+## Features
+- Generating sealed classes that describe violations (No string matching)
+- Generating the `validate` and `isValid` functions per constrainer
+- Support for adding properties to different violations
+- Support for Generics
+- Support providing extra parameters / type parameters to use during validation
+- Support validating the extra parameters
+- Third-party classes constrainers
+- Multiple constrainers per class
+- Constrainers composition
+- Declarative type-safe dsl to describe constraints
+- Property-specific and class-specific validations
+- Nested validations and constraints
+- Nesting shortcuts
+- Multiplatform ready-to-use validations
+- Support doing logical operations on validations
+- Validations for elements of different containers
+- Easy-to-create custom validations
+
+## Roadmap
+- Enforcing classes to be validated before usage
+- Providing ready-to-use constrainers (email, phone-number, ...)
+- More Multiplatform ready-to-use validations
+- Library-specific ready-to-use validations 
+- K/Jvm ready-to-use validations
+- K/N ready-to-use validations
+- K/Js ready-to-use validations
+- Arguments and returned values validation (call-site validation)
+- (Arrow, Kotest, ...) extensions
+- Jetpack Compose support?
+- To suspend or not to suspend.
+
 License
 -------
 
