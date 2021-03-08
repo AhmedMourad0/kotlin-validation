@@ -35,6 +35,7 @@ Check the samples for current syntax.
 - (Arrow, Kotest, ...) extensions
 - Jetpack Compose support?
 - To suspend or not to suspend.
+- Adding validations descriptions to be used by the IDE to describe constrainers
 
 License
 -------
