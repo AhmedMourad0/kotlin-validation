@@ -2,8 +2,8 @@ package dev.ahmedmourad.validation.compiler.verifier
 
 import arrow.meta.phases.CompilerContext
 import arrow.meta.quotes.ktClassOrObject
-import dev.ahmedmourad.validation.compiler.descriptors.Param
-import dev.ahmedmourad.validation.compiler.descriptors.Violation
+import dev.ahmedmourad.validation.compiler.descriptors.ParamDescriptor
+import dev.ahmedmourad.validation.compiler.descriptors.ViolationDescriptor
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_CONSTRAINT_FUN
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_DESCRIBE_FUN
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
@@ -22,8 +22,6 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.lazy.descriptors.LazyClassDescriptor
 import org.jetbrains.kotlin.types.KotlinType
 
-//TODO: verify location based on annotations and not names to support adding
-// elements to extension functions as well
 internal class DslVerifier(
     private val cc: CompilerContext,
     private val bindingContext: BindingContext
@@ -50,8 +48,8 @@ internal class DslVerifier(
     }
 
     internal fun verifyNoDuplicateViolations(
-        violationsPerConstrainer: Map<String?, List<Violation>>
-    ): Map<String?, List<Violation>> {
+        violationsPerConstrainer: Map<String?, List<ViolationDescriptor>>
+    ): Map<String?, List<ViolationDescriptor>> {
         return violationsPerConstrainer.mapValues { (_, violationsGroup) ->
             violationsGroup.groupBy { it.name }.map { (name, entries) ->
                 if (entries.size > 1) {
@@ -67,7 +65,7 @@ internal class DslVerifier(
         }
     }
 
-    internal fun verifyNoDuplicateParams(params: Sequence<Param>): Sequence<Param> {
+    internal fun verifyNoDuplicateParams(params: Sequence<ParamDescriptor>): Sequence<ParamDescriptor> {
         params.groupBy { it.name }.forEach { (name, entries) ->
             if (entries.size > 1) {
                 entries.forEach { entry ->

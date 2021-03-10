@@ -1,22 +1,15 @@
 package dev.ahmedmourad.validation.compiler.generators
 
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
-import dev.ahmedmourad.validation.compiler.descriptors.Param
+import dev.ahmedmourad.validation.compiler.descriptors.ParamDescriptor
 import dev.ahmedmourad.validation.compiler.utils.*
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_CASE
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_CONSTRAINT
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_ILLEGAL_FUN
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_LEGAL_FUN
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_VALIDATION
-import dev.ahmedmourad.validation.compiler.verifier.DslVerifier
-import org.jetbrains.kotlin.resolve.BindingContext
 
-private data class SimpleParam(val name: String, val typeFqName: String)
-
-internal class FunctionsGenerator(
-    private val verifier: DslVerifier,
-    private val bindingContext: BindingContext
-) : Generator {
+internal class FunctionsGenerator : Generator {
 
     override fun imports(constraintsDescriptor: ConstraintsDescriptor) = listOf(
         FQ_NAME_CASE,
@@ -39,68 +32,36 @@ internal class FunctionsGenerator(
     override fun generate(
         constraintsDescriptor: ConstraintsDescriptor
     ): List<String> {
-
-        val constrainedClass = constraintsDescriptor.constrainedClass ?: return emptyList()
-
-        val constrainedParams = verifier.verifyConstrainedClassHasPrimaryConstructor(
-            constrainedClass,
-            constraintsDescriptor.constrainedTypePsi
-        )?.valueParameters?.map {
-            SimpleParam(it.name.asString(), it.type.deepFqName())
-        } ?: return emptyList()
-
-        val constrainedFqName = constraintsDescriptor.constrainedFqName
-        val constrainerFqName = constraintsDescriptor.constrainerFqName
-        val constrainerTypeParams = constraintsDescriptor.constrainerTypeParams
-
         return listOfNotNull(
-            generateFactory(
-                constraintsDescriptor = constraintsDescriptor,
-                constrainedFqName = constrainedFqName,
-                constrainedParams = constrainedParams
-            ), generateIsValid(
-                constraintsDescriptor = constraintsDescriptor,
-                constrainedFqName = constrainedFqName,
-                constrainerFqName = constrainerFqName,
-                constrainerTypeParams = constrainerTypeParams
-            ), generateValidate(
-                constraintsDescriptor = constraintsDescriptor,
-                constrainedFqName = constrainedFqName,
-                constrainerFqName = constrainerFqName,
-                constrainerTypeParams = constrainerTypeParams
-            ), generateFindViolatedConstraints(
-                constrainedFqName = constrainedFqName,
-                constrainerFqName = constrainerFqName,
-                constrainerTypeParams = constrainerTypeParams
-            ), generateValidateNestedConstraints(
-                constraintsDescriptor = constraintsDescriptor,
-                constrainedFqName = constrainedFqName
-            ), generateToViolation(
-                constraintsDescriptor = constraintsDescriptor,
-                constrainedFqName = constrainedFqName
-            )
+            generateFactory(constraintsDescriptor = constraintsDescriptor),
+            generateIsValid(constraintsDescriptor = constraintsDescriptor),
+            generateValidate(constraintsDescriptor = constraintsDescriptor),
+            generateFindViolatedConstraints(constraintsDescriptor = constraintsDescriptor),
+            generateValidateNestedConstraints(constraintsDescriptor = constraintsDescriptor),
+            generateToViolation(constraintsDescriptor = constraintsDescriptor)
         )
     }
 
-    private fun generateIsValid(
-        constraintsDescriptor: ConstraintsDescriptor,
-        constrainedFqName: String,
-        constrainerFqName: String?,
-        constrainerTypeParams: String
-    ): String {
+    private fun generateIsValid(constraintsDescriptor: ConstraintsDescriptor): String {
+
+        val constrainedFqName = constraintsDescriptor.constrainedFqName
+
+        val constrainerFqName = constraintsDescriptor.constrainerFqName
+        val constrainerTypeParams = constraintsDescriptor.constrainerTypeParams
+        val constrainerTypeParamsAsTypeArgs = constraintsDescriptor.constrainerTypeParamsAsTypeArgs
 
         val validationContext = constraintsDescriptor.validationContextName
         val validationContextImpl = constraintsDescriptor.validationContextImplName
 
-        val validationContextInstantiation = if (constraintsDescriptor.isValidationContextImplAClass) {
-            "$validationContextImpl()"
-        } else {
+        val validationContextInstantiation = if (constraintsDescriptor.isValidationContextImplAnObject) {
             validationContextImpl
+        } else {
+            "$validationContextImpl()"
         }
 
         return """
             |fun $constrainerTypeParams$constrainerFqName.isValid(
-            |    createItem: $validationContext${constraintsDescriptor.constrainerTypeParamsAsTypeArgs}.() -> $constrainedFqName
+            |    createItem: $validationContext$constrainerTypeParamsAsTypeArgs.() -> $constrainedFqName
             |): Boolean {
             |
             |    val item = lazy {
@@ -112,55 +73,61 @@ internal class FunctionsGenerator(
         """.trimMargin()
     }
 
-    private fun generateValidate(
-        constraintsDescriptor: ConstraintsDescriptor,
-        constrainedFqName: String,
-        constrainerFqName: String?,
-        constrainerTypeParams: String
-    ): String {
+    private fun generateValidate(constraintsDescriptor: ConstraintsDescriptor): String {
+
+        val constrainedFqName = constraintsDescriptor.constrainedFqName
+
+        val constrainerFqName = constraintsDescriptor.constrainerFqName
+        val constrainerTypeParams = constraintsDescriptor.constrainerTypeParams
+        val constrainerTypeParamsAsTypeArgs = constraintsDescriptor.constrainerTypeParamsAsTypeArgs
 
         val violationsParent = constraintsDescriptor.violationsParentName
         val validationContext = constraintsDescriptor.validationContextName
         val validationContextImpl = constraintsDescriptor.validationContextImplName
 
-        val validationContextInstantiation = if (constraintsDescriptor.isValidationContextImplAClass) {
-            "$validationContextImpl()"
-        } else {
+        val validationContextInstantiation = if (constraintsDescriptor.isValidationContextImplAnObject) {
             validationContextImpl
+        } else {
+            "$validationContextImpl()"
         }
 
         return """
             |fun $constrainerTypeParams$constrainerFqName.validate(
-            |    createItem: $validationContext${constraintsDescriptor.constrainerTypeParamsAsTypeArgs}.() -> $constrainedFqName
+            |    createItem: $validationContext$constrainerTypeParamsAsTypeArgs.() -> $constrainedFqName
             |): Case<List<$violationsParent>, $constrainedFqName> {
             |
             |    val item = lazy {
             |        createItem($validationContextInstantiation)
             |    }
             |    
-            |    return findViolatedConstraints(item).map { it.toViolation(item) }
+            |    return findViolatedConstraints(item).map { it.toViolation$constrainerTypeParamsAsTypeArgs(item) }
             |        .takeIf(List<$violationsParent>::isNotEmpty)
             |        ?.illegal() ?: item.value.legal()
             |}
         """.trimMargin()
     }
 
-    private fun generateFactory(
-        constraintsDescriptor: ConstraintsDescriptor,
-        constrainedFqName: String,
-        constrainedParams: List<SimpleParam>
-    ): String {
+    private fun generateFactory(constraintsDescriptor: ConstraintsDescriptor): String? {
+
+        val constrainedParams = constraintsDescriptor.constrainedParams ?: return null
+        val constrainedFqName = constraintsDescriptor.constrainedFqName
+        val constrainedSimpleName = constraintsDescriptor.constrainedType.simpleName()
+
+        val constrainerTypeParams = constraintsDescriptor.constrainerTypeParams
+        val constrainerTypeParamsAsTypeArgs = constraintsDescriptor.constrainerTypeParamsAsTypeArgs
+
+        val validationContext = constraintsDescriptor.validationContextName
 
         val params = constrainedParams.joinToString(",\n\t") { param ->
-            param.name + ": " + param.typeFqName
+            param.name.asString() + ": " + param.type.deepFqName()
         }
 
         val itemArgs = constrainedParams.joinToString(",\n\t\t") { param ->
-            param.name
+            param.name.asString()
         }
 
         return """
-            |fun ${constraintsDescriptor.constrainerTypeParams.takeIf { it.isNotBlank() }?.plus(" ").orEmpty()}${constraintsDescriptor.validationContextName}${constraintsDescriptor.constrainerTypeParamsAsTypeArgs}.${constraintsDescriptor.constrainedType.simpleName()}(
+            |fun $constrainerTypeParams$validationContext$constrainerTypeParamsAsTypeArgs.$constrainedSimpleName(
             |    $params
             |): $constrainedFqName {
             |    return $constrainedFqName(
@@ -170,11 +137,13 @@ internal class FunctionsGenerator(
         """.trimMargin()
     }
 
-    private fun generateFindViolatedConstraints(
-        constrainedFqName: String,
-        constrainerFqName: String?,
-        constrainerTypeParams: String
-    ): String {
+    private fun generateFindViolatedConstraints(constraintsDescriptor: ConstraintsDescriptor): String {
+
+        val constrainedFqName = constraintsDescriptor.constrainedFqName
+        val constrainerFqName = constraintsDescriptor.constrainerFqName
+        val constrainerTypeParams = constraintsDescriptor.constrainerTypeParams
+        val constrainerTypeParamsAsTypeArgs = constraintsDescriptor.constrainerTypeParamsAsTypeArgs
+
         return """
             |private fun $constrainerTypeParams$constrainerFqName.findViolatedConstraints(
             |    item: kotlin.Lazy<$constrainedFqName>
@@ -182,16 +151,17 @@ internal class FunctionsGenerator(
             |    return this.constraints.filterNot { constraint ->
             |        constraint.validations.all { validation ->
             |            validation.validate(item.value)
-            |        } && constraint.validateNestedConstraints(item)
+            |        } && constraint.validateNestedConstraints$constrainerTypeParamsAsTypeArgs(item)
             |    }
             |}
         """.trimMargin()
     }
 
-    private fun generateValidateNestedConstraints(
-        constraintsDescriptor: ConstraintsDescriptor,
-        constrainedFqName: String
-    ): String {
+    private fun generateValidateNestedConstraints(constraintsDescriptor: ConstraintsDescriptor): String {
+
+        val constrainedFqName = constraintsDescriptor.constrainedFqName
+
+        val constrainerTypeParams = constraintsDescriptor.constrainerTypeParams
 
         val violationCases = constraintsDescriptor.violations.map { violation ->
 
@@ -199,10 +169,18 @@ internal class FunctionsGenerator(
                 "true"
             } else {
 
-                val inclusionParamsVars = violation.inclusionParams.mapIndexed { index, param ->
+                val inclusionParamsVals = violation.inclusionParams.mapIndexed { index, param ->
+
+                    val includedConstrainedFqName = param.includedConstraint!!.constrainedFqName
+                    val includedConstrainerFqName = param.includedConstraint.constrainerFqName
+
+                    val includedConstraintTypeArgs =
+                        "<$constrainedFqName, $includedConstrainedFqName, $includedConstrainerFqName>"
+                    val valName = "${param.name}Descriptor"
+
                     """
-                    |val ${param.name}Descriptor = this.includedConstraints[$index] as $FQ_NAME_INCLUDED_CONSTRAINTS<$constrainedFqName, ${param.includedConstraint!!.constrainedType.deepFqName()}, ${param.includedConstraint.constrainerType.deepFqName()}>
-                    |val ${param.name} = ${param.name}Descriptor.isValid(item.value) {
+                    |val $valName = this.includedConstraints[$index] as $FQ_NAME_INCLUDED_CONSTRAINTS$includedConstraintTypeArgs
+                    |val ${param.name} = $valName.isValid(item.value) {
                     |    this.isValid { it }
                     |}
                     """.trimMargin()
@@ -210,7 +188,7 @@ internal class FunctionsGenerator(
 
                 """
                 |
-                |$inclusionParamsVars
+                |$inclusionParamsVals
                 |
                 |${violation.inclusionParams.joinToString(" && ") { it.name }}
                 """.trimMargin()
@@ -225,7 +203,7 @@ internal class FunctionsGenerator(
 
         return """
             |@Suppress("UNCHECKED_CAST")
-            |private fun ${constraintsDescriptor.constrainerTypeParamsForConstrained.takeIf(String::isNotBlank)?.let{ "$it " }.orEmpty()}Constraint<$constrainedFqName>.validateNestedConstraints(
+            |private fun ${constrainerTypeParams}Constraint<$constrainedFqName>.validateNestedConstraints(
             |    item: kotlin.Lazy<$constrainedFqName>
             |): Boolean {
             |    return when (this.violation) {
@@ -242,10 +220,11 @@ internal class FunctionsGenerator(
         """.trimMargin()
     }
 
-    private fun generateToViolation(
-        constraintsDescriptor: ConstraintsDescriptor,
-        constrainedFqName: String
-    ): String {
+    private fun generateToViolation(constraintsDescriptor: ConstraintsDescriptor): String {
+
+        val constrainedFqName = constraintsDescriptor.constrainedFqName
+
+        val constrainerTypeParams = constraintsDescriptor.constrainerTypeParams
 
         val violationsParent = constraintsDescriptor.violationsParentName
 
@@ -255,18 +234,26 @@ internal class FunctionsGenerator(
                 "$violationsParent.${violation.name}"
             } else {
 
-                val regularParams = violation.regularParams
-                    .mapIndexed { index, param ->
-                        "${param.name} = this.params[$index].get(item.value) as ${param.typeFqName}"
-                    }
+                val regularParams = violation.regularParams.mapIndexed { index, param ->
+                    "${param.name} = this.params[$index].get(item.value) as ${param.typeFqName}"
+                }
 
                 val inclusionParamsList = violation.inclusionParams
-                    .takeIf(List<Param>::isNotEmpty)
+                    .takeIf(List<ParamDescriptor>::isNotEmpty)
 
-                val inclusionParamsVars = inclusionParamsList?.mapIndexed { index, param ->
+                val inclusionParamsVals = inclusionParamsList?.mapIndexed { index, param ->
+
+                    val includedConstrainedFqName = param.includedConstraint!!.constrainedFqName
+                    val includedConstrainerFqName = param.includedConstraint.constrainerFqName
+
+                    val includedConstraintTypeArgs =
+                        "<$constrainedFqName, $includedConstrainedFqName, $includedConstrainerFqName>"
+
+                    val valName = "${param.name}Descriptor"
+
                     """
-                    |val ${param.name}Descriptor = this.includedConstraints[$index] as $FQ_NAME_INCLUDED_CONSTRAINTS<$constrainedFqName, ${param.includedConstraint!!.constrainedType.deepFqName()}, ${param.includedConstraint.constrainerType.deepFqName()}>
-                    |val ${param.name} = ${param.name}Descriptor.findViolations(item.value) {
+                    |val $valName = this.includedConstraints[$index] as $FQ_NAME_INCLUDED_CONSTRAINTS$includedConstraintTypeArgs
+                    |val ${param.name} = $valName.findViolations(item.value) {
                     |    this.validate { it }
                     |}
                     """.trimMargin()
@@ -277,7 +264,7 @@ internal class FunctionsGenerator(
                 }.orEmpty()
 
                 """
-                |$inclusionParamsVars
+                |$inclusionParamsVals
                 |$violationsParent.${violation.name}(
                 |    ${(regularParams + inclusionParams).joinToString(",\n\t")}
                 |)
@@ -293,7 +280,7 @@ internal class FunctionsGenerator(
 
         return """
             |@Suppress("UNCHECKED_CAST")
-            |private fun ${constraintsDescriptor.constrainerTypeParamsForConstrained.takeIf(String::isNotBlank)?.let{ "$it " }.orEmpty()}Constraint<$constrainedFqName>.toViolation(
+            |private fun ${constrainerTypeParams}Constraint<$constrainedFqName>.toViolation(
             |    item: kotlin.Lazy<$constrainedFqName>
             |): $violationsParent {
             |    return when (this.violation) {

@@ -28,8 +28,8 @@ internal fun Meta.validationsAnalysisHandler(): AnalysisHandler = analysis(
         val verifier = DslVerifier(this, bindingTrace.bindingContext)
         val fileManager = FileManager(this, verifier)
         val violationsGenerator = ViolationsGenerator()
-        val functionsGenerator = FunctionsGenerator(verifier, bindingTrace.bindingContext)
-        val validationContextGenerator = ValidationContextGenerator(bindingTrace.bindingContext)
+        val functionsGenerator = FunctionsGenerator()
+        val validationContextGenerator = ValidationContextGenerator()
 
         ConstraintsAnalyser(
             bindingTrace.bindingContext,

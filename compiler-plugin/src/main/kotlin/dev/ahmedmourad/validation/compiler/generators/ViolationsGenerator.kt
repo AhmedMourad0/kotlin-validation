@@ -1,8 +1,7 @@
 package dev.ahmedmourad.validation.compiler.generators
 
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
-import dev.ahmedmourad.validation.compiler.descriptors.Violation
-import dev.ahmedmourad.validation.compiler.utils.deepFqName
+import dev.ahmedmourad.validation.compiler.descriptors.ViolationDescriptor
 
 internal class ViolationsGenerator : Generator {
 
@@ -28,7 +27,7 @@ internal class ViolationsGenerator : Generator {
 
     private fun generateViolation(
         parentName: String,
-        violation: Violation
+        violation: ViolationDescriptor
     ): String {
         return if (violation.params.isEmpty()) {
             "object ${violation.name} : $parentName()"

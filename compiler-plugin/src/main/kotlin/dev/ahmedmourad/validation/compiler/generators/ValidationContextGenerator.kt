@@ -3,11 +3,9 @@ package dev.ahmedmourad.validation.compiler.generators
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
 import dev.ahmedmourad.validation.compiler.utils.VALIDATION_CONTEXT_SUFFIX
 import dev.ahmedmourad.validation.compiler.utils.simpleName
-import org.jetbrains.kotlin.resolve.BindingContext
+import org.jetbrains.kotlin.types.TypeProjection
 
-internal class ValidationContextGenerator(
-    private val bindingContext: BindingContext
-) : Generator {
+internal class ValidationContextGenerator : Generator {
 
     override fun imports(constraintsDescriptor: ConstraintsDescriptor) = emptyList<String>()
 
@@ -31,27 +29,47 @@ internal class ValidationContextGenerator(
         }.distinctBy {
             it.validationsFileFqName
         }.map { includedConstraint ->
-            includedConstraint.validationsFileFqName +
-                    "." +
-                    includedConstraint.constrainedType.simpleName() + VALIDATION_CONTEXT_SUFFIX +
-                    includedConstraint.constrainerType
+
+            val includedConstrainerTypeArgs = includedConstraint.constrainerType
                 .arguments
-                .map { it.toString() }
+                .map(TypeProjection::toString)
                 .takeIf(List<String>::isNotEmpty)
                 ?.joinToString(separator = ", ", prefix = "<", postfix = ">")
                 .orEmpty()
-        }.takeIf(List<String>::isNotEmpty)?.joinToString(separator = ", ", prefix = " : ").orEmpty()
 
-        return "interface ${constraintsDescriptor.validationContextName}${constraintsDescriptor.constrainerTypeParams}$supertypes"
+            val includedConstrainedSimpleName = includedConstraint.constrainedType.simpleName()
+
+            val validationsFileFqName = includedConstraint.validationsFileFqName
+
+            "$validationsFileFqName.$includedConstrainedSimpleName$VALIDATION_CONTEXT_SUFFIX$includedConstrainerTypeArgs"
+        }.takeIf(List<String>::isNotEmpty)
+            ?.joinToString(separator = ", ", prefix = " : ")
+            .orEmpty()
+
+        val validationContextName = constraintsDescriptor.validationContextName
+        val constrainerTypeParams = constraintsDescriptor.constrainerTypeParams.let {
+            if (supertypes.isNotBlank()) {
+                it.trim()
+            } else {
+                it
+            }
+        }
+
+        return "interface $validationContextName$constrainerTypeParams$supertypes"
     }
 
-    private fun generateValidationContextImpl(
-        constraintsDescriptor: ConstraintsDescriptor
-    ): String {
-        return if (constraintsDescriptor.isValidationContextImplAClass) {
-            "private class ${constraintsDescriptor.validationContextImplName}${constraintsDescriptor.constrainerTypeParams}: ${constraintsDescriptor.validationContextName}${constraintsDescriptor.constrainerTypeParamsAsTypeArgs}"
+    private fun generateValidationContextImpl(constraintsDescriptor: ConstraintsDescriptor): String {
+
+        val validationContextName = constraintsDescriptor.validationContextName
+        val validationContextImplName = constraintsDescriptor.validationContextImplName
+
+        val constrainerTypeParams = constraintsDescriptor.constrainerTypeParams
+        val constrainerTypeParamsAsTypeArgs = constraintsDescriptor.constrainerTypeParamsAsTypeArgs
+
+        return if (constraintsDescriptor.isValidationContextImplAnObject) {
+            "private object $validationContextImplName : $validationContextName"
         } else {
-            "private object ${constraintsDescriptor.validationContextImplName} : ${constraintsDescriptor.validationContextName}"
+            "private class $validationContextImplName$constrainerTypeParams: $validationContextName$constrainerTypeParamsAsTypeArgs"
         }
     }
 }

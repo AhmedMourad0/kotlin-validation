@@ -59,11 +59,4 @@ internal fun KtTypeParameter.deepFqName(bindingContext: BindingContext): String 
     }.trim()
 }
 
-internal fun <T> List<T>.deepFlatMap(transform: (T) -> Iterable<T>): List<T> {
-    val oneLevelDeeper = this.flatMap(transform)
-    return if (oneLevelDeeper.isEmpty()) {
-        this
-    } else {
-        this + oneLevelDeeper.deepFlatMap(transform)
-    }
-}
+

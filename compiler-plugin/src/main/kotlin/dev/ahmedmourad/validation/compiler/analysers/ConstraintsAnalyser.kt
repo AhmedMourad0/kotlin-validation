@@ -1,13 +1,14 @@
 package dev.ahmedmourad.validation.compiler.analysers
 
 import arrow.meta.quotes.ktFile
-import dev.ahmedmourad.validation.compiler.descriptors.Param
-import dev.ahmedmourad.validation.compiler.descriptors.Violation
+import dev.ahmedmourad.validation.compiler.descriptors.ParamDescriptor
+import dev.ahmedmourad.validation.compiler.descriptors.ViolationDescriptor
 import dev.ahmedmourad.validation.compiler.utils.*
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
-import dev.ahmedmourad.validation.compiler.descriptors.IncludedConstraint
+import dev.ahmedmourad.validation.compiler.descriptors.IncludedConstraintDescriptor
 import dev.ahmedmourad.validation.compiler.verifier.DslVerifier
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.descriptors.ClassConstructorDescriptor
 import org.jetbrains.kotlin.js.descriptorUtils.getJetTypeFqName
 import org.jetbrains.kotlin.js.translate.utils.finalElement
 import org.jetbrains.kotlin.name.FqName
@@ -44,7 +45,7 @@ internal class ConstraintsAnalyser(
                         val (violationName, violationNameExpression) = getViolationName(resolvedCall)
                             ?: return@mapNotNull null
                         val params = getViolationParams(resolvedCall) ?: return@mapNotNull null
-                        Violation(
+                        ViolationDescriptor(
                             violationName,
                             violationNameExpression,
                             constrainedType,
@@ -145,9 +146,9 @@ internal class ConstraintsAnalyser(
         return verifier.verifyViolationName(nameExpression)
     }
 
-    private fun getViolationParams(resolvedCall: ResolvedCall<*>): List<Param>? {
+    private fun getViolationParams(resolvedCall: ResolvedCall<*>): List<ParamDescriptor>? {
 
-        fun analyseParamType(statementResolvedCall: ResolvedCall<*>): Pair<IncludedConstraint?, String>? {
+        fun analyseParamType(statementResolvedCall: ResolvedCall<*>): Pair<IncludedConstraintDescriptor?, String>? {
 
             val (paramTypeParam, paramTypeArg) = statementResolvedCall.typeArguments
                 .asSequence()
@@ -177,7 +178,7 @@ internal class ConstraintsAnalyser(
                     ?.joinToString(".")
                     ?: return null
 
-                    IncludedConstraint(
+                    IncludedConstraintDescriptor(
                         validationsFileFqName,
                         constrainedType,
                         paramTypeArg
@@ -188,7 +189,7 @@ internal class ConstraintsAnalyser(
             }
         }
 
-        fun extractParamEntry(statementResolvedCall: ResolvedCall<*>): Param? {
+        fun extractParamEntry(statementResolvedCall: ResolvedCall<*>): ParamDescriptor? {
 
             val (includedConstraint, paramTypeFqName) = analyseParamType(statementResolvedCall)
                 ?: return verifier.reportError(
@@ -215,7 +216,7 @@ internal class ConstraintsAnalyser(
             return verifier.verifyParamName(paramNameExpression)
                 ?.first
                 ?.let { paramName ->
-                    Param(
+                    ParamDescriptor(
                         paramName,
                         paramNameExpression,
                         paramTypeFqName,
