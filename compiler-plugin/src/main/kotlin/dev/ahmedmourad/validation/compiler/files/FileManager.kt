@@ -4,14 +4,14 @@ import arrow.meta.phases.CompilerContext
 import dev.ahmedmourad.validation.compiler.utils.*
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
 import dev.ahmedmourad.validation.compiler.generators.Generator
-import dev.ahmedmourad.validation.compiler.verifier.DslVerifier
+import dev.ahmedmourad.validation.compiler.verifier.ValidationVerifier
 import org.jetbrains.kotlin.cli.common.config.KotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.config.kotlinSourceRoots
 import java.io.File
 
 internal class FileManager(
     private val cc: CompilerContext,
-    private val verifier: DslVerifier
+    private val verifier: ValidationVerifier
 ) {
 
     private val sourceGenFolder by lazy { createSourceGenFolder() }

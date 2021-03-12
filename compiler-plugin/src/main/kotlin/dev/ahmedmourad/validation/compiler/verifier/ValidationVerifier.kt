@@ -1,31 +1,76 @@
 package dev.ahmedmourad.validation.compiler.verifier
 
 import arrow.meta.phases.CompilerContext
-import arrow.meta.quotes.ktClassOrObject
+import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
 import dev.ahmedmourad.validation.compiler.descriptors.ParamDescriptor
 import dev.ahmedmourad.validation.compiler.descriptors.ViolationDescriptor
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_CONSTRAINT_FUN
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_DESCRIBE_FUN
+import dev.ahmedmourad.validation.compiler.utils.OUTPUT_FOLDER
+import dev.ahmedmourad.validation.compiler.utils.simpleName
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageUtil
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.descriptors.ClassConstructorDescriptor
 import org.jetbrains.kotlin.descriptors.ConstructorDescriptor
-import org.jetbrains.kotlin.js.translate.utils.finalElement
 import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.kotlin.psi.psiUtil.isIdentifier
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.calls.callUtil.getParentCall
 import org.jetbrains.kotlin.resolve.calls.callUtil.getResolvedCall
 import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall
+import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.lazy.descriptors.LazyClassDescriptor
-import org.jetbrains.kotlin.types.KotlinType
+import org.jetbrains.kotlin.utils.addToStdlib.cast
+import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
-internal class DslVerifier(
+internal class ValidationVerifier(
     private val cc: CompilerContext,
     private val bindingContext: BindingContext
 ) {
+
+    internal fun verifyConstructorCallIsAllowed(
+        constraintsDescriptor: ConstraintsDescriptor?,
+        constructorResolvedCall: ResolvedCall<*>
+    ): ResolvedCall<*>? {
+
+        constraintsDescriptor ?: return null
+
+        val secondaryConstructorOwnerFqName = constructorResolvedCall.call
+            .callElement
+            .parent
+            .safeAs<KtSecondaryConstructor>()
+            ?.containingClassOrObject
+            ?.fqName
+            ?.asString()
+
+        if (secondaryConstructorOwnerFqName == constraintsDescriptor.constrainedClass?.fqNameOrNull()?.asString()) {
+            return null
+        }
+
+        val callerFqName = constructorResolvedCall.call
+            .callElement
+            .parent
+            ?.parent
+            ?.parent
+            ?.parent
+            ?.safeAs<KtFunction>()
+            ?.fqName
+            ?.asString()
+
+        val allowedCaller = "${constraintsDescriptor.packageName}.$OUTPUT_FOLDER.${constraintsDescriptor.constrainedType.simpleName()}"
+
+        return if (callerFqName != allowedCaller) {
+            reportError(
+                "Only validated instances of ${constraintsDescriptor.constrainedType.simpleName()} can be created",
+                constructorResolvedCall.call.callElement
+            )
+        } else {
+            constructorResolvedCall
+        }
+    }
 
     internal fun verifyParamIsCalledInsideConstraint(
         paramResolvedCall: ResolvedCall<*>
@@ -80,34 +125,6 @@ internal class DslVerifier(
         return params.distinctBy { it.name }
     }
 
-    //TODO: sealed, interface, abstract, inline, empty constructor
-    //TODO: warn when no type parameters or value parameters
-    internal fun verifyConstrainerIsObjectOrRegularClass(
-        describeCall: KtElement?
-    ): KtClassOrObject? {
-
-        val constrainer = describeCall?.parent
-            ?.parent
-            ?.parent
-            ?.parent as? KtClassOrObject
-
-        return when (constrainer) {
-
-            is KtObjectDeclaration -> constrainer
-
-            is KtClass -> {
-                constrainer
-            }
-
-            else -> {
-                reportError(
-                    "Only objects and regular classes can implement Constrains",
-                    constrainer?.finalElement
-                )
-            }
-        }
-    }
-
     internal fun verifyViolationName(nameExpression: KtExpression): Pair<String, KtExpression>? {
         return verifyValidIdentifier(
             nameExpression,
@@ -122,31 +139,6 @@ internal class DslVerifier(
             "Illegal property identifier",
             "Param name must be a String literal"
         )
-    }
-
-    internal fun verifyConstrainedClassType(
-        constrainedType: KotlinType,
-        constrainedTypePsi: PsiElement
-    ): LazyClassDescriptor? {
-
-        val constrainedClass = constrainedType.constructor
-            .declarationDescriptor as? LazyClassDescriptor
-            ?: return reportError(
-                "Only data classes and regular classes with primary constructors can be constrained",
-                constrainedTypePsi
-            )
-
-        reportError(constrainedClass.ktClassOrObject()?.modifierList?.text.toString(), null)
-
-        //TODO: sealed, objects, interfaces, inner
-        if (!constrainedClass.isData && constrainedClass.isInline) {
-            return reportError(
-                "Only data classes and regular classes with primary constructors can be constrained",
-                constrainedTypePsi
-            )
-        }
-
-        return constrainedClass
     }
 
     internal fun verifyConstrainedClassHasPrimaryConstructor(

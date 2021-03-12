@@ -9,6 +9,8 @@ import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_ILLEGAL_FUN
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_LEGAL_FUN
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_VALIDATION
 
+//TODO: only generate copy and factory when annotated
+//TODO: inline??
 internal class FunctionsGenerator : Generator {
 
     override fun imports(constraintsDescriptor: ConstraintsDescriptor) = listOf(
@@ -135,6 +137,10 @@ internal class FunctionsGenerator : Generator {
             |    )
             |}
         """.trimMargin()
+    }
+
+    private fun generateCopy(constraintsDescriptor: ConstraintsDescriptor): String? {
+        TODO("copy")
     }
 
     private fun generateFindViolatedConstraints(constraintsDescriptor: ConstraintsDescriptor): String {

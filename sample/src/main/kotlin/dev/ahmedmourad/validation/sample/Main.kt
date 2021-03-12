@@ -6,7 +6,9 @@ import dev.ahmedmourad.validation.core.validations.*
 //import dev.ahmedmourad.validation.sample.validations.*
 
 fun main() {
-
+//    Model(
+//        "", null, emptyArray(), emptyList(), object : X {}
+//    ).copy()
 }
 
 data class Rand<T : List<*>>(val v: List<T>?)
@@ -23,7 +25,9 @@ data class Nested(val x: String, val y: String?) {
 interface X
 class Y : X
 
-data class Model(val v: String, val n: Nested?, val l1: Array<Nested>, val l2: List<Nested?>, val x: X) {
+@MustBeValid
+data class Model internal constructor(val v: String, val n: Nested?, val l1: Array<Nested>, val l2: List<Nested?>, val x: X) {
+    internal constructor(n: Nested?, l1: Array<Nested>, l2: List<Nested?>, x: X) : this("v", n, l1, l2, x)
     companion object : Constrains<Model> {
         override val constraints by describe {
             constraint(violation = "TooShort") {

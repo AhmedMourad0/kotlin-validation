@@ -12,6 +12,8 @@ internal const val FQ_NAME_VALIDATION_CONTEXT = "$PACKAGE_CORE.ValidationContext
 internal const val FQ_NAME_VALIDATOR = "$PACKAGE_CORE.Validator"
 internal const val FQ_NAME_CASE = "$PACKAGE_CORE.Case"
 
+internal const val FQ_NAME_MUST_BE_VALID_ANNOTATION = "$PACKAGE_CORE.MustBeValid"
+
 internal const val FQ_NAME_LEGAL_FUN = "$PACKAGE_CORE.legal"
 internal const val FQ_NAME_ILLEGAL_FUN = "$PACKAGE_CORE.illegal"
 internal const val FQ_NAME_SWAP_FUN = "$PACKAGE_CORE.swap"

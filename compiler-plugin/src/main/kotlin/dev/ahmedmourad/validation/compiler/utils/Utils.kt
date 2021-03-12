@@ -58,5 +58,3 @@ internal fun KtTypeParameter.deepFqName(bindingContext: BindingContext): String 
         "$variance $name : $bound"
     }.trim()
 }
-
-

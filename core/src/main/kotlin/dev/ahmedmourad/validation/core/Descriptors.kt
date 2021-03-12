@@ -1,5 +1,9 @@
 package dev.ahmedmourad.validation.core
 
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.BINARY)
+annotation class MustBeValid
+
 class ConstraintsDescriptor<T : Any> internal constructor(
     private val values: List<Constraint<T>>
 ) : List<Constraint<T>> by values
@@ -17,6 +21,7 @@ data class IncludedConstraints<T : Any, DT : Any, C : Constrains<DT>>(
     val constrainer: (T) -> C
 ) {
 
+    //TODO: maybe hide these with OptIn
     inline fun isValid(
         item: T,
         crossinline isValid: C.(DT) -> Boolean

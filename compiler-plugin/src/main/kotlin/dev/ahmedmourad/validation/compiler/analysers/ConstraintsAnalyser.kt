@@ -1,12 +1,13 @@
 package dev.ahmedmourad.validation.compiler.analysers
 
 import arrow.meta.quotes.ktFile
+import dev.ahmedmourad.validation.compiler.descriptors.*
+import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
+import dev.ahmedmourad.validation.compiler.descriptors.IncludedConstraintDescriptor
 import dev.ahmedmourad.validation.compiler.descriptors.ParamDescriptor
 import dev.ahmedmourad.validation.compiler.descriptors.ViolationDescriptor
 import dev.ahmedmourad.validation.compiler.utils.*
-import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
-import dev.ahmedmourad.validation.compiler.descriptors.IncludedConstraintDescriptor
-import dev.ahmedmourad.validation.compiler.verifier.DslVerifier
+import dev.ahmedmourad.validation.compiler.verifier.ValidationVerifier
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.descriptors.ClassConstructorDescriptor
 import org.jetbrains.kotlin.js.descriptorUtils.getJetTypeFqName
@@ -18,68 +19,103 @@ import org.jetbrains.kotlin.resolve.calls.callUtil.getParentCall
 import org.jetbrains.kotlin.resolve.calls.callUtil.getResolvedCall
 import org.jetbrains.kotlin.resolve.calls.callUtil.getValueArgumentsInParentheses
 import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall
+import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
+import org.jetbrains.kotlin.resolve.lazy.descriptors.LazyClassDescriptor
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.typeUtil.supertypes
 import org.jetbrains.kotlin.util.containingNonLocalDeclaration
+import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
 internal class ConstraintsAnalyser(
     private val bindingContext: BindingContext,
-    private val verifier: DslVerifier
+    private val verifier: ValidationVerifier
 ) {
 
     internal fun analyse(): List<ConstraintsDescriptor> {
-        return bindingContext.getSliceContents(BindingContext.RESOLVED_CALL)
-            .asSequence()
-            .mapNotNull { (_, resolvedCall) ->
 
-                when {
+        val violationsCalls = mutableListOf<ResolvedCall<*>>()
+        val paramsCalls = mutableListOf<ResolvedCall<*>>()
+        val constructorsCalls = mutableListOf<ResolvedCall<*>>()
 
-                    resolvedCall?.candidateDescriptor?.fqNameSafe?.asString() == FQ_NAME_CONSTRAINT_FUN -> {
-                        val describeCall = getDescribeCall(resolvedCall) ?: return@mapNotNull null
-                        val constrainerObject = getConstrainerClassOrObject(describeCall) ?: return@mapNotNull null
-                        val constrainedType = getConstrainedType(resolvedCall) ?: return@mapNotNull null
-                        val constrainedTypePsi = getConstrainedTypePsi(resolvedCall) ?: return@mapNotNull null
-                        verifier.verifyConstrainedClassType(constrainedType, constrainedTypePsi)
-                            ?: return@mapNotNull null
-                        val (violationName, violationNameExpression) = getViolationName(resolvedCall)
-                            ?: return@mapNotNull null
-                        val params = getViolationParams(resolvedCall) ?: return@mapNotNull null
-                        ViolationDescriptor(
-                            violationName,
-                            violationNameExpression,
-                            constrainedType,
-                            constrainedTypePsi,
-                            constrainerObject,
-                            params
-                        )
-                    }
+        bindingContext.getSliceContents(BindingContext.RESOLVED_CALL).forEach { (_, resolvedCall) ->
+            when {
 
-                    resolvedCall?.candidateDescriptor?.annotations?.hasAnnotation(FqName(FQ_NAME_PARAM_ANNOTATION)) == true -> {
-                        verifier.verifyParamIsCalledInsideConstraint(resolvedCall)
-                        null
-                    }
-
-                    else -> null
+                resolvedCall?.candidateDescriptor?.fqNameSafe?.asString() == FQ_NAME_CONSTRAINT_FUN -> {
+                    violationsCalls += resolvedCall
                 }
-            }.groupBy {
-                it.constrainerClassOrObject.fqName?.asString()
-            }.let {
-                verifier.verifyNoDuplicateViolations(it)
-            }.map { (_, violationsGroup) ->
 
-                verifier.reportError("zzzzzzzzzz", null)
+                resolvedCall?.candidateDescriptor?.annotations?.hasAnnotation(FqName(FQ_NAME_PARAM_ANNOTATION)) == true -> {
+                    paramsCalls += resolvedCall
+                }
 
-                val any = violationsGroup.first()
-                ConstraintsDescriptor(
-                    bindingContext,
-                    verifier,
-                    any.constrainedType,
-                    any.constrainedTypePsi,
-                    any.constrainerClassOrObject,
-                    violationsGroup
-                )
+                resolvedCall?.candidateDescriptor is ClassConstructorDescriptor -> {
+                    val mustBeValid = resolvedCall.candidateDescriptor
+                        .containingDeclaration
+                        .annotations
+                        .hasAnnotation(FqName(FQ_NAME_MUST_BE_VALID_ANNOTATION))
+                    if (mustBeValid) {
+                        constructorsCalls += resolvedCall
+                    }
+                }
             }
+        }
+
+        paramsCalls.forEach {
+            //TODO: verify no duplicate params
+            verifier.verifyParamIsCalledInsideConstraint(it)
+        }
+
+        val constraintsDescriptors = violationsCalls.mapNotNull { resolvedCall ->
+            val describeCall = getDescribeCall(resolvedCall) ?: return@mapNotNull null
+            val constrainerObject = getConstrainerClassOrObject(describeCall) ?: return@mapNotNull null
+            val constrainedType = getConstrainedType(resolvedCall) ?: return@mapNotNull null
+            val constrainedTypePsi = getConstrainedTypePsi(resolvedCall) ?: return@mapNotNull null
+            val (violationName, violationNameExpression) = getViolationName(resolvedCall) ?: return@mapNotNull null
+            val params = getViolationParams(resolvedCall) ?: return@mapNotNull null
+            ViolationDescriptor(
+                violationName,
+                violationNameExpression,
+                constrainedType,
+                constrainedTypePsi,
+                constrainerObject,
+                params
+            )
+        }.groupBy {
+            it.constrainerClassOrObject.fqName?.asString()
+        }.let {
+            verifier.verifyNoDuplicateViolations(it)
+        }.map { (_, violationsGroup) ->
+
+            verifier.reportError("zzzzzzzzzz", null)
+
+            val any = violationsGroup.first()
+            ConstraintsDescriptor(
+                bindingContext,
+                verifier,
+                any.constrainedType,
+                any.constrainedTypePsi,
+                any.constrainerClassOrObject,
+                violationsGroup
+            )
+        }
+
+        constructorsCalls.forEach { resolvedCall ->
+
+            val constructorOwnerFqName = resolvedCall.candidateDescriptor
+                .containingDeclaration
+                .safeAs<LazyClassDescriptor>()
+                ?.fqNameOrNull()
+                ?.asString()
+
+            val descriptor = constraintsDescriptors.firstOrNull {
+                it.constrainedClass?.fqNameOrNull()?.asString() == constructorOwnerFqName
+            }
+
+            verifier.verifyConstructorCallIsAllowed(descriptor, resolvedCall)
+        }
+
+        return constraintsDescriptors
     }
 
     private fun getConstrainedTypePsi(constraintResolvedCall: ResolvedCall<*>): PsiElement? {
@@ -89,9 +125,10 @@ internal class ConstraintsAnalyser(
             .parent
             ?.parent as? KtFunctionLiteral
 
-        return (describeFunctionLiteral?.getParentCall(bindingContext)
+        return describeFunctionLiteral?.getParentCall(bindingContext)
             ?.callElement
-            ?.containingNonLocalDeclaration() as? KtClassOrObject)
+            ?.containingNonLocalDeclaration()
+            ?.safeAs<KtClassOrObject>()
             ?.superTypeListEntries
             ?.firstOrNull {
                 bindingContext.get(BindingContext.TYPE, it.typeReference)
@@ -130,7 +167,10 @@ internal class ConstraintsAnalyser(
     }
 
     private fun getConstrainerClassOrObject(describeCall: KtElement?): KtClassOrObject? {
-        return verifier.verifyConstrainerIsObjectOrRegularClass(describeCall)
+        return describeCall?.parent
+            ?.parent
+            ?.parent
+            ?.parent as? KtClassOrObject
     }
 
     private fun getViolationName(resolvedCall: ResolvedCall<*>): Pair<String, KtExpression>? {
@@ -178,11 +218,11 @@ internal class ConstraintsAnalyser(
                     ?.joinToString(".")
                     ?: return null
 
-                    IncludedConstraintDescriptor(
-                        validationsFileFqName,
-                        constrainedType,
-                        paramTypeArg
-                    ) to "List<$validationsFileFqName.${constrainedType.simpleName()}$VIOLATIONS_SUPER_CLASS_SUFFIX>"
+                IncludedConstraintDescriptor(
+                    validationsFileFqName,
+                    constrainedType,
+                    paramTypeArg
+                ) to "List<$validationsFileFqName.${constrainedType.simpleName()}$VIOLATIONS_SUPER_CLASS_SUFFIX>"
 
             } else {
                 null to paramTypeArg.deepFqName()
