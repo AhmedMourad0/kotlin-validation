@@ -92,7 +92,7 @@ internal fun Meta.validationsSyntheticResolver(): SyntheticResolver = syntheticR
 )
 
 //TODO: also enforce no vars
-//TODO: this's just poc, it's no where near good enough, it will be changed when typed quotes are released
+//TODO: this's just poc, it's terrible, it will be changed when typed quotes are released
 internal fun Meta.validationsClassDeclarationQuote(cc: CompilerContext): ExtensionPhase = classDeclaration(cc, {
     this.isAnnotatedWith("@MustBeValid".toRegex())
 }) {

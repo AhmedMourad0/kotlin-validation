@@ -62,7 +62,6 @@ internal class ConstraintsAnalyser(
         }
 
         paramsCalls.forEach {
-            //TODO: verify no duplicate params
             verifier.verifyParamIsCalledInsideConstraint(it)
         }
 
