@@ -1,7 +1,7 @@
 package dev.ahmedmourad.validation.core.validations
 
 import dev.ahmedmourad.validation.core.Validator
-import dev.ahmedmourad.validation.core.validation
+import dev.ahmedmourad.validation.core.ValidatorImpl
 
 inline fun <DT> Validator<DT>.isEqualTo(
     crossinline other: (DT) -> DT
@@ -50,17 +50,17 @@ fun <DT> Validator<DT>.notInValues(vararg candidates: DT) = validation {
 inline fun <DT> Validator<DT>.anyOf(
     crossinline validator: Validator<DT>.() -> Unit
 ) = validation {
-    Validator<DT>().apply { validator() }.validateAny(it)
+    ValidatorImpl<DT>().apply { validator() }.validateAny(it)
 }
 
 inline fun <DT> Validator<DT>.allOf(
     crossinline validator: Validator<DT>.() -> Unit
 ) = validation {
-    Validator<DT>().apply { validator() }.validateAll(it)
+    ValidatorImpl<DT>().apply { validator() }.validateAll(it)
 }
 
 inline fun <DT> Validator<DT>.noneOf(
     crossinline validator: Validator<DT>.() -> Unit
 ) = validation {
-    Validator<DT>().apply { validator() }.validateNone(it)
+    ValidatorImpl<DT>().apply { validator() }.validateNone(it)
 }

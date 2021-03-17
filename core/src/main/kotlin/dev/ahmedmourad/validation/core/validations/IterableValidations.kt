@@ -1,13 +1,13 @@
 package dev.ahmedmourad.validation.core.validations
 
 import dev.ahmedmourad.validation.core.Validator
-import dev.ahmedmourad.validation.core.validation
+import dev.ahmedmourad.validation.core.ValidatorImpl
 
 inline fun <DT> Validator<out Iterable<DT>>.forAll(
     crossinline itemValidator: Validator<DT>.() -> Unit
 ) = validation { validated ->
     validated.all {
-        Validator<DT>().apply(itemValidator).validateAll(it)
+        ValidatorImpl<DT>().apply(itemValidator).validateAll(it)
     }
 }
 
@@ -15,7 +15,7 @@ inline fun <DT> Validator<out Iterable<DT>>.forAny(
     crossinline itemValidator: Validator<DT>.() -> Unit
 ) = validation { validated ->
     validated.any {
-        Validator<DT>().apply(itemValidator).validateAll(it)
+        ValidatorImpl<DT>().apply(itemValidator).validateAll(it)
     }
 }
 
@@ -23,7 +23,7 @@ inline fun <DT> Validator<out Iterable<DT>>.forNone(
     crossinline itemValidator: Validator<DT>.() -> Unit
 ) = validation { validated ->
     validated.none {
-        Validator<DT>().apply(itemValidator).validateAll(it)
+        ValidatorImpl<DT>().apply(itemValidator).validateAll(it)
     }
 }
 

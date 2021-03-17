@@ -45,15 +45,35 @@ class ConstraintsBuilder<T : Any> internal constructor() {
     internal fun build(): ConstraintsDescriptor<T> = ConstraintsDescriptor(constraints)
 }
 
+interface Validator<DT> {
+
+    fun validation(validate: (DT) -> Boolean)
+
+    fun <DT1 : Any> on(property: (DT) -> DT1, validator: Validator<DT1>.() -> Unit)
+    fun <DT1 : Any> on(property: (DT) -> DT1?): PropertyNullableValidator<DT, DT1>
+    fun <DT1 : Any> on(property: KProperty0<DT1>, validator: Validator<DT1>.() -> Unit)
+    fun <DT1 : Any> on(property: KProperty0<DT1?>): PropertyNullableValidator<DT, DT1>
+
+    infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.ifExists(
+        validations: Validator<DT1>.() -> Unit
+    )
+
+    infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.mustExist(
+        validations: Validator<DT1>.() -> Unit
+    )
+}
+
 @ValidationDslMarker
-class ConstraintBuilder<T : Any> internal constructor(private val violation: String) {
+class ConstraintBuilder<T : Any> internal constructor(
+    private val violation: String
+) : Validator<T> {
 
     private val includedConstraints: MutableList<IncludedConstraints<T, *, *>> = mutableListOf()
     private val validations: MutableList<Validation<T>> = mutableListOf()
     private val params: MutableList<Parameter<T, *>> = mutableListOf()
 
-    internal fun add(validation: Validation<T>) {
-        validations.add(validation)
+    override fun validation(validate: (T) -> Boolean) {
+        validations.add(Validation(validate))
     }
 
     @Param
@@ -79,45 +99,45 @@ class ConstraintBuilder<T : Any> internal constructor(private val violation: Str
         includedConstraints.add(IncludedConstraints(param, { property.get() }, constrainer))
     }
 
-    inline fun <DT : Any> on(
-        crossinline property: (T) -> DT,
-        crossinline validator: Validator<DT>.() -> Unit
+    override fun <DT : Any> on(
+        property: (T) -> DT,
+        validator: Validator<DT>.() -> Unit
     ) = validation {
-        Validator<DT>().apply(validator).validateAll(property.invoke(it))
+        ValidatorImpl<DT>().apply(validator).validateAll(property.invoke(it))
     }
 
-    inline fun <DT : Any> on(
+    override fun <DT : Any> on(
         property: KProperty0<DT>,
-        crossinline validator: Validator<DT>.() -> Unit
+        validator: Validator<DT>.() -> Unit
     ) = validation {
-        Validator<DT>().apply(validator).validateAll(property.get())
+        ValidatorImpl<DT>().apply(validator).validateAll(property.get())
     }
 
-    fun <DT : Any> on(property: (T) -> DT?): PropertyNullableValidator<T, DT> {
+    override fun <DT : Any> on(property: (T) -> DT?): PropertyNullableValidator<T, DT> {
         return PropertyNullableValidator(property)
     }
 
-    fun <DT : Any> on(property: KProperty0<DT?>): PropertyNullableValidator<T, DT> {
+    override fun <DT : Any> on(property: KProperty0<DT?>): PropertyNullableValidator<T, DT> {
         return PropertyNullableValidator { property.get() }
     }
 
-    infix fun <DT : Any> PropertyNullableValidator<T, DT>.ifExists(
+    override infix fun <DT : Any> PropertyNullableValidator<T, DT>.ifExists(
         validations: Validator<DT>.() -> Unit
     ) = this@ConstraintBuilder.validation {
         val item = this@ifExists.get(it)
         if (item != null) {
-            Validator<DT>().apply(validations).validateAll(item)
+            ValidatorImpl<DT>().apply(validations).validateAll(item)
         } else {
             true
         }
     }
 
-    infix fun <DT : Any> PropertyNullableValidator<T, DT>.mustExist(
+    override infix fun <DT : Any> PropertyNullableValidator<T, DT>.mustExist(
         validations: Validator<DT>.() -> Unit
     ) = this@ConstraintBuilder.validation {
         val item = this@mustExist.get(it)
         if (item != null) {
-            Validator<DT>().apply(validations).validateAll(item)
+            ValidatorImpl<DT>().apply(validations).validateAll(item)
         } else {
             false
         }
@@ -131,78 +151,54 @@ class ConstraintBuilder<T : Any> internal constructor(private val violation: Str
     )
 }
 
-fun <T : Any> ConstraintBuilder<T>.validation(validate: (T) -> Boolean) {
-    add(Validation(validate))
-}
-
 @ValidationDslMarker
-class Validator<DT> {
+class ValidatorImpl<DT> : Validator<DT> {
 
     private val validations: MutableList<Validation<DT>> = mutableListOf()
 
-    internal fun add(validation: Validation<DT>) {
-        validations.add(validation)
+    override fun validation(validate: (DT) -> Boolean) {
+        validations.add(Validation(validate))
     }
 
-    inline fun <DT1 : Any> on(
-        crossinline property: (DT) -> DT1,
-        crossinline validator: Validator<DT1>.() -> Unit
+    override fun <DT1 : Any> on(
+        property: (DT) -> DT1,
+        validator: Validator<DT1>.() -> Unit
     ) = validation {
-        Validator<DT1>().apply(validator).validateAll(property.invoke(it))
+        ValidatorImpl<DT1>().apply(validator).validateAll(property.invoke(it))
     }
 
-    inline fun <DT1 : Any> on(
+    override fun <DT1 : Any> on(
         property: KProperty0<DT1>,
-        crossinline validator: Validator<DT1>.() -> Unit
+        validator: Validator<DT1>.() -> Unit
     ) = validation {
-        Validator<DT1>().apply(validator).validateAll(property.get())
+        ValidatorImpl<DT1>().apply(validator).validateAll(property.get())
     }
 
-    fun <DT1 : Any> on(property: (DT) -> DT1?): PropertyNullableValidator<DT, DT1> {
+    override fun <DT1 : Any> on(property: (DT) -> DT1?): PropertyNullableValidator<DT, DT1> {
         return PropertyNullableValidator(property)
     }
 
-    fun <DT1 : Any> on(property: KProperty0<DT1?>): PropertyNullableValidator<DT, DT1> {
+    override fun <DT1 : Any> on(property: KProperty0<DT1?>): PropertyNullableValidator<DT, DT1> {
         return PropertyNullableValidator { property.get() }
     }
 
-    infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.ifExists(
+    override infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.ifExists(
         validations: Validator<DT1>.() -> Unit
-    ) = this@Validator.validation {
+    ) = this@ValidatorImpl.validation {
         val item = this@ifExists.get(it)
         if (item != null) {
-            Validator<DT1>().apply(validations).validateAll(item)
+            ValidatorImpl<DT1>().apply(validations).validateAll(item)
         } else {
             true
         }
     }
 
-    infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.mustExist(
+    override infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.mustExist(
         validations: Validator<DT1>.() -> Unit
-    ) = this@Validator.validation {
+    ) = this@ValidatorImpl.validation {
         val item = this@mustExist.get(it)
         if (item != null) {
-            Validator<DT1>().apply(validations).validateAll(item)
-        } else {
-            false
-        }
-    }
-
-    inline fun <reified DT1 : DT> ifIs(
-        crossinline validator: Validator<DT1>.() -> Unit
-    ) = validation {
-        if (it is DT1) {
-            Validator<DT1>().apply { validator() }.validateNone(it)
-        } else {
-            true
-        }
-    }
-
-    inline fun <reified DT1 : DT> mustBeA(
-        crossinline validator: Validator<DT1>.() -> Unit
-    ) = validation {
-        if (it is DT1) {
-            Validator<DT1>().apply { validator() }.validateNone(it)
+            ValidatorImpl<DT1>().apply(validations).validateAll(item)
         } else {
             false
         }
@@ -219,10 +215,6 @@ class Validator<DT> {
     fun validateAll(item: DT): Boolean {
         return validations.all { it.validate(item) }
     }
-}
-
-fun <DT> Validator<DT>.validation(validate: (DT) -> Boolean) {
-    add(Validation(validate))
 }
 
 @ValidationDslMarker

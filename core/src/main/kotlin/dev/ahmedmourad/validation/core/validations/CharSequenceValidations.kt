@@ -1,7 +1,6 @@
 package dev.ahmedmourad.validation.core.validations
 
 import dev.ahmedmourad.validation.core.Validator
-import dev.ahmedmourad.validation.core.validation
 
 inline fun <DT : CharSequence> Validator<DT>.minLength(
     crossinline min: (DT) -> Int

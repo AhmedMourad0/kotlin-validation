@@ -1,7 +1,6 @@
 package dev.ahmedmourad.validation.core.validations
 
 import dev.ahmedmourad.validation.core.Validator
-import dev.ahmedmourad.validation.core.validation
 
 inline fun Validator<Double>.isDivisibleBy(
     crossinline other: (Double) -> Double

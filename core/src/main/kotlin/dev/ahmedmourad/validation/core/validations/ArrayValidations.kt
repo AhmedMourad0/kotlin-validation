@@ -1,15 +1,14 @@
 package dev.ahmedmourad.validation.core.validations
 
 import dev.ahmedmourad.validation.core.Validator
-import dev.ahmedmourad.validation.core.validation
-import java.util.*
+import dev.ahmedmourad.validation.core.ValidatorImpl
 import kotlin.NoSuchElementException
 
 inline fun <DT> Validator<Array<DT>>.forAll(
     crossinline itemValidator: Validator<DT>.() -> Unit
 ) = validation { validated ->
     validated.all {
-        Validator<DT>().apply(itemValidator).validateAll(it)
+        ValidatorImpl<DT>().apply(itemValidator).validateAll(it)
     }
 }
 
@@ -17,7 +16,7 @@ inline fun <DT> Validator<Array<DT>>.forAny(
     crossinline itemValidator: Validator<DT>.() -> Unit
 ) = validation { validated ->
     validated.any {
-        Validator<DT>().apply(itemValidator).validateAll(it)
+        ValidatorImpl<DT>().apply(itemValidator).validateAll(it)
     }
 }
 
@@ -25,7 +24,7 @@ inline fun <DT> Validator<Array<DT>>.forNone(
     crossinline itemValidator: Validator<DT>.() -> Unit
 ) = validation { validated ->
     validated.none {
-        Validator<DT>().apply(itemValidator).validateAll(it)
+        ValidatorImpl<DT>().apply(itemValidator).validateAll(it)
     }
 }
 

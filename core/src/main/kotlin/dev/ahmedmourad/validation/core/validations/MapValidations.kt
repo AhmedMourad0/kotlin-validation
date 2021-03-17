@@ -1,7 +1,7 @@
 package dev.ahmedmourad.validation.core.validations
 
 import dev.ahmedmourad.validation.core.Validator
-import dev.ahmedmourad.validation.core.validation
+import dev.ahmedmourad.validation.core.ValidatorImpl
 
 fun Validator<out Map<*, *>>.isEmpty() = validation {
     it.isEmpty()
@@ -79,26 +79,26 @@ inline fun <K, V, DTM : Map<K, V>> Validator<DTM>.sizeNotEqualTo(
 
 fun <K, V> Validator<out Map<K, V>>.sizeNotEqualTo(value: Int) = sizeNotEqualTo { value }
 
-inline fun <K, V> Validator<Map<K, V>>.keys(
-    crossinline keysValidator: Validator<Set<K>>.() -> Unit
+fun <K, V> Validator<Map<K, V>>.keys(
+    keysValidator: Validator<Set<K>>.() -> Unit
 ) = on(Map<K, V>::keys, keysValidator)
 
-inline fun <K, V> Validator<Map<K, V>>.values(
-    crossinline valuesValidator: Validator<Collection<V>>.() -> Unit
+fun <K, V> Validator<Map<K, V>>.values(
+    valuesValidator: Validator<Collection<V>>.() -> Unit
 ) = on(Map<K, V>::values, valuesValidator)
 
-inline fun <K, V> Validator<Map<K, V>>.entries(
-    crossinline entriesValidator: Validator<Set<Map.Entry<K, V>>>.() -> Unit
+fun <K, V> Validator<Map<K, V>>.entries(
+    entriesValidator: Validator<Set<Map.Entry<K, V>>>.() -> Unit
 ) = on(Map<K, V>::entries, entriesValidator)
 
-inline fun <K, V> Validator<Map.Entry<K, V>>.key(
-    crossinline keyValidator: Validator<K>.() -> Unit
+fun <K, V> Validator<Map.Entry<K, V>>.key(
+    keyValidator: Validator<K>.() -> Unit
 ) = validation {
-    Validator<K>().apply(keyValidator).validateAll(it.key)
+    ValidatorImpl<K>().apply(keyValidator).validateAll(it.key)
 }
 
 inline fun <K, V> Validator<Map.Entry<K, V>>.value(
     crossinline valueValidator: Validator<V>.() -> Unit
 ) = validation {
-    Validator<V>().apply(valueValidator).validateAll(it.value)
+    ValidatorImpl<V>().apply(valueValidator).validateAll(it.value)
 }
