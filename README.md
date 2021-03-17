@@ -36,6 +36,7 @@ Check the samples for current syntax.
 - Jetpack Compose support?
 - To suspend or not to suspend.
 - Adding validations descriptions to be used by the IDE to describe constrainers
+- IDE plugin to test values against constraints on the spot?
 
 License
 -------
