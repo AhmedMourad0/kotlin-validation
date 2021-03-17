@@ -24,42 +24,42 @@ fun <DT> Validator<DT>.isNotEqualTo(other: DT) = validation {
 }
 
 inline fun <DT> Validator<DT>.inValues(
-    crossinline candidates: (DT) -> List<DT>
+    crossinline candidates: (DT) -> Iterable<DT>
 ) = validation {
     it in candidates(it)
 }
 
-fun <DT> Validator<DT>.inValues(candidates: List<DT>) = inValues { candidates }
+fun <DT> Validator<DT>.inValues(candidates: Iterable<DT>) = inValues { candidates }
 
 fun <DT> Validator<DT>.inValues(vararg candidates: DT) = validation {
     it in candidates
 }
 
 inline fun <DT> Validator<DT>.notInValues(
-    crossinline candidates: (DT) -> List<DT>
+    crossinline candidates: (DT) -> Iterable<DT>
 ) = validation {
     it !in candidates(it)
 }
 
-fun <DT> Validator<DT>.notInValues(candidates: List<DT>) = notInValues { candidates }
+fun <DT> Validator<DT>.notInValues(candidates: Iterable<DT>) = notInValues { candidates }
 
 fun <DT> Validator<DT>.notInValues(vararg candidates: DT) = validation {
     it !in candidates
 }
 
-inline fun <DT> Validator<DT>.enforceAtLeastOne(
+inline fun <DT> Validator<DT>.anyOf(
     crossinline validator: Validator<DT>.() -> Unit
 ) = validation {
     Validator<DT>().apply { validator() }.validateAny(it)
 }
 
-inline fun <DT> Validator<DT>.enforceAll(
+inline fun <DT> Validator<DT>.allOf(
     crossinline validator: Validator<DT>.() -> Unit
 ) = validation {
     Validator<DT>().apply { validator() }.validateAll(it)
 }
 
-inline fun <DT> Validator<DT>.enforceNone(
+inline fun <DT> Validator<DT>.noneOf(
     crossinline validator: Validator<DT>.() -> Unit
 ) = validation {
     Validator<DT>().apply { validator() }.validateNone(it)

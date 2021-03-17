@@ -52,12 +52,14 @@ fun Validator<Byte>.isNotZero() = validation {
 }
 
 fun Validator<Byte>.isPrime() = validation {
+    if (it < 2) return@validation false
     (2..(it / 2)).none { n ->
         it % n == 0
     }
 }
 
 fun Validator<Byte>.isNotPrime() = validation {
+    if (it < 2) return@validation true
     (2..(it / 2)).any { n ->
         it % n == 0
     }

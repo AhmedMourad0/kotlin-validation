@@ -20,20 +20,20 @@ inline fun <DT : CharSequence> Validator<DT>.maxLength(
 fun <DT : CharSequence> Validator<DT>.maxLength(max: Int) = maxLength { max }
 
 inline fun <DT : CharSequence> Validator<DT>.lengthLessThan(
-    crossinline minExclusive: (DT) -> Int
-) = validation {
-    it.length > minExclusive(it)
-}
-
-fun <DT : CharSequence> Validator<DT>.lengthLessThan(minExclusive: Int) = lengthLessThan { minExclusive }
-
-inline fun <DT : CharSequence> Validator<DT>.lengthLargerThan(
     crossinline maxExclusive: (DT) -> Int
 ) = validation {
     it.length < maxExclusive(it)
 }
 
-fun <DT : CharSequence> Validator<DT>.lengthLargerThan(maxExclusive: Int) = lengthLargerThan { maxExclusive }
+fun <DT : CharSequence> Validator<DT>.lengthLessThan(maxExclusive: Int) = lengthLessThan { maxExclusive }
+
+inline fun <DT : CharSequence> Validator<DT>.lengthLargerThan(
+    crossinline minExclusive: (DT) -> Int
+) = validation {
+    it.length > minExclusive(it)
+}
+
+fun <DT : CharSequence> Validator<DT>.lengthLargerThan(minExclusive: Int) = lengthLargerThan { minExclusive }
 
 inline fun <DT : CharSequence> Validator<DT>.lengthIn(
     crossinline range: (DT) -> IntRange
@@ -44,6 +44,16 @@ inline fun <DT : CharSequence> Validator<DT>.lengthIn(
 fun <DT : CharSequence> Validator<DT>.lengthIn(range: IntRange) = lengthIn { range }
 
 fun <DT : CharSequence> Validator<DT>.lengthIn(min: Int, max: Int) = lengthIn(min..max)
+
+inline fun <DT : CharSequence> Validator<DT>.lengthNotIn(
+    crossinline range: (DT) -> IntRange
+) = validation {
+    it.length !in range(it)
+}
+
+fun <DT : CharSequence> Validator<DT>.lengthNotIn(range: IntRange) = lengthNotIn { range }
+
+fun <DT : CharSequence> Validator<DT>.lengthNotIn(min: Int, max: Int) = lengthNotIn(min..max)
 
 inline fun <DT : CharSequence> Validator<DT>.lengthEqualTo(
     crossinline value: (DT) -> Int
@@ -69,8 +79,8 @@ inline fun <DT : CharSequence> Validator<DT>.contains(
 }
 
 fun <DT : CharSequence> Validator<DT>.contains(
-    ignoreCase: Boolean = false,
-    portion: CharSequence
+    portion: CharSequence,
+    ignoreCase: Boolean = false
 ) = contains(ignoreCase) { portion }
 
 inline fun <DT : CharSequence> Validator<DT>.containsChar(
@@ -81,8 +91,8 @@ inline fun <DT : CharSequence> Validator<DT>.containsChar(
 }
 
 fun <DT : CharSequence> Validator<DT>.containsChar(
-    ignoreCase: Boolean = false,
-    portion: Char
+    portion: Char,
+    ignoreCase: Boolean = false
 ) = containsChar(ignoreCase) { portion }
 
 fun <DT : CharSequence> Validator<DT>.contains(regex: Regex) = validation {
@@ -97,8 +107,8 @@ inline fun <DT : CharSequence> Validator<DT>.startsWith(
 }
 
 fun <DT : CharSequence> Validator<DT>.startsWith(
-    ignoreCase: Boolean = false,
-    prefix: CharSequence
+    prefix: CharSequence,
+    ignoreCase: Boolean = false
 ) = startsWith(ignoreCase) { prefix }
 
 inline fun <DT : CharSequence> Validator<DT>.startsWithChar(
@@ -109,8 +119,8 @@ inline fun <DT : CharSequence> Validator<DT>.startsWithChar(
 }
 
 fun <DT : CharSequence> Validator<DT>.startsWithChar(
-    ignoreCase: Boolean = false,
-    prefix: Char
+    prefix: Char,
+    ignoreCase: Boolean = false
 ) = startsWithChar(ignoreCase) { prefix }
 
 
@@ -122,10 +132,11 @@ inline fun <DT : CharSequence> Validator<DT>.endsWith(
 }
 
 fun <DT : CharSequence> Validator<DT>.endsWith(
-    ignoreCase: Boolean = false,
-    suffix: CharSequence
+    suffix: CharSequence,
+    ignoreCase: Boolean = false
 ) = endsWith(ignoreCase) { suffix }
 
+//TODO: @OverloadResolutionByLambdaReturnType
 inline fun <DT : CharSequence> Validator<DT>.endsWithChar(
     ignoreCase: Boolean = false,
     crossinline suffix: (DT) -> Char
@@ -134,8 +145,8 @@ inline fun <DT : CharSequence> Validator<DT>.endsWithChar(
 }
 
 fun <DT : CharSequence> Validator<DT>.endsWithChar(
-    ignoreCase: Boolean = false,
-    suffix: Char
+    suffix: Char,
+    ignoreCase: Boolean = false
 ) = endsWithChar(ignoreCase) { suffix }
 
 fun <DT : CharSequence> Validator<DT>.matches(regex: Regex) = validation {

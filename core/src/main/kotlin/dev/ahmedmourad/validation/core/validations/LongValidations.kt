@@ -52,12 +52,14 @@ fun Validator<Long>.isNotZero() = validation {
 }
 
 fun Validator<Long>.isPrime() = validation {
+    if (it < 2) return@validation false
     (2..(it / 2)).none { n ->
         it % n == 0L
     }
 }
 
 fun Validator<Long>.isNotPrime() = validation {
+    if (it < 2) return@validation true
     (2..(it / 2)).any { n ->
         it % n == 0L
     }

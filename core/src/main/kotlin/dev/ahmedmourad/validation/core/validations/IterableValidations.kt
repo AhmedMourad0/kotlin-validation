@@ -3,7 +3,7 @@ package dev.ahmedmourad.validation.core.validations
 import dev.ahmedmourad.validation.core.Validator
 import dev.ahmedmourad.validation.core.validation
 
-inline fun <DT> Validator<out Iterable<DT>>.all(
+inline fun <DT> Validator<out Iterable<DT>>.forAll(
     crossinline itemValidator: Validator<DT>.() -> Unit
 ) = validation { validated ->
     validated.all {
@@ -11,7 +11,7 @@ inline fun <DT> Validator<out Iterable<DT>>.all(
     }
 }
 
-inline fun <DT> Validator<out Iterable<DT>>.any(
+inline fun <DT> Validator<out Iterable<DT>>.forAny(
     crossinline itemValidator: Validator<DT>.() -> Unit
 ) = validation { validated ->
     validated.any {
@@ -19,7 +19,7 @@ inline fun <DT> Validator<out Iterable<DT>>.any(
     }
 }
 
-inline fun <DT> Validator<out Iterable<DT>>.none(
+inline fun <DT> Validator<out Iterable<DT>>.forNone(
     crossinline itemValidator: Validator<DT>.() -> Unit
 ) = validation { validated ->
     validated.none {
@@ -36,7 +36,7 @@ fun <DT> Validator<out Iterable<DT>>.isNotEmpty() = validation {
 }
 
 fun <DT> Validator<out Iterable<DT>>.isDistinct() = validation {
-    it.distinct() == it
+    it.distinct().count() == it.count()
 }
 
 inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.minSize(
@@ -56,20 +56,20 @@ inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.maxSize(
 fun <DT> Validator<out Iterable<DT>>.maxSize(max: Int) = maxSize { max }
 
 inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeLessThan(
-    crossinline minExclusive: (DTI) -> Int
-) = validation {
-    it.count() > minExclusive(it)
-}
-
-fun <DT> Validator<out Iterable<DT>>.sizeLessThan(minExclusive: Int) = sizeLessThan { minExclusive }
-
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeLargerThan(
     crossinline maxExclusive: (DTI) -> Int
 ) = validation {
     it.count() < maxExclusive(it)
 }
 
-fun <DT> Validator<out Iterable<DT>>.sizeLargerThan(maxExclusive: Int) = sizeLargerThan { maxExclusive }
+fun <DT> Validator<out Iterable<DT>>.sizeLessThan(maxExclusive: Int) = sizeLessThan { maxExclusive }
+
+inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeLargerThan(
+    crossinline minExclusive: (DTI) -> Int
+) = validation {
+    it.count() > minExclusive(it)
+}
+
+fun <DT> Validator<out Iterable<DT>>.sizeLargerThan(minExclusive: Int) = sizeLargerThan { minExclusive }
 
 inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeIn(
     crossinline range: (DTI) -> IntRange
@@ -80,6 +80,16 @@ inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeIn(
 fun <DT> Validator<out Iterable<DT>>.sizeIn(range: IntRange) = sizeIn { range }
 
 fun <DT> Validator<out Iterable<DT>>.sizeIn(min: Int, max: Int) = sizeIn(min..max)
+
+inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeNotIn(
+    crossinline range: (DTI) -> IntRange
+) = validation {
+    it.count() !in range(it)
+}
+
+fun <DT> Validator<out Iterable<DT>>.sizeNotIn(range: IntRange) = sizeNotIn { range }
+
+fun <DT> Validator<out Iterable<DT>>.sizeNotIn(min: Int, max: Int) = sizeNotIn(min..max)
 
 inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeEqualTo(
     crossinline value: (DTI) -> Int
@@ -106,6 +116,16 @@ inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.contains(
 fun <DT> Validator<out Iterable<DT>>.contains(
     element: DT
 ) = contains { element }
+
+inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.doesNotContain(
+    crossinline element: (DTI) -> DT
+) = validation {
+    !it.contains(element(it))
+}
+
+fun <DT> Validator<out Iterable<DT>>.doesNotContain(
+    element: DT
+) = doesNotContain { element }
 
 inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.containsAt(
     index: Int,
@@ -180,15 +200,19 @@ fun <DT, DTI : Iterable<DT>> Validator<DTI>.isPartOf(
     elements: Iterable<DT>
 ) = isPartOf { elements }
 
-fun Validator<out Iterable<Boolean>>.all() = validation { validated ->
+fun Validator<out Iterable<Boolean>>.allTrue() = validation { validated ->
     validated.all { it }
 }
 
-fun Validator<out Iterable<Boolean>>.any() = validation { validated ->
+fun Validator<out Iterable<Boolean>>.anyTrue() = validation { validated ->
     validated.any { it }
 }
 
-fun Validator<out Iterable<Boolean>>.none() = validation { validated ->
+fun Validator<out Iterable<Boolean>>.anyFalse() = validation { validated ->
+    validated.any { !it }
+}
+
+fun Validator<out Iterable<Boolean>>.allFalse() = validation { validated ->
     validated.none { it }
 }
 
@@ -197,25 +221,11 @@ fun <DT, DTI : Iterable<DT>> Validator<DTI>.contentEquals(
     ignoreOrder: Boolean,
     other: (DTI) -> Iterable<DT>
 ) = validation { validated ->
-
-    val thisWithDistinct = if (ignoreDuplicates) validated.distinct() else validated
-    val otherWithDistinct = if (ignoreDuplicates) other(validated).distinct() else other(validated)
-
-    val thisCount = thisWithDistinct.count()
-    if (thisCount != otherWithDistinct.count()) {
-        return@validation false
-    }
-
-    if (ignoreOrder) {
-        thisWithDistinct.all { otherWithDistinct.contains(it) }
-    } else {
-        for (i in 0 until thisCount) {
-            if (thisWithDistinct.elementAt(i) != otherWithDistinct.elementAt(i)) {
-                return@validation false
-            }
-        }
-        true
-    }
+    validated.contentEquals(
+        ignoreDuplicates,
+        ignoreOrder,
+        other(validated)
+    )
 }
 
 fun <DT> Validator<out Iterable<DT>>.contentEquals(
@@ -229,25 +239,11 @@ fun <DT, DTI : Iterable<DT>> Validator<DTI>.contentNotEquals(
     ignoreOrder: Boolean,
     other: (DTI) -> Iterable<DT>
 ) = validation { validated ->
-
-    val thisWithDistinct = if (ignoreDuplicates) validated.distinct() else validated
-    val otherWithDistinct = if (ignoreDuplicates) other(validated).distinct() else other(validated)
-
-    val thisCount = thisWithDistinct.count()
-    if (thisCount != otherWithDistinct.count()) {
-        return@validation true
-    }
-
-    if (ignoreOrder) {
-        thisWithDistinct.any { !otherWithDistinct.contains(it) }
-    } else {
-        for (i in 0 until thisCount) {
-            if (thisWithDistinct.elementAt(i) != otherWithDistinct.elementAt(i)) {
-                return@validation true
-            }
-        }
-        false
-    }
+    validated.contentNotEquals(
+        ignoreDuplicates,
+        ignoreOrder,
+        other(validated)
+    )
 }
 
 fun <DT> Validator<out Iterable<DT>>.contentNotEquals(

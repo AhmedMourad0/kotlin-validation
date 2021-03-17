@@ -3,8 +3,12 @@ package dev.ahmedmourad.validation.core.validations
 import dev.ahmedmourad.validation.core.Validator
 import dev.ahmedmourad.validation.core.validation
 
-fun Validator<String>.isNumber() = validation {
+fun Validator<String>.isInteger() = validation {
     it.toLongOrNull() != null
+}
+
+fun Validator<String>.isNumber() = validation {
+    it.toDoubleOrNull() != null
 }
 
 fun Validator<String>.isPositiveInteger(orZero: Boolean) = validation { validated ->
@@ -23,7 +27,7 @@ fun Validator<String>.isNegativeInteger(orZero: Boolean) = validation { validate
     }
 }
 
-fun Validator<String>.isPositiveDecimal(orZero: Boolean) = validation { validated ->
+fun Validator<String>.isPositiveNumber(orZero: Boolean) = validation { validated ->
     if (orZero) {
         validated.toDoubleOrNull()?.let { it >= 0.0 } ?: false
     } else {
@@ -31,7 +35,7 @@ fun Validator<String>.isPositiveDecimal(orZero: Boolean) = validation { validate
     }
 }
 
-fun Validator<String>.isNegativeDecimal(orZero: Boolean) = validation { validated ->
+fun Validator<String>.isNegativeNumber(orZero: Boolean) = validation { validated ->
     if (orZero) {
         validated.toDoubleOrNull()?.let { it <= 0.0 } ?: false
     } else {
@@ -40,11 +44,11 @@ fun Validator<String>.isNegativeDecimal(orZero: Boolean) = validation { validate
 }
 
 fun Validator<String>.isZero() = validation {
-    (it.toIntOrNull() ?: 1) == 0
+    (it.toDoubleOrNull() ?: 1.0) == 0.0
 }
 
 fun Validator<String>.isNotZero() = validation {
-    (it.toLongOrNull() ?: 0L) != 0L
+    (it.toDoubleOrNull() ?: 1.0) != 0.0
 }
 
 inline fun Validator<String>.isEqualTo(
@@ -55,8 +59,8 @@ inline fun Validator<String>.isEqualTo(
 }
 
 fun Validator<String>.isEqualTo(
-    ignoreCase: Boolean,
-    other: String
+    other: String,
+    ignoreCase: Boolean
 ) = isEqualTo(ignoreCase) { other }
 
 inline fun Validator<String>.isNotEqualTo(
@@ -67,6 +71,6 @@ inline fun Validator<String>.isNotEqualTo(
 }
 
 fun Validator<String>.isNotEqualTo(
-    ignoreCase: Boolean,
-    other: String
+    other: String,
+    ignoreCase: Boolean
 ) = isNotEqualTo(ignoreCase) { other }

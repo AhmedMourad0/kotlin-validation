@@ -3,7 +3,7 @@ package dev.ahmedmourad.validation.core.validations
 import dev.ahmedmourad.validation.core.Validator
 import dev.ahmedmourad.validation.core.validation
 
-inline fun <DT> Validator<out Sequence<DT>>.all(
+inline fun <DT> Validator<out Sequence<DT>>.forAll(
     crossinline itemValidator: Validator<DT>.() -> Unit
 ) = validation { validated ->
     validated.all {
@@ -11,7 +11,7 @@ inline fun <DT> Validator<out Sequence<DT>>.all(
     }
 }
 
-inline fun <DT> Validator<out Sequence<DT>>.any(
+inline fun <DT> Validator<out Sequence<DT>>.forAny(
     crossinline itemValidator: Validator<DT>.() -> Unit
 ) = validation { validated ->
     validated.any {
@@ -19,7 +19,7 @@ inline fun <DT> Validator<out Sequence<DT>>.any(
     }
 }
 
-inline fun <DT> Validator<out Sequence<DT>>.none(
+inline fun <DT> Validator<out Sequence<DT>>.forNone(
     crossinline itemValidator: Validator<DT>.() -> Unit
 ) = validation { validated ->
     validated.none {
@@ -36,7 +36,7 @@ fun <DT> Validator<out Sequence<DT>>.isNotEmpty() = validation {
 }
 
 fun <DT> Validator<out Sequence<DT>>.isDistinct() = validation {
-    it.distinct() == it
+    it.distinct().count() == it.count()
 }
 
 inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.minSize(
@@ -56,20 +56,20 @@ inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.maxSize(
 fun <DT> Validator<out Sequence<DT>>.maxSize(max: Int) = maxSize { max }
 
 inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeLessThan(
-    crossinline minExclusive: (DTS) -> Int
-) = validation {
-    it.count() > minExclusive(it)
-}
-
-fun <DT> Validator<out Sequence<DT>>.sizeLessThan(minExclusive: Int) = sizeLessThan { minExclusive }
-
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeLargerThan(
     crossinline maxExclusive: (DTS) -> Int
 ) = validation {
     it.count() < maxExclusive(it)
 }
 
-fun <DT> Validator<out Sequence<DT>>.sizeLargerThan(maxExclusive: Int) = sizeLargerThan { maxExclusive }
+fun <DT> Validator<out Sequence<DT>>.sizeLessThan(maxExclusive: Int) = sizeLessThan { maxExclusive }
+
+inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeLargerThan(
+    crossinline minExclusive: (DTS) -> Int
+) = validation {
+    it.count() > minExclusive(it)
+}
+
+fun <DT> Validator<out Sequence<DT>>.sizeLargerThan(minExclusive: Int) = sizeLargerThan { minExclusive }
 
 inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeIn(
     crossinline range: (DTS) -> IntRange
@@ -80,6 +80,16 @@ inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeIn(
 fun <DT> Validator<out Sequence<DT>>.sizeIn(range: IntRange) = sizeIn { range }
 
 fun <DT> Validator<out Sequence<DT>>.sizeIn(min: Int, max: Int) = sizeIn(min..max)
+
+inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeNotIn(
+    crossinline range: (DTS) -> IntRange
+) = validation {
+    it.count() !in range(it)
+}
+
+fun <DT> Validator<out Sequence<DT>>.sizeNotIn(range: IntRange) = sizeNotIn { range }
+
+fun <DT> Validator<out Sequence<DT>>.sizeNotIn(min: Int, max: Int) = sizeNotIn(min..max)
 
 inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeEqualTo(
     crossinline value: (DTS) -> Int
@@ -106,6 +116,16 @@ inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.contains(
 fun <DT> Validator<out Sequence<DT>>.contains(
     element: DT
 ) = contains { element }
+
+inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.doesNotContain(
+    crossinline element: (DTS) -> DT
+) = validation {
+    !it.contains(element(it))
+}
+
+fun <DT> Validator<out Sequence<DT>>.doesNotContain(
+    element: DT
+) = doesNotContain { element }
 
 inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.containsAt(
     index: Int,
@@ -180,42 +200,54 @@ fun <DT, DTS : Sequence<DT>> Validator<DTS>.isPartOf(
     elements: Sequence<DT>
 ) = isPartOf { elements }
 
-fun Validator<out Sequence<Boolean>>.all() = validation { validated ->
+fun Validator<out Sequence<Boolean>>.allTrue() = validation { validated ->
     validated.all { it }
 }
 
-fun Validator<out Sequence<Boolean>>.any() = validation { validated ->
+fun Validator<out Sequence<Boolean>>.anyTrue() = validation { validated ->
     validated.any { it }
 }
 
-fun Validator<out Sequence<Boolean>>.none() = validation { validated ->
+fun Validator<out Sequence<Boolean>>.anyFalse() = validation { validated ->
+    validated.any { !it }
+}
+
+fun Validator<out Sequence<Boolean>>.allFalse() = validation { validated ->
     validated.none { it }
 }
 
-fun <DT, DTS : Sequence<DT>> Validator<DTS>.isEqualTo(other: DTS) = validation {
-    val thisCount = it.count()
-    if (thisCount != other.count()) {
-        false
-    } else {
-        for (i in 0 until thisCount) {
-            if (it.elementAt(i) != other.elementAt(i)) {
-                return@validation false
-            }
-        }
-        true
-    }
+fun <DT, DTS : Sequence<DT>> Validator<DTS>.contentEquals(
+    ignoreDuplicates: Boolean,
+    ignoreOrder: Boolean,
+    other: (DTS) -> Sequence<DT>
+) = validation { validated ->
+    validated.toList().contentEquals(
+        ignoreDuplicates,
+        ignoreOrder,
+        other(validated).toList()
+    )
 }
 
-fun <DT, DTS : Sequence<DT>> Validator<DTS>.isNotEqualTo(other: DTS) = validation {
-    val thisCount = it.count()
-    if (thisCount != other.count()) {
-        true
-    } else {
-        for (i in 0 until thisCount) {
-            if (it.elementAt(i) != other.elementAt(i)) {
-                return@validation true
-            }
-        }
-        false
-    }
+fun <DT> Validator<out Sequence<DT>>.contentEquals(
+    ignoreDuplicates: Boolean,
+    ignoreOrder: Boolean,
+    other: Sequence<DT>
+) = contentEquals(ignoreDuplicates, ignoreOrder) { other }
+
+fun <DT, DTS : Sequence<DT>> Validator<DTS>.contentNotEquals(
+    ignoreDuplicates: Boolean,
+    ignoreOrder: Boolean,
+    other: (DTS) -> Sequence<DT>
+) = validation { validated ->
+    validated.toList().contentNotEquals(
+        ignoreDuplicates,
+        ignoreOrder,
+        other(validated).toList()
+    )
 }
+
+fun <DT> Validator<out Sequence<DT>>.contentNotEquals(
+    ignoreDuplicates: Boolean,
+    ignoreOrder: Boolean,
+    other: Sequence<DT>
+) = contentNotEquals(ignoreDuplicates, ignoreOrder) { other }

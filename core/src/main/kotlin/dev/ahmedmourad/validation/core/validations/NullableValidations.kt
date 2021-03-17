@@ -22,3 +22,11 @@ fun <DT : Any> Validator<DT?>.mustExist(
         false
     }
 }
+
+fun <DT : Any> Validator<DT?>.exists() = validation {
+    it != null
+}
+
+fun <DT : Any> Validator<DT?>.doesNotExist() = validation {
+    it == null
+}
