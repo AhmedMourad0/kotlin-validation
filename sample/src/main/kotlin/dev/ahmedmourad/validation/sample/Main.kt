@@ -23,7 +23,6 @@ data class Nested(val x: String, val y: String?) {
 }
 
 interface X
-class Y : X
 
 @MustBeValid
 data class Model internal constructor(val v: String, val n: Nested?, val l1: Array<Nested>, val l2: List<Nested?>, val x: X) {
@@ -62,14 +61,6 @@ data class Model internal constructor(val v: String, val n: Nested?, val l1: Arr
 
                     }
                     noneOf {
-
-                    }
-                }
-                on(Model::x) {
-                    ifIs<Y> {
-
-                    }
-                    mustBeA<Y> {
 
                     }
                 }
