@@ -55,13 +55,13 @@ data class Model internal constructor(val v: String, val n: Nested?, val l1: Arr
                     }
                 }
                 on(Model::x) {
-                    enforceAll {
+                    allOf {
 
                     }
-                    enforceAtLeastOne {
+                    anyOf {
 
                     }
-                    enforceNone {
+                    noneOf {
 
                     }
                 }
@@ -74,7 +74,7 @@ data class Model internal constructor(val v: String, val n: Nested?, val l1: Arr
                     }
                 }
                 on(Model::l1) {
-                    all {
+                    forAll {
                         on(Nested::y) ifExists {
 
                         }
@@ -82,15 +82,15 @@ data class Model internal constructor(val v: String, val n: Nested?, val l1: Arr
 
                         }
                     }
-                    any {
+                    forAny {
                         //...
                     }
-                    none {
+                    forNone {
                         //...
                     }
                 }
                 on(Model::l2) {
-                    all {
+                    forAll {
                         ifExists {
                             on(Nested::y) ifExists {
 
