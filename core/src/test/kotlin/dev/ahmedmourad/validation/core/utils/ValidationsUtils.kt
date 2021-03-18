@@ -1,14 +1,16 @@
-package dev.ahmedmourad.validation.core
+package dev.ahmedmourad.validation.core.utils
 
+import dev.ahmedmourad.validation.core.Validator
+import dev.ahmedmourad.validation.core.ValidatorImpl
 import org.jetbrains.annotations.TestOnly
 
 @TestOnly
-fun <DT> validator(validations: Validator<DT>.() -> Unit): Validator<DT> {
-    return Validator<DT>().apply(validations)
+fun <DT> validator(validations: Validator<DT>.() -> Unit): ValidatorImpl<DT> {
+    return ValidatorImpl<DT>().apply(validations)
 }
 
 @TestOnly
-fun <DT> Validator<DT>.allMatch(vararg items: DT): Validator<DT> {
+fun <DT> ValidatorImpl<DT>.allMatch(vararg items: DT): ValidatorImpl<DT> {
     val failed = items.filterNot {
         this.validateAll(it)
     }
@@ -21,7 +23,7 @@ fun <DT> Validator<DT>.allMatch(vararg items: DT): Validator<DT> {
 }
 
 @TestOnly
-fun <DT> Validator<DT>.allFail(vararg items: DT): Validator<DT> {
+fun <DT> ValidatorImpl<DT>.allFail(vararg items: DT): ValidatorImpl<DT> {
     val matching = items.filter {
         this.validateAll(it)
     }

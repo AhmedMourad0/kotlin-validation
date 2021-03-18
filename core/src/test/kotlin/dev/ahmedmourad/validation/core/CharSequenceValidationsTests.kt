@@ -1,5 +1,8 @@
 package dev.ahmedmourad.validation.core
 
+import dev.ahmedmourad.validation.core.utils.allFail
+import dev.ahmedmourad.validation.core.utils.allMatch
+import dev.ahmedmourad.validation.core.utils.validator
 import dev.ahmedmourad.validation.core.validations.*
 import org.junit.Test
 
