@@ -22,7 +22,8 @@ internal class FunctionsGenerator : Generator {
         FQ_NAME_CONSTRAINT,
         FQ_NAME_VALIDATION,
         FQ_NAME_CONSTRAINTS_DESCRIPTOR,
-        FQ_NAME_INCLUDED_CONSTRAINTS
+        FQ_NAME_INCLUDED_CONSTRAINTS,
+        FQ_NAME_INTERNAL_VALIDATION_API_ANNOTATION
     ) + constraintsDescriptor.violations.flatMap { violation ->
         violation.params.flatMap { param ->
             param.includedConstraint
@@ -210,6 +211,7 @@ internal class FunctionsGenerator : Generator {
 
         return """
             |@Suppress("UNCHECKED_CAST")
+            |@UseExperimental($FQ_NAME_INTERNAL_VALIDATION_API_ANNOTATION::class)
             |private fun ${constrainerTypeParams}Constraint<$constrainedFqName>.validateNestedConstraints(
             |    item: kotlin.Lazy<$constrainedFqName>
             |): Boolean {
@@ -287,6 +289,7 @@ internal class FunctionsGenerator : Generator {
 
         return """
             |@Suppress("UNCHECKED_CAST")
+            |@UseExperimental($FQ_NAME_INTERNAL_VALIDATION_API_ANNOTATION::class)
             |private fun ${constrainerTypeParams}Constraint<$constrainedFqName>.toViolation(
             |    item: kotlin.Lazy<$constrainedFqName>
             |): $violationsParent {

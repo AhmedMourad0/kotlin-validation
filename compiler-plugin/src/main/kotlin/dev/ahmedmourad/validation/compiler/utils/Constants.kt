@@ -26,6 +26,7 @@ internal const val FQ_NAME_PARAM_ANNOTATION = "$PACKAGE_CORE.Param"
 internal const val FQ_NAME_PARAM_NAME_ANNOTATION = "$PACKAGE_CORE.ParamName"
 internal const val FQ_NAME_PARAM_TYPE_ANNOTATION = "$PACKAGE_CORE.ParamType"
 internal const val FQ_NAME_INCLUSION_TYPE_ANNOTATION = "$PACKAGE_CORE.InclusionType"
+internal const val FQ_NAME_INTERNAL_VALIDATION_API_ANNOTATION = "$PACKAGE_CORE.InternalValidationApi"
 
 internal const val VIOLATIONS_SUPER_CLASS_SUFFIX = "Violation"
 internal const val VALIDATION_CONTEXT_SUFFIX = "ValidationContext"
