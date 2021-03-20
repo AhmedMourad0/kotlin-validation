@@ -33,7 +33,7 @@ data class Model internal constructor(val v: String, val n: Nested?, val l1: Arr
                 param<Number>("min") { 7 }
                 param("max") { Rand(emptyList()) }
                 param("len") { 56.567 }
-                include("nestedViolations", Model::n) {
+                include("nestedViolations", Model::n) { _, _ ->
                     Nested.Companion
                 }
 
