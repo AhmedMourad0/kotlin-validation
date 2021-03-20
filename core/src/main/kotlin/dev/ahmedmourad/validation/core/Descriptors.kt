@@ -1,10 +1,20 @@
 package dev.ahmedmourad.validation.core
 
+@Experimental(level = Experimental.Level.ERROR)
+@MustBeDocumented
+@Retention(AnnotationRetention.BINARY)
+annotation class InternalValidationApi
+
+@Experimental(level = Experimental.Level.ERROR)
+@MustBeDocumented
+@Retention(AnnotationRetention.BINARY)
+annotation class UnsafeValidationContext
+
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
 annotation class MustBeValid
 
-class ConstraintsDescriptor<T : Any> internal constructor(
+data class ConstraintsDescriptor<T : Any> internal constructor(
     private val values: List<Constraint<T>>
 ) : List<Constraint<T>> by values
 
@@ -15,35 +25,45 @@ data class Constraint<T : Any> internal constructor(
     val params: List<Parameter<T, *>>
 )
 
-data class IncludedConstraints<T : Any, DT : Any, C : Constrains<DT>>(
+data class IncludedConstraints<T : Any, T1 : Any, C : Constrains<T1>>(
     val param: String,
-    val constrained: (T) -> DT?,
-    val constrainer: (T) -> C
+    private val constrained: (T) -> T1?,
+    private val constrainer: (T, T1) -> C
 ) {
 
-    //TODO: maybe hide these with OptIn
+    fun constrained(item: T) = constrained.invoke(item)
+    fun constrainer(item: T, included: T1) = constrainer.invoke(item, included)
+
+    @InternalValidationApi
     inline fun isValid(
         item: T,
-        crossinline isValid: C.(DT) -> Boolean
+        crossinline isValid: C.(T1) -> Boolean
     ): Boolean {
         return constrained(item)?.let {
-            constrainer(item).isValid(it)
+            constrainer(item, it).isValid(it)
         } ?: true
     }
 
+    @InternalValidationApi
     inline fun <V : Any> findViolations(
         item: T,
-        crossinline validate: C.(DT) -> Case<List<V>, DT>
+        crossinline validate: C.(T1) -> Case<List<V>, T1>
     ): List<V> {
         return constrained(item)?.let {
-            constrainer(item).validate(it).swap().orElse { emptyList() }
+            constrainer(item, it).validate(it).swap().orElse { emptyList() }
         }.orEmpty()
     }
 }
 
 data class Parameter<T : Any, P> internal constructor(
     val name: String,
-    val get: (T) -> P
-)
+    private val get: (T) -> P
+) {
+    fun get(item: T) = get.invoke(item)
+}
 
-data class Validation<DT> internal constructor(val validate: (DT) -> Boolean)
+data class Validation<DT> internal constructor(
+    private val validate: (DT) -> Boolean
+) {
+    fun validate(item: DT) = validate.invoke(item)
+}

@@ -49,9 +49,9 @@ interface Validator<DT> {
 
     fun validation(validate: (DT) -> Boolean)
 
-    fun <DT1 : Any> on(property: (DT) -> DT1, validator: Validator<DT1>.() -> Unit)
+    fun <DT1> on(property: (DT) -> DT1, validator: Validator<DT1>.() -> Unit)
+    fun <DT1> on(property: KProperty0<DT1>, validator: Validator<DT1>.() -> Unit)
     fun <DT1 : Any> on(property: (DT) -> DT1?): PropertyNullableValidator<DT, DT1>
-    fun <DT1 : Any> on(property: KProperty0<DT1>, validator: Validator<DT1>.() -> Unit)
     fun <DT1 : Any> on(property: KProperty0<DT1?>): PropertyNullableValidator<DT, DT1>
 
     infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.ifExists(
@@ -85,7 +85,7 @@ class ConstraintBuilder<T : Any> internal constructor(
     fun <T1 : Any, @InclusionType @ParamType C : Constrains<T1>> include(
         @ParamName param: String,
         property: (T) -> T1?,
-        constrainer: (T) -> C
+        constrainer: (T, T1) -> C
     ) {
         includedConstraints.add(IncludedConstraints(param, property, constrainer))
     }
@@ -94,19 +94,19 @@ class ConstraintBuilder<T : Any> internal constructor(
     fun <T1 : Any, @InclusionType @ParamType C : Constrains<T1>> include(
         @ParamName param: String,
         property: KProperty0<T1?>,
-        constrainer: (T) -> C
+        constrainer: (T, T1) -> C
     ) {
-        includedConstraints.add(IncludedConstraints(param, { property.get() }, constrainer))
+        include(param, { property.get() }, constrainer)
     }
 
-    override fun <DT : Any> on(
+    override fun <DT> on(
         property: (T) -> DT,
         validator: Validator<DT>.() -> Unit
     ) = validation {
         ValidatorImpl<DT>().apply(validator).validateAll(property.invoke(it))
     }
 
-    override fun <DT : Any> on(
+    override fun <DT> on(
         property: KProperty0<DT>,
         validator: Validator<DT>.() -> Unit
     ) = validation {
@@ -118,7 +118,7 @@ class ConstraintBuilder<T : Any> internal constructor(
     }
 
     override fun <DT : Any> on(property: KProperty0<DT?>): PropertyNullableValidator<T, DT> {
-        return PropertyNullableValidator { property.get() }
+        return on { property.get() }
     }
 
     override infix fun <DT : Any> PropertyNullableValidator<T, DT>.ifExists(
@@ -160,14 +160,14 @@ class ValidatorImpl<DT> : Validator<DT> {
         validations.add(Validation(validate))
     }
 
-    override fun <DT1 : Any> on(
+    override fun <DT1> on(
         property: (DT) -> DT1,
         validator: Validator<DT1>.() -> Unit
     ) = validation {
         ValidatorImpl<DT1>().apply(validator).validateAll(property.invoke(it))
     }
 
-    override fun <DT1 : Any> on(
+    override fun <DT1> on(
         property: KProperty0<DT1>,
         validator: Validator<DT1>.() -> Unit
     ) = validation {
@@ -179,7 +179,7 @@ class ValidatorImpl<DT> : Validator<DT> {
     }
 
     override fun <DT1 : Any> on(property: KProperty0<DT1?>): PropertyNullableValidator<DT, DT1> {
-        return PropertyNullableValidator { property.get() }
+        return on { property.get() }
     }
 
     override infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.ifExists(
@@ -204,23 +204,25 @@ class ValidatorImpl<DT> : Validator<DT> {
         }
     }
 
-    fun validateNone(item: DT): Boolean {
-        return validations.none { it.validate(item) }
+    fun validateAll(item: DT): Boolean {
+        return validations.all { it.validate(item) }
     }
 
     fun validateAny(item: DT): Boolean {
         return validations.any { it.validate(item) }
     }
 
-    fun validateAll(item: DT): Boolean {
-        return validations.all { it.validate(item) }
+    fun validateNone(item: DT): Boolean {
+        return validations.none { it.validate(item) }
     }
 }
 
 @ValidationDslMarker
 class PropertyNullableValidator<T, DT : Any> internal constructor(
-    internal val get: (T) -> DT?
-)
+    private val get: (T) -> DT?
+) {
+    internal fun get(owner: T)  = get.invoke(owner)
+}
 
 @Suppress("unused")
 // The receiver is needed to ensure dsl integrity
