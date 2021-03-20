@@ -109,6 +109,7 @@ internal class FunctionsGenerator : Generator {
         """.trimMargin()
     }
 
+    //TODO: generate a factory for each constructor (be careful with their visibility)
     private fun generateFactory(constraintsDescriptor: ConstraintsDescriptor): String? {
 
         val constrainedParams = constraintsDescriptor.constrainedParams ?: return null
