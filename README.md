@@ -14,6 +14,7 @@ Check the samples for current syntax.
 - Third-party classes constrainers
 - Multiple constrainers per class
 - Constrainers composition
+- Ability to enforce classes to be validated before usage
 - Declarative type-safe dsl to describe constraints
 - Property-specific and class-specific validations
 - Nested validations and constraints
@@ -24,7 +25,6 @@ Check the samples for current syntax.
 - Easy-to-create custom validations
 
 ## Roadmap
-- Enforcing classes to be validated before usage
 - Providing ready-to-use constrainers (email, phone-number, ...)
 - More Multiplatform ready-to-use validations
 - Library-specific ready-to-use validations 
