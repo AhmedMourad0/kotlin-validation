@@ -3,12 +3,37 @@ package dev.ahmedmourad.validation.sample
 import dev.ahmedmourad.validation.core.*
 import dev.ahmedmourad.validation.core.validations.*
 
-//import dev.ahmedmourad.validation.sample.validations.*
+import dev.ahmedmourad.validation.sample.validations.*
 
 fun main() {
 //    Model(
 //        "", null, emptyArray(), emptyList(), object : X {}
 //    ).copy()
+}
+
+@ConstrainedAlias("LongInt")
+object IntConstrainer : Constrains<Int> {
+    override val constraints by describe {
+        constraint(violation = "TooShort") { }
+    }
+}
+
+@ConstrainedAlias("SomeInt")
+object SomeConstrainer : Constrains<Int> {
+    override val constraints by describe {
+        constraint("Something") {
+            param("name") { "Ahmed" }
+            param("country") { "Egypt" }
+            include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
+            include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
+        }
+        constraint("AnotherThing") {
+            param("name") { "Ahmed" }
+            param("country") { "Egypt" }
+            include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
+            include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
+        }
+    }
 }
 
 data class Rand<T : List<*>>(val v: List<T>?)
@@ -25,7 +50,13 @@ data class Nested(val x: String, val y: String?) {
 interface X
 
 @MustBeValid
-data class Model internal constructor(val v: String, val n: Nested?, val l1: Array<Nested>, val l2: List<Nested?>, val x: X) {
+data class Model internal constructor(
+    val v: String,
+    val n: Nested?,
+    val l1: Array<Nested>,
+    val l2: List<Nested?>,
+    val x: X
+) {
     internal constructor(n: Nested?, l1: Array<Nested>, l2: List<Nested?>, x: X) : this("v", n, l1, l2, x)
     companion object : Constrains<Model> {
         override val constraints by describe {
