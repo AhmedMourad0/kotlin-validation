@@ -141,6 +141,14 @@ internal class ValidationVerifier(
         )
     }
 
+    internal fun verifyConstrainedAlias(alias: String, element: PsiElement?): String? {
+        return verifyValidIdentifier(
+            alias,
+            element,
+            "Illegal class identifier"
+        )
+    }
+
     internal fun verifyConstrainedClassHasPrimaryConstructor(
         constrainedClass: LazyClassDescriptor,
         constrainedTypePsi: PsiElement
@@ -172,6 +180,21 @@ internal class ValidationVerifier(
             reportError(
                 nonStringLiteralMessage,
                 nameExpression
+            )
+        }
+    }
+
+    private fun verifyValidIdentifier(
+        name: String,
+        element: PsiElement?,
+        illegalIdentifierMessage: String
+    ): String? {
+        return if (name.isIdentifier()) {
+            name
+        } else {
+            reportError(
+                illegalIdentifierMessage,
+                element
             )
         }
     }

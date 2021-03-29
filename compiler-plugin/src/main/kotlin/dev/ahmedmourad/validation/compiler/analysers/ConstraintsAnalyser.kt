@@ -200,10 +200,21 @@ internal class ConstraintsAnalyser(
                     ?.firstOrNull { it.getJetTypeFqName(false) == FQ_NAME_CONSTRAINS }
                     ?: return null
 
+                val constrainedAlias = paramTypeArg.constructor
+                    .declarationDescriptor
+                    ?.annotations
+                    ?.findAnnotation(FqName(FQ_NAME_CONSTRAINED_ALIAS_ANNOTATION))
+                    ?.allValueArguments
+                    ?.get(Name.identifier(NAME_PARAM_CONSTRAINED_ALIAS_ANNOTATION))
+                    ?.value
+                    ?.safeAs<String>()
+
                 val constrainedType = constrainsSuperType.arguments
                     .firstOrNull()
                     ?.type
                     ?: return null
+
+                val constrainedAliasOrSimpleName = constrainedAlias ?: constrainedType.simpleName() ?: return null
 
                 val validationsFileFqName = paramTypeArg.constructor
                     .declarationDescriptor
@@ -219,8 +230,9 @@ internal class ConstraintsAnalyser(
                 IncludedConstraintDescriptor(
                     validationsFileFqName,
                     constrainedType,
-                    paramTypeArg
-                ) to "List<$validationsFileFqName.${constrainedType.simpleName()}$VIOLATIONS_SUPER_CLASS_SUFFIX>"
+                    paramTypeArg,
+                    constrainedAliasOrSimpleName
+                ) to "List<$validationsFileFqName.${constrainedAliasOrSimpleName}$VIOLATIONS_SUPER_CLASS_SUFFIX>"
 
             } else {
                 null to paramTypeArg.deepFqName()

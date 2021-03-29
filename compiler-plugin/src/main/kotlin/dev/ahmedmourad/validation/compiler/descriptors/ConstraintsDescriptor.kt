@@ -62,6 +62,26 @@ internal class ConstraintsDescriptor constructor(
             .plus(constrainedTypeArgs)
     }
 
+    private val constrainedAlias by lazy {
+
+        val (annotation, entry) = constrainerClassOrObject.annotationEntries
+            .mapNotNull { annotationEntry ->
+                bindingContext.get(BindingContext.ANNOTATION, annotationEntry).takeIf {
+                    it?.fqName == FqName(FQ_NAME_CONSTRAINED_ALIAS_ANNOTATION)
+                } to annotationEntry
+            }.firstOrNull() ?: null to null
+
+            annotation?.allValueArguments
+            ?.get(Name.identifier(NAME_PARAM_CONSTRAINED_ALIAS_ANNOTATION))
+            ?.value
+            ?.safeAs<String>()
+            ?.let { verifier.verifyConstrainedAlias(it, entry) }
+    }
+
+    private val constrainedAliasOrSimpleName by lazy {
+        constrainedAlias ?: constrainedType.simpleName()
+    }
+
     val constrainerTypeParamsAsTypeArgs by lazy {
         constrainerClassOrObject
             .typeParameters
@@ -88,9 +108,9 @@ internal class ConstraintsDescriptor constructor(
             ?.plus(constrainerTypeParamsAsTypeArgs)
     }
 
-    val violationsParentName by lazy { constrainedType.simpleName()!! + VIOLATIONS_SUPER_CLASS_SUFFIX }
+    val violationsParentName by lazy { constrainedAliasOrSimpleName!! + VIOLATIONS_SUPER_CLASS_SUFFIX }
 
-    val validationContextName by lazy { constrainedType.simpleName()!! + VALIDATION_CONTEXT_SUFFIX }
+    val validationContextName by lazy { constrainedAliasOrSimpleName!! + VALIDATION_CONTEXT_SUFFIX }
     val validationContextImplName by lazy { validationContextName + VALIDATION_CONTEXT_IMPL_SUFFIX }
 
     val isValidationContextImplAnObject by lazy { constrainerTypeParams.isBlank() }

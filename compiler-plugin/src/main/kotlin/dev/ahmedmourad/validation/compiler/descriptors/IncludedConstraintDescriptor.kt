@@ -6,7 +6,8 @@ import org.jetbrains.kotlin.types.KotlinType
 internal data class IncludedConstraintDescriptor(
     val validationsFileFqName: String,
     val constrainedType: KotlinType,
-    val constrainerType: KotlinType
+    val constrainerType: KotlinType,
+    val constrainedAliasOrSimpleName: String
 ) {
 
     val constrainedFqName by lazy { constrainedType.deepFqName() }

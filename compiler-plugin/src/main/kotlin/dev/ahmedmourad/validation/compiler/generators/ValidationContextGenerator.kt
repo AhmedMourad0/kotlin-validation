@@ -37,7 +37,7 @@ internal class ValidationContextGenerator : Generator {
                 ?.joinToString(separator = ", ", prefix = "<", postfix = ">")
                 .orEmpty()
 
-            val includedConstrainedSimpleName = includedConstraint.constrainedType.simpleName()
+            val includedConstrainedSimpleName = includedConstraint.constrainedAliasOrSimpleName
 
             val validationsFileFqName = includedConstraint.validationsFileFqName
 
