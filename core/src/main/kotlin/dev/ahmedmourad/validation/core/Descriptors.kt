@@ -14,10 +14,9 @@ annotation class UnsafeValidationContext
 @Retention(AnnotationRetention.BINARY)
 annotation class MustBeValid
 
-//TODO: is a typealias better here? I don't think it is
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
-annotation class ConstrainedAlias(val name: String)
+annotation class ConstrainerConfig(val constrainedAlias: String)
 
 data class ConstraintsDescriptor<T : Any> internal constructor(
     private val values: List<Constraint<T>>

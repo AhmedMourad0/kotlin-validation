@@ -13,9 +13,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtClassOrObject
-import org.jetbrains.kotlin.psi.synthetics.findClassDescriptor
 import org.jetbrains.kotlin.resolve.BindingContext
-import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.lazy.descriptors.LazyClassDescriptor
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.utils.addToStdlib.cast
@@ -72,7 +70,7 @@ internal class ConstraintsDescriptor constructor(
             }.firstOrNull() ?: null to null
 
             annotation?.allValueArguments
-            ?.get(Name.identifier(NAME_PARAM_CONSTRAINED_ALIAS_ANNOTATION))
+            ?.get(Name.identifier(CONSTRAINED_ALIAS_PARAM_CONSTRAINER_CONFIG_ANNOTATION))
             ?.value
             ?.safeAs<String>()
             ?.let { verifier.verifyConstrainedAlias(it, entry) }
