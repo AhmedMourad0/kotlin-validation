@@ -11,14 +11,14 @@ fun main() {
 //    ).copy()
 }
 
-@ConstrainedAlias("LongInt")
+@ConstrainerConfig(constrainedAlias = "LongInt")
 object IntConstrainer : Constrains<Int> {
     override val constraints by describe {
         constraint(violation = "TooShort") { }
     }
 }
 
-@ConstrainedAlias("SomeInt")
+@ConstrainerConfig(constrainedAlias = "SomeInt")
 object SomeConstrainer : Constrains<Int> {
     override val constraints by describe {
         constraint("Something") {
