@@ -211,7 +211,7 @@ internal class FunctionsGenerator : Generator {
 
         return """
             |@Suppress("UNCHECKED_CAST")
-            |@UseExperimental($FQ_NAME_INTERNAL_VALIDATION_API_ANNOTATION::class)
+            |@UseExperimental(InternalValidationApi::class)
             |private fun ${constrainerTypeParams}Constraint<$constrainedFqName>.validateNestedConstraints(
             |    item: kotlin.Lazy<$constrainedFqName>
             |): Boolean {
@@ -289,7 +289,7 @@ internal class FunctionsGenerator : Generator {
 
         return """
             |@Suppress("UNCHECKED_CAST")
-            |@UseExperimental($FQ_NAME_INTERNAL_VALIDATION_API_ANNOTATION::class)
+            |@UseExperimental(InternalValidationApi::class)
             |private fun ${constrainerTypeParams}Constraint<$constrainedFqName>.toViolation(
             |    item: kotlin.Lazy<$constrainedFqName>
             |): $violationsParent {

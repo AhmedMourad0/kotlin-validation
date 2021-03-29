@@ -76,8 +76,8 @@ class ConstraintBuilderTests {
         val actual = ConstraintBuilder<Model>(expected.violation).apply {
             include(
                 expectedIncludedConstraint.param,
-                expectedIncludedConstraint::constrained,
-                expectedIncludedConstraint::constrainer
+                expectedIncludedConstraint::getConstrained,
+                expectedIncludedConstraint::getConstrainer
             )
         }.build()
 
@@ -85,12 +85,12 @@ class ConstraintBuilderTests {
 
         assertEquals(expectedIncludedConstraint.param, actualIncludedConstraint.param)
         assertEquals(
-            expectedIncludedConstraint.constrained(Model(5)),
-            actualIncludedConstraint.constrained(Model(5))
+            expectedIncludedConstraint.getConstrained(Model(5)),
+            actualIncludedConstraint.getConstrained(Model(5))
         )
         assertEquals(
-            expectedIncludedConstraint.constrainer(Model(5), 5),
-            actualIncludedConstraint.constrainer(Model(5), 5)
+            expectedIncludedConstraint.getConstrainer(Model(5), 5),
+            actualIncludedConstraint.getConstrainer(Model(5), 5)
         )
     }
 
@@ -122,8 +122,8 @@ class ConstraintBuilderTests {
         val actual = ConstraintBuilder<Int>(expected.violation).apply {
             include(
                 expectedIncludedConstraint.param,
-                expectedIncludedConstraint::constrained,
-                expectedIncludedConstraint::constrainer
+                expectedIncludedConstraint::getConstrained,
+                expectedIncludedConstraint::getConstrainer
             )
         }.build()
 
@@ -131,12 +131,12 @@ class ConstraintBuilderTests {
 
         assertEquals(expectedIncludedConstraint.param, actualIncludedConstraint.param)
         assertEquals(
-            expectedIncludedConstraint.constrained(5),
-            actualIncludedConstraint.constrained(5)
+            expectedIncludedConstraint.getConstrained(5),
+            actualIncludedConstraint.getConstrained(5)
         )
         assertEquals(
-            expectedIncludedConstraint.constrainer(5, 5),
-            actualIncludedConstraint.constrainer(5, 5)
+            expectedIncludedConstraint.getConstrainer(5, 5),
+            actualIncludedConstraint.getConstrainer(5, 5)
         )
     }
 

@@ -31,16 +31,19 @@ data class IncludedConstraints<T : Any, T1 : Any, C : Constrains<T1>>(
     private val constrainer: (T, T1) -> C
 ) {
 
-    fun constrained(item: T) = constrained.invoke(item)
-    fun constrainer(item: T, included: T1) = constrainer.invoke(item, included)
+    @InternalValidationApi
+    fun getConstrained(item: T) = constrained.invoke(item)
+
+    @InternalValidationApi
+    fun getConstrainer(item: T, included: T1) = constrainer.invoke(item, included)
 
     @InternalValidationApi
     inline fun isValid(
         item: T,
         crossinline isValid: C.(T1) -> Boolean
     ): Boolean {
-        return constrained(item)?.let {
-            constrainer(item, it).isValid(it)
+        return getConstrained(item)?.let {
+            getConstrainer(item, it).isValid(it)
         } ?: true
     }
 
@@ -49,8 +52,8 @@ data class IncludedConstraints<T : Any, T1 : Any, C : Constrains<T1>>(
         item: T,
         crossinline validate: C.(T1) -> Case<List<V>, T1>
     ): List<V> {
-        return constrained(item)?.let {
-            constrainer(item, it).validate(it).swap().orElse { emptyList() }
+        return getConstrained(item)?.let {
+            getConstrainer(item, it).validate(it).swap().orElse { emptyList() }
         }.orEmpty()
     }
 }

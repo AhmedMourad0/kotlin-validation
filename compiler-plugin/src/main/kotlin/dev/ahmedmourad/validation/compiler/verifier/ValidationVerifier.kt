@@ -23,7 +23,6 @@ import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.lazy.descriptors.LazyClassDescriptor
-import org.jetbrains.kotlin.utils.addToStdlib.cast
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
 internal class ValidationVerifier(
@@ -72,7 +71,7 @@ internal class ValidationVerifier(
         }
     }
 
-    internal fun verifyParamIsCalledInsideConstraint(
+    internal fun verifyParamIsCalledDirectlyInsideConstraint(
         paramResolvedCall: ResolvedCall<*>
     ): KtElement? {
         return verifyParentBlockAs(
@@ -82,7 +81,8 @@ internal class ValidationVerifier(
         )
     }
 
-    internal fun verifyConstraintIsCalledInsideDescribe(
+    //TODO: verify describe is only called where it should be
+    internal fun verifyConstraintIsCalledDirectlyInsideDescribe(
         constraintResolvedCall: ResolvedCall<*>
     ): KtElement? {
         return verifyParentBlockAs(
@@ -100,7 +100,7 @@ internal class ValidationVerifier(
                 if (entries.size > 1) {
                     entries.forEach { entry ->
                         reportError(
-                            "Duplicate violations: $name",
+                            "Duplicate violation: $name",
                             entry.nameExpression
                         )
                     }
@@ -115,7 +115,7 @@ internal class ValidationVerifier(
             if (entries.size > 1) {
                 entries.forEach { entry ->
                     reportError(
-                        "Duplicate violation params: $name",
+                        "Duplicate violation param: $name",
                         entry.nameExpression
                     )
                 }

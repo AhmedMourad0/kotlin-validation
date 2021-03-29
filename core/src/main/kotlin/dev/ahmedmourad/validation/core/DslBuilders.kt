@@ -45,6 +45,7 @@ class ConstraintsBuilder<T : Any> internal constructor() {
     internal fun build(): ConstraintsDescriptor<T> = ConstraintsDescriptor(constraints)
 }
 
+@ValidationDslMarker
 interface Validator<DT> {
 
     fun validation(validate: (DT) -> Boolean)

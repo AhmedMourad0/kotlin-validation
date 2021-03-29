@@ -13,6 +13,7 @@ import org.jetbrains.kotlin.descriptors.ClassConstructorDescriptor
 import org.jetbrains.kotlin.js.descriptorUtils.getJetTypeFqName
 import org.jetbrains.kotlin.js.translate.utils.finalElement
 import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.calls.callUtil.getParentCall
@@ -62,7 +63,7 @@ internal class ConstraintsAnalyser(
         }
 
         paramsCalls.forEach {
-            verifier.verifyParamIsCalledInsideConstraint(it)
+            verifier.verifyParamIsCalledDirectlyInsideConstraint(it)
         }
 
         val constraintsDescriptors = violationsCalls.mapNotNull { resolvedCall ->
@@ -85,8 +86,6 @@ internal class ConstraintsAnalyser(
         }.let {
             verifier.verifyNoDuplicateViolations(it)
         }.map { (_, violationsGroup) ->
-
-            verifier.reportError("zzzzzzzzzz", null)
 
             val any = violationsGroup.first()
             ConstraintsDescriptor(
@@ -162,7 +161,7 @@ internal class ConstraintsAnalyser(
     }
 
     private fun getDescribeCall(constraintResolvedCall: ResolvedCall<*>): KtElement? {
-        return verifier.verifyConstraintIsCalledInsideDescribe(constraintResolvedCall)
+        return verifier.verifyConstraintIsCalledDirectlyInsideDescribe(constraintResolvedCall)
     }
 
     private fun getConstrainerClassOrObject(describeCall: KtElement?): KtClassOrObject? {
