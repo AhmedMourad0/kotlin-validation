@@ -1,4 +1,4 @@
-package dev.ahmedmourad.validation.compiler.verifier
+package dev.ahmedmourad.validation.compiler.dsl
 
 import arrow.meta.phases.CompilerContext
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
@@ -11,8 +11,6 @@ import dev.ahmedmourad.validation.compiler.utils.simpleName
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageUtil
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
-import org.jetbrains.kotlin.descriptors.ClassConstructorDescriptor
-import org.jetbrains.kotlin.descriptors.ConstructorDescriptor
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.kotlin.psi.psiUtil.isIdentifier
@@ -22,10 +20,9 @@ import org.jetbrains.kotlin.resolve.calls.callUtil.getResolvedCall
 import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
-import org.jetbrains.kotlin.resolve.lazy.descriptors.LazyClassDescriptor
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
-internal class ValidationVerifier(
+internal class DslValidator(
     private val cc: CompilerContext,
     private val bindingContext: BindingContext
 ) {
@@ -147,18 +144,6 @@ internal class ValidationVerifier(
             element,
             "Illegal class identifier"
         )
-    }
-
-    internal fun verifyConstrainedClassHasPrimaryConstructor(
-        constrainedClass: LazyClassDescriptor,
-        constrainedTypePsi: PsiElement
-    ): ClassConstructorDescriptor? {
-        return constrainedClass.constructors
-            .firstOrNull(ConstructorDescriptor::isPrimary)
-            ?: reportError(
-                "Only data classes and regular classes with primary constructors can be constrained",
-                constrainedTypePsi
-            )
     }
 
     private fun verifyValidIdentifier(

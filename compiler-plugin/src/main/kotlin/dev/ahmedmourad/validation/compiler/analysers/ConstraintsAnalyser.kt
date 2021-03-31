@@ -7,7 +7,7 @@ import dev.ahmedmourad.validation.compiler.descriptors.IncludedConstraintDescrip
 import dev.ahmedmourad.validation.compiler.descriptors.ParamDescriptor
 import dev.ahmedmourad.validation.compiler.descriptors.ViolationDescriptor
 import dev.ahmedmourad.validation.compiler.utils.*
-import dev.ahmedmourad.validation.compiler.verifier.ValidationVerifier
+import dev.ahmedmourad.validation.compiler.dsl.DslValidator
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.descriptors.ClassConstructorDescriptor
 import org.jetbrains.kotlin.js.descriptorUtils.getJetTypeFqName
@@ -30,7 +30,7 @@ import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
 internal class ConstraintsAnalyser(
     private val bindingContext: BindingContext,
-    private val verifier: ValidationVerifier
+    private val dslValidator: DslValidator
 ) {
 
     internal fun analyse(): List<ConstraintsDescriptor> {
@@ -63,10 +63,10 @@ internal class ConstraintsAnalyser(
         }
 
         paramsCalls.forEach {
-            verifier.verifyParamIsCalledDirectlyInsideConstraint(it)
+            dslValidator.verifyParamIsCalledDirectlyInsideConstraint(it)
         }
 
-        val constraintsDescriptors = violationsCalls.mapNotNull { resolvedCall ->
+        val constraintsDescriptors = violationsCalls.asSequence().mapNotNull { resolvedCall ->
             val describeCall = getDescribeCall(resolvedCall) ?: return@mapNotNull null
             val constrainerObject = getConstrainerClassOrObject(describeCall) ?: return@mapNotNull null
             val constrainedType = getConstrainedType(resolvedCall) ?: return@mapNotNull null
@@ -84,13 +84,15 @@ internal class ConstraintsAnalyser(
         }.groupBy {
             it.constrainerClassOrObject.fqName?.asString()
         }.let {
-            verifier.verifyNoDuplicateViolations(it)
+            dslValidator.verifyNoDuplicateViolations(it)
         }.map { (_, violationsGroup) ->
+
+//            dslValidator.reportError("zzzzzzzzzz", null)
 
             val any = violationsGroup.first()
             ConstraintsDescriptor(
                 bindingContext,
-                verifier,
+                dslValidator,
                 any.constrainedType,
                 any.constrainedTypePsi,
                 any.constrainerClassOrObject,
@@ -110,7 +112,7 @@ internal class ConstraintsAnalyser(
                 it.constrainedClass?.fqNameOrNull()?.asString() == constructorOwnerFqName
             }
 
-            verifier.verifyConstructorCallIsAllowed(descriptor, resolvedCall)
+            dslValidator.verifyConstructorCallIsAllowed(descriptor, resolvedCall)
         }
 
         return constraintsDescriptors
@@ -135,7 +137,7 @@ internal class ConstraintsAnalyser(
             ?.typeArguments
             ?.elementAtOrNull(0)
             ?.finalElement
-            ?: verifier.reportError(
+            ?: dslValidator.reportError(
                 "Failed to resolve constrained type",
                 describeFunctionLiteral
             )
@@ -154,14 +156,14 @@ internal class ConstraintsAnalyser(
             ?.typeArguments
             ?.values
             ?.elementAtOrNull(0)
-            ?: return verifier.reportError(
+            ?: return dslValidator.reportError(
                 "Could not find the constrained type",
                 constraintResolvedCall.call.callElement
             )
     }
 
     private fun getDescribeCall(constraintResolvedCall: ResolvedCall<*>): KtElement? {
-        return verifier.verifyConstraintIsCalledDirectlyInsideDescribe(constraintResolvedCall)
+        return dslValidator.verifyConstraintIsCalledDirectlyInsideDescribe(constraintResolvedCall)
     }
 
     private fun getConstrainerClassOrObject(describeCall: KtElement?): KtClassOrObject? {
@@ -176,12 +178,12 @@ internal class ConstraintsAnalyser(
         val nameExpression = resolvedCall.call.getValueArgumentsInParentheses()
             .getOrNull(0)
             ?.getArgumentExpression()
-            ?: return verifier.reportError(
+            ?: return dslValidator.reportError(
                 "Unable to find `violation` name",
                 resolvedCall.call.callElement
             )
 
-        return verifier.verifyViolationName(nameExpression)
+        return dslValidator.verifyViolationName(nameExpression)
     }
 
     private fun getViolationParams(resolvedCall: ResolvedCall<*>): List<ParamDescriptor>? {
@@ -205,7 +207,7 @@ internal class ConstraintsAnalyser(
                     ?.annotations
                     ?.findAnnotation(FqName(FQ_NAME_CONSTRAINED_ALIAS_ANNOTATION))
                     ?.allValueArguments
-                    ?.get(Name.identifier(NAME_PARAM_CONSTRAINED_ALIAS_ANNOTATION))
+                    ?.get(Name.identifier(CONSTRAINED_ALIAS_PARAM_CONSTRAINER_CONFIG_ANNOTATION))
                     ?.value
                     ?.safeAs<String>()
 
@@ -242,14 +244,14 @@ internal class ConstraintsAnalyser(
         fun extractParamEntry(statementResolvedCall: ResolvedCall<*>): ParamDescriptor? {
 
             val (includedConstraint, paramTypeFqName) = analyseParamType(statementResolvedCall)
-                ?: return verifier.reportError(
+                ?: return dslValidator.reportError(
                     "Unable to find `param` type",
                     statementResolvedCall.call.callElement
                 )
 
             val nameIndex = statementResolvedCall.candidateDescriptor.valueParameters.firstOrNull {
                 it.annotations.hasAnnotation(FqName(FQ_NAME_PARAM_NAME_ANNOTATION))
-            }?.index ?: return verifier.reportError(
+            }?.index ?: return dslValidator.reportError(
                 "Unable to find `param` name",
                 statementResolvedCall.call.callElement
             )
@@ -258,12 +260,12 @@ internal class ConstraintsAnalyser(
                 .valueArguments
                 .elementAtOrNull(nameIndex)
                 ?.getArgumentExpression()
-                ?: return verifier.reportError(
+                ?: return dslValidator.reportError(
                     "Unable to find `param` name",
                     statementResolvedCall.call.callElement
                 )
 
-            return verifier.verifyParamName(paramNameExpression)
+            return dslValidator.verifyParamName(paramNameExpression)
                 ?.first
                 ?.let { paramName ->
                     ParamDescriptor(
@@ -287,11 +289,11 @@ internal class ConstraintsAnalyser(
             }?.filter {
                 it.candidateDescriptor.annotations.hasAnnotation(FqName(FQ_NAME_PARAM_ANNOTATION))
             }?.mapNotNull(::extractParamEntry)
-            ?: return verifier.reportError(
+            ?: return dslValidator.reportError(
                 "Unable to resolve violation param",
                 resolvedCall.call.callElement
             )
 
-        return verifier.verifyNoDuplicateParams(params).toList()
+        return dslValidator.verifyNoDuplicateParams(params).toList()
     }
 }

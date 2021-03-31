@@ -4,14 +4,15 @@ import arrow.meta.phases.CompilerContext
 import dev.ahmedmourad.validation.compiler.utils.*
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
 import dev.ahmedmourad.validation.compiler.generators.Generator
-import dev.ahmedmourad.validation.compiler.verifier.ValidationVerifier
+import dev.ahmedmourad.validation.compiler.dsl.DslValidator
 import org.jetbrains.kotlin.cli.common.config.KotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.config.kotlinSourceRoots
 import java.io.File
 
+//TODO: there's probably a better approach to this
 internal class FileManager(
     private val cc: CompilerContext,
-    private val verifier: ValidationVerifier
+    private val dslValidator: DslValidator
 ) {
 
     private val sourceGenFolder by lazy { createSourceGenFolder() }
@@ -24,12 +25,21 @@ internal class FileManager(
         vararg generators: Generator
     ) {
 
-        val fileName = constraintsDescriptor.constrainedType.simpleName() + OUTPUT_FILE_NAME_SUFFIX
+        val fileName = constraintsDescriptor.constrainerClassOrObject
+            .let { classOrObject ->
+                if (classOrObject.safeAs<KtObjectDeclaration>()?.isCompanion() == true) {
+                    classOrObject.fqName?.parentOrNull()?.shortName()?.asString()?.plus("Companion")
+                } else {
+                    classOrObject.fqName?.shortName()?.asString()
+                }
+            }?.plus(OUTPUT_FILE_NAME_SUFFIX)
+            ?: dslValidator.reportError("Unable to find constrainer name", constraintsDescriptor.constrainerClassOrObject)
+
         val directory = File(sourceGenFolder, constraintsDescriptor.packageAsPath + "/$OUTPUT_FOLDER")
         val file = File(directory, "$fileName.kt")
 
         if (!file.parentFile.exists() && !file.parentFile.mkdirs()) {
-            verifier.reportError("Could not generate package directory: $file", null)
+            dslValidator.reportError("Could not generate package directory: $file", null)
             return
         }
 
@@ -51,7 +61,7 @@ internal class FileManager(
         fun kotlinValidationDir(parent: File): File? {
             val file = File(parent, "kotlin-validation")
             return if (!file.exists() && !file.mkdirs()) {
-                verifier.reportError("Could not create source generation directory: $file", null)
+                dslValidator.reportError("Could not create source generation directory: $file", null)
             } else {
                 file
             }
@@ -65,8 +75,7 @@ internal class FileManager(
             return kotlinValidationDir(File(it.parentFile, "build"))
         }
 
-        // If the src dir is not part of the input (incremental build), look for the build dir
-        // directly.
+        // If the src dir is not part of the input (incremental build), look for the build dir directly.
         parentSequence.firstOrNull { it.name == "build" }?.let {
             return kotlinValidationDir(it)
         }

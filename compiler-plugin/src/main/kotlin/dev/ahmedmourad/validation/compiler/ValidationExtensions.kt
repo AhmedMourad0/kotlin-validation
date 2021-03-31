@@ -17,22 +17,16 @@ import dev.ahmedmourad.validation.compiler.generators.FunctionsGenerator
 import dev.ahmedmourad.validation.compiler.generators.ValidationContextGenerator
 import dev.ahmedmourad.validation.compiler.generators.ViolationsGenerator
 import dev.ahmedmourad.validation.compiler.utils.FQ_NAME_MUST_BE_VALID_ANNOTATION
-import dev.ahmedmourad.validation.compiler.verifier.ValidationVerifier
+import dev.ahmedmourad.validation.compiler.dsl.DslValidator
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageUtil
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.SimpleFunctionDescriptor
-import org.jetbrains.kotlin.descriptors.Visibilities
-import org.jetbrains.kotlin.js.translate.utils.finalElement
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.*
-import org.jetbrains.kotlin.psi.psiUtil.getAnnotationEntries
-import org.jetbrains.kotlin.psi.psiUtil.visibilityModifier
-import org.jetbrains.kotlin.psi.psiUtil.visibilityModifierType
-import org.jetbrains.kotlin.psi.psiUtil.visibilityModifierTypeOrDefault
 import org.jetbrains.kotlin.resolve.BindingContext
 import java.util.*
 
@@ -50,15 +44,15 @@ internal fun Meta.validationsAnalysisHandler(): AnalysisHandler = analysis(
     analysisCompleted = { _, module, bindingTrace, _ ->
 
         //TODO: every one should follow the visibility of the least of the constrainer and constrained (public or internal only)
-        val verifier = ValidationVerifier(this, bindingTrace.bindingContext)
-        val fileManager = FileManager(this, verifier)
+        val dslValidator = DslValidator(this, bindingTrace.bindingContext)
+        val fileManager = FileManager(this, dslValidator)
         val violationsGenerator = ViolationsGenerator()
         val functionsGenerator = FunctionsGenerator()
         val validationContextGenerator = ValidationContextGenerator()
 
         ConstraintsAnalyser(
             bindingTrace.bindingContext,
-            verifier
+            dslValidator
         ).analyse().forEach { constraintsDescriptor ->
             fileManager.createFile(
                 constraintsDescriptor,

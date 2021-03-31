@@ -5,8 +5,9 @@ import dev.ahmedmourad.validation.compiler.utils.VALIDATION_CONTEXT_IMPL_SUFFIX
 import dev.ahmedmourad.validation.compiler.utils.VALIDATION_CONTEXT_SUFFIX
 import dev.ahmedmourad.validation.compiler.utils.VIOLATIONS_SUPER_CLASS_SUFFIX
 import dev.ahmedmourad.validation.compiler.utils.simpleName
-import dev.ahmedmourad.validation.compiler.verifier.ValidationVerifier
+import dev.ahmedmourad.validation.compiler.dsl.DslValidator
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.descriptors.ConstructorDescriptor
 import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.js.descriptorUtils.getJetTypeFqName
 import org.jetbrains.kotlin.name.FqName
@@ -21,7 +22,7 @@ import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
 internal class ConstraintsDescriptor constructor(
     bindingContext: BindingContext,
-    verifier: ValidationVerifier,
+    dslValidator: DslValidator,
     val constrainedType: KotlinType,
     constrainedTypePsi: PsiElement,
     val constrainerClassOrObject: KtClassOrObject,
@@ -46,12 +47,9 @@ internal class ConstraintsDescriptor constructor(
     }
 
     val constrainedParams: List<ValueParameterDescriptor>? by lazy {
-        constrainedClass?.let {
-            verifier.verifyConstrainedClassHasPrimaryConstructor(
-                it,
-                constrainedTypePsi
-            )?.valueParameters
-        }
+        constrainedClass?.constructors
+            ?.firstOrNull(ConstructorDescriptor::isPrimary)
+            ?.valueParameters
     }
 
     val constrainedFqName by lazy {
@@ -73,7 +71,7 @@ internal class ConstraintsDescriptor constructor(
             ?.get(Name.identifier(CONSTRAINED_ALIAS_PARAM_CONSTRAINER_CONFIG_ANNOTATION))
             ?.value
             ?.safeAs<String>()
-            ?.let { verifier.verifyConstrainedAlias(it, entry) }
+            ?.let { dslValidator.verifyConstrainedAlias(it, entry) }
     }
 
     private val constrainedAliasOrSimpleName by lazy {
