@@ -11,6 +11,7 @@ import dev.ahmedmourad.validation.compiler.utils.simpleName
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageUtil
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.descriptors.ConstructorDescriptor
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.kotlin.psi.psiUtil.isIdentifier
@@ -28,11 +29,23 @@ internal class DslValidator(
 ) {
 
     internal fun verifyConstructorCallIsAllowed(
-        constraintsDescriptor: ConstraintsDescriptor?,
+        constraintsDescriptors: List<ConstraintsDescriptor>,
         constructorResolvedCall: ResolvedCall<*>
     ): ResolvedCall<*>? {
 
-        constraintsDescriptor ?: return null
+        if (constraintsDescriptors.isEmpty()) {
+
+            val constrainedName = constructorResolvedCall.candidateDescriptor
+                .containingDeclaration
+                .fqNameOrNull()
+                ?.shortName()
+                ?.asString()
+
+            return reportError(
+                "Only validated instances of $constrainedName can be created",
+                constructorResolvedCall.call.callElement
+            )
+        }
 
         val secondaryConstructorOwnerFqName = constructorResolvedCall.call
             .callElement
@@ -41,10 +54,6 @@ internal class DslValidator(
             ?.containingClassOrObject
             ?.fqName
             ?.asString()
-
-        if (secondaryConstructorOwnerFqName == constraintsDescriptor.constrainedClass?.fqNameOrNull()?.asString()) {
-            return null
-        }
 
         val callerFqName = constructorResolvedCall.call
             .callElement
@@ -56,13 +65,29 @@ internal class DslValidator(
             ?.fqName
             ?.asString()
 
-        val allowedCaller = "${constraintsDescriptor.packageName}.$OUTPUT_FOLDER.${constraintsDescriptor.constrainedType.simpleName()}"
+        val constrainedClass = constraintsDescriptors.firstOrNull()?.constrainedClass
 
-        return if (callerFqName != allowedCaller) {
+        if (secondaryConstructorOwnerFqName == constrainedClass?.fqNameOrNull()?.asString()) {
+            return null
+        }
+
+        val allowedCallers = constraintsDescriptors.map { descriptor ->
+            "${descriptor.packageName}.$OUTPUT_FOLDER.${descriptor.constrainedType.simpleName()}"
+        }
+
+        return if (callerFqName !in allowedCallers) {
+
+            val constrainedName = constructorResolvedCall.candidateDescriptor
+                .containingDeclaration
+                .fqNameOrNull()
+                ?.shortName()
+                ?.asString()
+
             reportError(
-                "Only validated instances of ${constraintsDescriptor.constrainedType.simpleName()} can be created",
+                "Only validated instances of $constrainedName can be created",
                 constructorResolvedCall.call.callElement
             )
+
         } else {
             constructorResolvedCall
         }

@@ -108,11 +108,11 @@ internal class ConstraintsAnalyser(
                 ?.fqNameOrNull()
                 ?.asString()
 
-            val descriptor = constraintsDescriptors.firstOrNull {
+            val descriptors = constraintsDescriptors.filter {
                 it.constrainedClass?.fqNameOrNull()?.asString() == constructorOwnerFqName
             }
 
-            dslValidator.verifyConstructorCallIsAllowed(descriptor, resolvedCall)
+            dslValidator.verifyConstructorCallIsAllowed(descriptors, resolvedCall)
         }
 
         return constraintsDescriptors
