@@ -212,107 +212,107 @@ class DslIntegrityTests {
         assertEquals(KotlinCompilation.ExitCode.OK, successResult.exitCode)
     }
 
-//    @Test
-//    fun `param names inside a constraint must be unique`() {
-//
-//        val failedResult = compile(
-//            kotlin("FailedTest.kt", """$PACKAGE_AND_IMPORTS
-//                $MINIMAL_INT_CONSTRAINER
-//                object SomeConstrainer : Constrains<Int> {
-//                    override val constraints by describe {
-//                        constraint("Something") {
-//
-//                            param("name") { "Ahmed" }
-//                            param("name") { "Not Ahmed" }
-//
-//                            param("aname") { "Ahmed" }
-//                            param("aname") { 5 }
-//
-//                            include("bname", { 22 }) { _, _ -> IntConstrainer }
-//                            include("bname", { 4 }) { _, _ -> IntConstrainer }
-//
-//                            param("cname") { "Ahmed" }
-//                            include("cname", { 4 }) { _, _ -> IntConstrainer }
-//
-//                            param("dname") { "Ahmed" }
-//                        }
-//                    }
-//                }
-//            """)
-//        )
-//        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, failedResult.exitCode)
-//        assertTrue(failedResult.messages.contains("Duplicate violation param: name"))
-//        assertTrue(failedResult.messages.contains("Duplicate violation param: aname"))
-//        assertTrue(failedResult.messages.contains("Duplicate violation param: bname"))
-//        assertTrue(failedResult.messages.contains("Duplicate violation param: cname"))
-//        assertFalse(failedResult.messages.contains("Duplicate violation param: dname"))
-//
-//        val successResult = compile(
-//            kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
-//                $MINIMAL_INT_CONSTRAINER
-//                @ConstrainerConfig(constrainedAlias = "SomeInt")
-//                object SomeConstrainer : Constrains<Int> {
-//                    override val constraints by describe {
-//                        constraint("Something") {
-//                            param("name") { "Ahmed" }
-//                            param("country") { "Egypt" }
-//                            include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
-//                            include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
-//                        }
-//                        constraint("AnotherThing") {
-//                            param("name") { "Ahmed" }
-//                            param("country") { "Egypt" }
-//                            include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
-//                            include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
-//                        }
-//                    }
-//                }
-//            """
-//            )
-//        )
-//        assertEquals(KotlinCompilation.ExitCode.OK, successResult.exitCode)
-//    }
+    @Test
+    fun `param names inside a constraint must be unique`() {
 
-//    @Test
-//    fun `compilation fails for all invalid violation name identifiers`() {
-//
-//        fun case(index: Int, violation: String): String {
-//            return """
-//                object SomeConstrainer$index : Constrains<Int> {
-//                    override val constraints by describe {
-//                        val text = "Hello"
-//                        constraint($violation) { }
-//                    }
-//                }
-//            """
-//        }
-//
-//        val illegalIdentifierResult = compile(
-//            kotlin("FailingTest.kt", listOf(
-//                "\"1Something\"",
-//                "\"Some thing\"",
-//                "\\\$Something\"",
-//                "\"Some\\\$thing\"",
-//                "\"@Something\"",
-//                "java.util.UUID.randomUUID().toString()"
-//            ).mapIndexed { index, s ->
-//                case(index, s)
-//            }.joinToString("\n", prefix = "$PACKAGE_AND_IMPORTS\n"))
-//        )
-//
-//        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, illegalIdentifierResult.exitCode)
-//        assertTrue(illegalIdentifierResult.messages.contains("Illegal class identifier"))
-//        assertFalse(illegalIdentifierResult.messages.contains("Violation name must be a String literal"))
-//
-//        val nonStringLiteralResult = compile(
-//            kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
-//                ${case(99, "text")}
-//            """.trimIndent())
-//        )
-//        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, nonStringLiteralResult.exitCode)
-//        assertTrue(nonStringLiteralResult.messages.contains("Violation name must be a String literal"))
-//        assertFalse(nonStringLiteralResult.messages.contains("Illegal class identifier"))
-//    }
+        val failedResult = compile(
+            kotlin("FailedTest.kt", """$PACKAGE_AND_IMPORTS
+                $MINIMAL_INT_CONSTRAINER
+                object SomeConstrainer : Constrains<Int> {
+                    override val constraints by describe {
+                        constraint("Something") {
+
+                            param("name") { "Ahmed" }
+                            param("name") { "Not Ahmed" }
+
+                            param("aname") { "Ahmed" }
+                            param("aname") { 5 }
+
+                            include("bname", { 22 }) { _, _ -> IntConstrainer }
+                            include("bname", { 4 }) { _, _ -> IntConstrainer }
+
+                            param("cname") { "Ahmed" }
+                            include("cname", { 4 }) { _, _ -> IntConstrainer }
+
+                            param("dname") { "Ahmed" }
+                        }
+                    }
+                }
+            """)
+        )
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, failedResult.exitCode)
+        assertTrue(failedResult.messages.contains("Duplicate violation param: name"))
+        assertTrue(failedResult.messages.contains("Duplicate violation param: aname"))
+        assertTrue(failedResult.messages.contains("Duplicate violation param: bname"))
+        assertTrue(failedResult.messages.contains("Duplicate violation param: cname"))
+        assertFalse(failedResult.messages.contains("Duplicate violation param: dname"))
+
+        val successResult = compile(
+            kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
+                $MINIMAL_INT_CONSTRAINER
+                @ConstrainerConfig(constrainedAlias = "SomeInt")
+                object SomeConstrainer : Constrains<Int> {
+                    override val constraints by describe {
+                        constraint("Something") {
+                            param("name") { "Ahmed" }
+                            param("country") { "Egypt" }
+                            include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
+                            include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
+                        }
+                        constraint("AnotherThing") {
+                            param("name") { "Ahmed" }
+                            param("country") { "Egypt" }
+                            include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
+                            include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
+                        }
+                    }
+                }
+            """
+            )
+        )
+        assertEquals(KotlinCompilation.ExitCode.OK, successResult.exitCode)
+    }
+
+    @Test
+    fun `compilation fails for all invalid violation name identifiers`() {
+
+        fun case(index: Int, violation: String): String {
+            return """
+                object SomeConstrainer$index : Constrains<Int> {
+                    override val constraints by describe {
+                        val text = "Hello"
+                        constraint($violation) { }
+                    }
+                }
+            """
+        }
+
+        val illegalIdentifierResult = compile(
+            kotlin("FailingTest.kt", listOf(
+                "\"1Something\"",
+                "\"Some thing\"",
+                "\\\$Something\"",
+                "\"Some\\\$thing\"",
+                "\"@Something\"",
+                "java.util.UUID.randomUUID().toString()"
+            ).mapIndexed { index, s ->
+                case(index, s)
+            }.joinToString("\n", prefix = "$PACKAGE_AND_IMPORTS\n"))
+        )
+
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, illegalIdentifierResult.exitCode)
+        assertTrue(illegalIdentifierResult.messages.contains("Illegal class identifier"))
+        assertFalse(illegalIdentifierResult.messages.contains("Violation name must be a String literal"))
+
+        val nonStringLiteralResult = compile(
+            kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
+                ${case(99, "text")}
+            """.trimIndent())
+        )
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, nonStringLiteralResult.exitCode)
+        assertTrue(nonStringLiteralResult.messages.contains("Violation name must be a String literal"))
+        assertFalse(nonStringLiteralResult.messages.contains("Illegal class identifier"))
+    }
 
     @Test
     fun `compilation passes for all valid violation name identifiers`() {
@@ -376,26 +376,26 @@ class DslIntegrityTests {
         assertFalse(nonStringLiteralResult.messages.contains("Illegal property identifier"))
     }
 
-//    @Test
-//    fun `compilation passes for all valid param name identifiers`() {
-//        val successResult = compile(
-//            kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
-//                object SomeConstrainer : Constrains<Int> {
-//                    override val constraints by describe {
-//                        constraint("SomeConstraint") {
-//                            param("Something") { 4 }
-//                            param("anotherThing") { 4 }
-//                            param("OneMore" + "Thing") { 4 }
-//                            param(${"\"\"\""}JustOneMoreThing${"\"\"\""}) { 4 }
-//                            param("A" + 55.toString()) { 4 }
-//                            param("B" + (55 + 1).toString()) { 4 }
-//                        }
-//                    }
-//                }
-//            """)
-//        )
-//        assertEquals(KotlinCompilation.ExitCode.OK, successResult.exitCode)
-//    }
+    @Test
+    fun `compilation passes for all valid param name identifiers`() {
+        val successResult = compile(
+            kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
+                object SomeConstrainer : Constrains<Int> {
+                    override val constraints by describe {
+                        constraint("SomeConstraint") {
+                            param("Something") { 4 }
+                            param("anotherThing") { 4 }
+                            param("OneMore" + "Thing") { 4 }
+                            param(${"\"\"\""}JustOneMoreThing${"\"\"\""}) { 4 }
+                            param("A" + 55.toString()) { 4 }
+                            param("B" + (55 + 1).toString()) { 4 }
+                        }
+                    }
+                }
+            """)
+        )
+        assertEquals(KotlinCompilation.ExitCode.OK, successResult.exitCode)
+    }
 
     @Test
     fun `compilation fails for all invalid constrained alias identifiers`() {
