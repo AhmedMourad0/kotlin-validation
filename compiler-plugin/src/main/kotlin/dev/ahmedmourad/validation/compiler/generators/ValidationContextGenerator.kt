@@ -2,7 +2,6 @@ package dev.ahmedmourad.validation.compiler.generators
 
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
 import dev.ahmedmourad.validation.compiler.utils.VALIDATION_CONTEXT_SUFFIX
-import dev.ahmedmourad.validation.compiler.utils.simpleName
 import org.jetbrains.kotlin.types.TypeProjection
 
 internal class ValidationContextGenerator : Generator {
@@ -26,8 +25,6 @@ internal class ValidationContextGenerator : Generator {
             it.params
         }.mapNotNull {
             it.includedConstraint
-        }.distinctBy {
-            it.validationsFileFqName
         }.map { includedConstraint ->
 
             val includedConstrainerTypeArgs = includedConstraint.constrainerType
@@ -42,7 +39,8 @@ internal class ValidationContextGenerator : Generator {
             val validationsFileFqName = includedConstraint.validationsFileFqName
 
             "$validationsFileFqName.$includedConstrainedSimpleName$VALIDATION_CONTEXT_SUFFIX$includedConstrainerTypeArgs"
-        }.takeIf(List<String>::isNotEmpty)
+        }.distinct()
+            .takeIf(List<String>::isNotEmpty)
             ?.joinToString(separator = ", ", prefix = " : ")
             .orEmpty()
 
