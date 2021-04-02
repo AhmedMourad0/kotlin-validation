@@ -111,6 +111,7 @@ internal class FunctionsGenerator : Generator {
     }
 
     //TODO: generate a factory for each constructor (be careful with their visibility)
+    //TODO: only generate factories for @MustBeValid annotated classes that live in the same module
     private fun generateFactory(constraintsDescriptor: ConstraintsDescriptor): String? {
 
         val constrainedParams = constraintsDescriptor.constrainedParams ?: return null

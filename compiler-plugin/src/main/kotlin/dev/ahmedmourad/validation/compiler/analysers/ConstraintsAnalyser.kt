@@ -237,6 +237,7 @@ internal class ConstraintsAnalyser(
                 ) to "List<$validationsFileFqName.${constrainedAliasOrSimpleName}$VIOLATIONS_SUPER_CLASS_SUFFIX>"
 
             } else {
+                //TODO: if the paramTypeArg is a type param, inherit it from the constrainer .. or its parents?
                 null to paramTypeArg.deepFqName()
             }
         }

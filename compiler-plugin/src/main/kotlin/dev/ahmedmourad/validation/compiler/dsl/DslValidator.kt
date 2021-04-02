@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
+//TODO: validate constrainer is not an inner class or anything that can use the type params of something else
 internal class DslValidator(
     private val cc: CompilerContext,
     private val bindingContext: BindingContext
