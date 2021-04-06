@@ -3,12 +3,14 @@ package dev.ahmedmourad.validation.sample
 import dev.ahmedmourad.validation.core.*
 import dev.ahmedmourad.validation.core.validations.*
 
-import dev.ahmedmourad.validation.sample.validations.*
+//import dev.ahmedmourad.validation.sample.validations.*
 
 fun main() {
-//    Model(
-//        "", null, emptyArray(), emptyList(), object : X {}
-//    ).copy()
+//    Model.validate {
+//        Model(
+//            "", null, emptyArray(), emptyList(), object : X {}
+//        ).copy()
+//    }
 }
 
 @ConstrainerConfig(constrainedAlias = "LongInt")
@@ -153,6 +155,8 @@ fun <T : List<*>> Validator<List<T>>.customValidation() = validation {
 class RandConstrainer<T : List<*>, M>(val x: String, val m: T, val c: List<T>, d: M) : Constrains<Rand<T>> {
     override val constraints by describe {
         constraint("ad") {
+//            param<M>("m") { throw RuntimeException() }
+//            param<T>("t") { throw RuntimeException() }
             on(Rand<T>::v) ifExists {
                 customValidation()
             }
