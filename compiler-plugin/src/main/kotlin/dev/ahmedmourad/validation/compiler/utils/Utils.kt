@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.resolve.bindingContextUtil.getAbbreviatedTypeOrType
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.typeUtil.isTypeParameter
 
+//TODO: replace getJetTypeFqName with type.constructor.declarationDescriptor?.fqNameSafe
 internal fun KotlinType.simpleName(): String? {
     return this.getJetTypeFqName(false)
         .split('.')

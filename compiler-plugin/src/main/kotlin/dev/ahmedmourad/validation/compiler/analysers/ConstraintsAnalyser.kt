@@ -33,7 +33,7 @@ internal class ConstraintsAnalyser(
     private val dslValidator: DslValidator
 ) {
 
-    internal fun analyse(): List<ConstraintsDescriptor> {
+    fun analyse(): List<ConstraintsDescriptor> {
 
         val violationsCalls = mutableListOf<ResolvedCall<*>>()
         val paramsCalls = mutableListOf<ResolvedCall<*>>()

@@ -1,4 +1,4 @@
-package dev.ahmedmourad.validation.compiler.generators
+package dev.ahmedmourad.validation.compiler.codegen
 
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
 import dev.ahmedmourad.validation.compiler.descriptors.ParamDescriptor
