@@ -4,29 +4,26 @@ plugins {
     kotlin("jvm")
 }
 
+apply(plugin = "dev.ahmedmourad.validation.validation-gradle-plugin")
+
 group = "dev.ahmedmourad.validation"
-version = "0.0.1-SNAPSHOT"
+version = "0.1.0-SNAPSHOT"
 
 val validationVersion: String by project
-val arrowVersion: String by project
 val jvmTargetVersion: String by project
-val kotlinTestVersion: String by project
 
 dependencies {
     implementation(kotlin("stdlib"))
-    compileOnly("io.arrow-kt:arrow-annotations:$arrowVersion")
 
-    implementation(project(path = ":core"))
-    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-script-util:1.3.61") {
+    implementation("dev.ahmedmourad.validation:validation-core")
+    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-script-util:1.5.0") {
         exclude("org.jetbrains.kotlin", "kotlin-stdlib")
         exclude("org.jetbrains.kotlin", "kotlin-compiler")
         exclude("org.jetbrains.kotlin", "kotlin-compiler-embeddable")
     }
-    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.3.61")
-    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.3.61")
-    kotlinCompilerClasspath(project(":core"))
-
-    testImplementation("io.kotlintest:kotlintest-runner-junit4:$kotlinTestVersion")
+    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.5.0")
+    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.5.0")
+//    kotlinCompilerClasspath("dev.ahmedmourad.validation:validation-core")
 }
 
 tasks {
@@ -34,12 +31,11 @@ tasks {
     val compileTestKotlin: KotlinCompile by this
     compileKotlin.kotlinOptions {
         jvmTarget = jvmTargetVersion
-        freeCompilerArgs =
-            listOf("-Xplugin=${project.rootDir}/compiler-plugin/build/libs/compiler-plugin-$validationVersion-all.jar")
+        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
-    compileKotlin.dependsOn(":compiler-plugin:createValidationPlugin")
     compileTestKotlin.kotlinOptions {
         jvmTarget = jvmTargetVersion
+        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
     jar {
         manifest {
