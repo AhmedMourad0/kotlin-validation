@@ -18,20 +18,8 @@ fun Validator<Char>.isDigit() = validation {
     it.isDigit()
 }
 
-fun Validator<Char>.isIdentifierIgnorable() = validation {
-    it.isIdentifierIgnorable()
-}
-
 fun Validator<Char>.isISOControl() = validation {
     it.isISOControl()
-}
-
-fun Validator<Char>.isJavaIdentifierPart() = validation {
-    it.isJavaIdentifierPart()
-}
-
-fun Validator<Char>.isJavaIdentifierStart() = validation {
-    it.isJavaIdentifierStart()
 }
 
 fun Validator<Char>.isWhitespace() = validation {

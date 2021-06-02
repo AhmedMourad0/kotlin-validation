@@ -92,27 +92,6 @@ class CharValidationsTests {
     }
 
     @Test
-    fun isIdentifierIgnorable_meansThisCharacterIsIgnorableInUnicodeIdentifiers() {
-        validator<Char> {
-            isIdentifierIgnorable()
-        }.allMatch(
-            '\u0000',
-            '\u000E'
-        ).allFail(
-            '1',
-            '2',
-            'a',
-            'b',
-            'A',
-            'B',
-            '@',
-            '$',
-            ' ',
-            '\n'
-        )
-    }
-
-    @Test
     fun isISOControl_meansThisCharacterIsAnISOControlCharacter() {
         validator<Char> {
             isISOControl()
@@ -123,50 +102,6 @@ class CharValidationsTests {
         ).allFail(
             '1',
             'a'
-        )
-    }
-
-    @Test
-    fun isJavaIdentifierPart_meansThisCharacterMayBePartOfAJavaIdentifier() {
-        validator<Char> {
-            isJavaIdentifierPart()
-        }.allMatch(
-            'a',
-            'b',
-            'A',
-            'B',
-            '$',
-            '_',
-            '1',
-            '2'
-        ).allFail(
-            '%',
-            '^',
-            '&',
-            '(',
-            '>'
-        )
-    }
-
-    @Test
-    fun isJavaIdentifierStart_meansThisCharacterMayBeTheStartOfAJavaIdentifier() {
-        validator<Char> {
-            isJavaIdentifierStart()
-        }.allMatch(
-            '$',
-            '_',
-            'a',
-            'b',
-            'A',
-            'B'
-        ).allFail(
-            '%',
-            '^',
-            '&',
-            '(',
-            '>',
-            '1',
-            '2'
         )
     }
 
