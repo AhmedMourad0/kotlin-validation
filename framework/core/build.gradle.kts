@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm")
+    kotlin("multiplatform")
 }
 
 group = "dev.ahmedmourad.validation"
@@ -9,16 +9,32 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    implementation(kotlin("stdlib"))
-    testImplementation("junit:junit:4.12")
-}
+kotlin {
+    jvm()
+    js {
+        browser()
+        nodejs()
+    }
+    ios()
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(kotlin("stdlib-common"))
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+            }
+        }
+    }
 
-val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by project
-val compileTestKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by project
-compileKotlin.kotlinOptions {
-    freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
-}
-compileTestKotlin.kotlinOptions {
-    freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+    targets.all {
+        compilations.all {
+            kotlinOptions {
+                freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+            }
+        }
+    }
 }
