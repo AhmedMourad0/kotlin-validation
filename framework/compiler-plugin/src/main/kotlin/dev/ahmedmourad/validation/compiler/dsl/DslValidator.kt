@@ -1,8 +1,7 @@
 package dev.ahmedmourad.validation.compiler.dsl
 
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
-import dev.ahmedmourad.validation.compiler.descriptors.ParamDescriptor
-import dev.ahmedmourad.validation.compiler.descriptors.ViolationDescriptor
+import dev.ahmedmourad.validation.compiler.descriptors.MetaDescriptor
 import dev.ahmedmourad.validation.compiler.utils.fqNameConstraintFun
 import dev.ahmedmourad.validation.compiler.utils.fqNameDescribeFun
 import dev.ahmedmourad.validation.compiler.utils.OUTPUT_FOLDER
@@ -63,13 +62,13 @@ internal class DslValidator(
         return callerFqName?.asString() == allowedCaller
     }
 
-    internal fun verifyParamIsCalledDirectlyInsideConstraint(
-        paramResolvedCall: ResolvedCall<*>
+    internal fun verifyMetaIsCalledDirectlyInsideConstraint(
+        metaResolvedCall: ResolvedCall<*>
     ): KtElement? {
         return verifyParentBlockAs(
-            paramResolvedCall,
+            metaResolvedCall,
             fqNameConstraintFun,
-            "`${paramResolvedCall.candidateDescriptor.name.asString()}` can only be called directly inside a `constraint` block"
+            "`${metaResolvedCall.candidateDescriptor.name.asString()}` can only be called directly inside a `constraint` block"
         )
     }
 
@@ -99,19 +98,19 @@ internal class DslValidator(
         return constraintsDescriptor
     }
 
-    internal fun verifyNoDuplicateParams(params: Sequence<ParamDescriptor>): Sequence<ParamDescriptor> {
-        params.groupBy { it.name }.forEach { (name, entries) ->
+    internal fun verifyNoDuplicateMetas(metas: Sequence<MetaDescriptor>): Sequence<MetaDescriptor> {
+        metas.groupBy { it.name }.forEach { (name, entries) ->
             if (entries.size > 1) {
                 entries.forEach { entry ->
                     reportError(
-                        "Duplicate violation param: $name",
+                        "Duplicate violation meta: $name",
                         entry.nameExpression
                     )
                 }
 
             }
         }
-        return params.distinctBy { it.name }
+        return metas.distinctBy { it.name }
     }
 
     internal fun verifyViolationName(nameExpression: KtExpression): Pair<String, KtExpression>? {
@@ -122,11 +121,11 @@ internal class DslValidator(
         )
     }
 
-    internal fun verifyParamName(nameExpression: KtExpression): Pair<String, KtExpression>? {
+    internal fun verifyMetaName(nameExpression: KtExpression): Pair<String, KtExpression>? {
         return verifyValidIdentifier(
             nameExpression,
             "Illegal property identifier",
-            "Param name must be a String literal"
+            "Meta name must be a String literal"
         )
     }
 

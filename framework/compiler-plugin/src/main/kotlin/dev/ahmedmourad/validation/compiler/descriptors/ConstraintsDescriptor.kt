@@ -8,7 +8,6 @@ import dev.ahmedmourad.validation.compiler.utils.simpleName
 import dev.ahmedmourad.validation.compiler.dsl.DslValidator
 import org.jetbrains.kotlin.descriptors.ConstructorDescriptor
 import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
-import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.resolve.BindingContext

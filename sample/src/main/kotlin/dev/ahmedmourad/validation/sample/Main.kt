@@ -24,15 +24,15 @@ object IntConstrainer : Constrains<Int> {
 object SomeConstrainer : Constrains<Int> {
     override val constraints by describe {
         constraint("Something") {
-            param("name") { "Ahmed" }
-//            param("name1") { "Ahmed" }
-            param("country") { "Egypt" }
+            meta("name") { "Ahmed" }
+//            meta("name1") { "Ahmed" }
+            meta("country") { "Egypt" }
             include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
             include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
         }
         constraint("AnotherThing") {
-            param("name") { "Ahmed" }
-            param("country") { "Egypt" }
+            meta("name") { "Ahmed" }
+            meta("country") { "Egypt" }
             include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
             include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
         }
@@ -64,9 +64,9 @@ data class Model internal constructor(
     companion object : Constrains<Model> {
         override val constraints by describe {
             constraint(violation = "TooShort") {
-                param<Number>("min") { 7 }
-                param("max") { Rand(emptyList()) }
-                param("len") { 56.567 }
+                meta<Number>("min") { 7 }
+                meta("max") { Rand(emptyList()) }
+                meta("len") { 56.567 }
                 include("nestedViolations", Model::n) { _, _ ->
                     Nested.Companion
                 }
@@ -156,8 +156,8 @@ fun <T : List<*>> Validator<List<T>>.customValidation() = validation {
 class RandConstrainer<T : List<*>, M>(val x: String, val m: T, val c: List<T>, d: M) : Constrains<Rand<T>> {
     override val constraints by describe {
         constraint("ad") {
-//            param<M>("m") { throw RuntimeException() }
-//            param<T>("t") { throw RuntimeException() }
+//            meta<M>("m") { throw RuntimeException() }
+//            meta<T>("t") { throw RuntimeException() }
             on(Rand<T>::v) ifExists {
                 customValidation()
             }

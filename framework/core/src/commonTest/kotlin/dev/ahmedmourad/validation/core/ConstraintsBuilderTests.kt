@@ -30,24 +30,24 @@ class ConstraintsBuilderTests : Constrains<Int> {
     @Test
     fun constraint_declaresConstraintAsPartOfThisConstraintsDescriptor() {
 
-        val expectedParam = Parameter<Int, Int>("someParam") { 2 }
+        val expectedMeta = Metadata<Int, Int>("someMeta") { 2 }
 
         val expected = Constraint(
             "SomeViolation",
             emptyList(),
             emptyList(),
-            listOf(expectedParam)
+            listOf(expectedMeta)
         )
 
         val actual = ConstraintsBuilder<Int>().apply {
             constraint(expected.violation) {
-                param(expectedParam.name, expectedParam::get)
+                meta(expectedMeta.name, expectedMeta::get)
             }
         }.build().first()
 
-        val actualParam = actual.params.first()
+        val actualMeta = actual.metadata.first()
 
-        assertEquals(expectedParam.name, actualParam.name)
-        assertEquals(expectedParam.get(5), actualParam.get(5))
+        assertEquals(expectedMeta.name, actualMeta.name)
+        assertEquals(expectedMeta.get(5), actualMeta.get(5))
     }
 }

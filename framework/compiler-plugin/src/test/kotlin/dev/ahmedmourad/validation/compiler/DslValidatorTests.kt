@@ -65,18 +65,18 @@ class DslValidatorTests {
     }
 
     @Test
-    fun `param can only be called inside the constraint block`() {
+    fun `meta can only be called inside the constraint block`() {
 
         val failedResult = compile(
             kotlin("FailedTest.kt", """$PACKAGE_AND_IMPORTS
                 fun <T : Any> ConstraintBuilder<T>.something() {
-                    param("illegal") { 4 }
+                    meta("illegal") { 4 }
                 }
             """)
         )
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, failedResult.exitCode)
         assertTrue(failedResult.messages.contains(
-                "`param` can only be called directly inside a `constraint` block"
+                "`meta` can only be called directly inside a `constraint` block"
         ))
 
         val successResult = compile(
@@ -85,7 +85,7 @@ class DslValidatorTests {
                     companion object : Constrains<Model> {
                         override val constraints by describe {
                             constraint("Something") {
-                                param("legal") { 4 }
+                                meta("legal") { 4 }
                             }
                         }
                     }
@@ -193,7 +193,7 @@ class DslValidatorTests {
     }
 
     @Test
-    fun `param names inside a constraint must be unique`() {
+    fun `meta names inside a constraint must be unique`() {
 
         val failedResult = compile(
             kotlin("FailedTest.kt", """$PACKAGE_AND_IMPORTS
@@ -203,19 +203,19 @@ class DslValidatorTests {
                     override val constraints by describe {
                         constraint("Something") {
 
-                            param("name") { "Ahmed" }
-                            param("name") { "Not Ahmed" }
+                            meta("name") { "Ahmed" }
+                            meta("name") { "Not Ahmed" }
 
-                            param("aname") { "Ahmed" }
-                            param("aname") { 5 }
+                            meta("aname") { "Ahmed" }
+                            meta("aname") { 5 }
 
                             include("bname", { 22 }) { _, _ -> IntConstrainer }
                             include("bname", { 4 }) { _, _ -> IntConstrainer }
 
-                            param("cname") { "Ahmed" }
+                            meta("cname") { "Ahmed" }
                             include("cname", { 4 }) { _, _ -> IntConstrainer }
 
-                            param("dname") { "Ahmed" }
+                            meta("dname") { "Ahmed" }
                         }
                     }
                 }
@@ -224,11 +224,11 @@ class DslValidatorTests {
         )
         println("nnn"+failedResult.messages+"nnn")
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, failedResult.exitCode)
-        assertTrue(failedResult.messages.contains("Duplicate violation param: name"))
-        assertTrue(failedResult.messages.contains("Duplicate violation param: aname"))
-        assertTrue(failedResult.messages.contains("Duplicate violation param: bname"))
-        assertTrue(failedResult.messages.contains("Duplicate violation param: cname"))
-        assertFalse(failedResult.messages.contains("Duplicate violation param: dname"))
+        assertTrue(failedResult.messages.contains("Duplicate violation meta: name"))
+        assertTrue(failedResult.messages.contains("Duplicate violation meta: aname"))
+        assertTrue(failedResult.messages.contains("Duplicate violation meta: bname"))
+        assertTrue(failedResult.messages.contains("Duplicate violation meta: cname"))
+        assertFalse(failedResult.messages.contains("Duplicate violation meta: dname"))
 
         val successResult = compile(
             kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
@@ -237,14 +237,14 @@ class DslValidatorTests {
                 object SomeConstrainer : Constrains<Int> {
                     override val constraints by describe {
                         constraint("Something") {
-                            param("name") { "Ahmed" }
-                            param("country") { "Egypt" }
+                            meta("name") { "Ahmed" }
+                            meta("country") { "Egypt" }
                             include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
                             include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
                         }
                         constraint("AnotherThing") {
-                            param("name") { "Ahmed" }
-                            param("country") { "Egypt" }
+                            meta("name") { "Ahmed" }
+                            meta("country") { "Egypt" }
                             include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
                             include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
                         }
@@ -317,15 +317,15 @@ class DslValidatorTests {
     }
 
     @Test
-    fun `compilation fails for all invalid param name identifiers`() {
+    fun `compilation fails for all invalid meta name identifiers`() {
 
-        fun case(index: Int, param: String): String {
+        fun case(index: Int, meta: String): String {
             return """
                 object SomeConstrainer$index : Constrains<Int> {
                     override val constraints by describe {
                         val text = "Hello"
                         constraint("SomeConstraint") {
-                            param($param) { 4 }
+                            meta($meta) { 4 }
                         }
                     }
                 }
@@ -347,7 +347,7 @@ class DslValidatorTests {
 
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, illegalIdentifierResult.exitCode)
         assertTrue(illegalIdentifierResult.messages.contains("Illegal property identifier"))
-        assertFalse(illegalIdentifierResult.messages.contains("Param name must be a String literal"))
+        assertFalse(illegalIdentifierResult.messages.contains("Meta name must be a String literal"))
 
         val nonStringLiteralResult = compile(
             kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
@@ -355,23 +355,23 @@ class DslValidatorTests {
             """.trimIndent())
         )
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, nonStringLiteralResult.exitCode)
-        assertTrue(nonStringLiteralResult.messages.contains("Param name must be a String literal"))
+        assertTrue(nonStringLiteralResult.messages.contains("Meta name must be a String literal"))
         assertFalse(nonStringLiteralResult.messages.contains("Illegal property identifier"))
     }
 
     @Test
-    fun `compilation passes for all valid param name identifiers`() {
+    fun `compilation passes for all valid meta name identifiers`() {
         val successResult = compile(
             kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
                 object SomeConstrainer : Constrains<Int> {
                     override val constraints by describe {
                         constraint("SomeConstraint") {
-                            param("Something") { 4 }
-                            param("anotherThing") { 4 }
-                            param("OneMore" + "Thing") { 4 }
-                            param(${"\"\"\""}JustOneMoreThing${"\"\"\""}) { 4 }
-                            param("A" + 55.toString()) { 4 }
-                            param("B" + (55 + 1).toString()) { 4 }
+                            meta("Something") { 4 }
+                            meta("anotherThing") { 4 }
+                            meta("OneMore" + "Thing") { 4 }
+                            meta(${"\"\"\""}JustOneMoreThing${"\"\"\""}) { 4 }
+                            meta("A" + 55.toString()) { 4 }
+                            meta("B" + (55 + 1).toString()) { 4 }
                         }
                     }
                 }

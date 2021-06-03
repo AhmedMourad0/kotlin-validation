@@ -4,7 +4,6 @@ import dev.ahmedmourad.validation.compiler.descriptors.*
 import dev.ahmedmourad.validation.compiler.dsl.DslValidator
 import dev.ahmedmourad.validation.compiler.utils.*
 import org.jetbrains.kotlin.descriptors.ClassConstructorDescriptor
-import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.calls.callUtil.getResolvedCall
@@ -30,8 +29,8 @@ internal class ConstraintsAnalyser(
                     resolvedCall.candidateDescriptor.fqNameSafe == fqNameConstraintFun -> {
                         dslValidator.verifyConstraintIsCalledDirectlyInsideDescribe(resolvedCall)
                     }
-                    resolvedCall.candidateDescriptor.hasAnnotation(fqNameParam) -> {
-                        dslValidator.verifyParamIsCalledDirectlyInsideConstraint(resolvedCall)
+                    resolvedCall.candidateDescriptor.hasAnnotation(fqNameMeta) -> {
+                        dslValidator.verifyMetaIsCalledDirectlyInsideConstraint(resolvedCall)
                     }
                 }
             }.filter { resolvedCall ->
@@ -58,8 +57,7 @@ internal class ConstraintsAnalyser(
             dslValidator.reportError(constrainer.nameAsSafeName.asString(), null)
 
             val constraintCalls = mutableListOf<ResolvedCall<*>>()
-            val paramCalls = mutableListOf<ResolvedCall<*>>()
-
+            val metaCalls = mutableListOf<ResolvedCall<*>>()
 
             constrainer.getOrCreateBody().properties.firstOrNull {
                 it.nameAsSafeName == propertyConstraints
@@ -78,8 +76,8 @@ internal class ConstraintsAnalyser(
                         resolvedCall.candidateDescriptor.fqNameSafe == fqNameConstraintFun -> {
                             constraintCalls += resolvedCall
                         }
-                        resolvedCall.candidateDescriptor.hasAnnotation(fqNameParam) -> {
-                            paramCalls += resolvedCall
+                        resolvedCall.candidateDescriptor.hasAnnotation(fqNameMeta) -> {
+                            metaCalls += resolvedCall
                         }
                     }
                 } ?: return@mapNotNull null
@@ -88,11 +86,11 @@ internal class ConstraintsAnalyser(
 
             val violationsDescriptors = constraintCalls.mapNotNull innerMap@{ violationResolvedCall ->
                 val (name, nameExpression) = findViolationName(violationResolvedCall) ?: return@innerMap null
-                val params = findAllParams(violationResolvedCall) ?: return@innerMap null
+                val metas = findAllMetas(violationResolvedCall) ?: return@innerMap null
                 ViolationDescriptor(
                     name,
                     nameExpression,
-                    params
+                    metas
                 )
             }
 
@@ -154,9 +152,9 @@ internal class ConstraintsAnalyser(
         return dslValidator.verifyViolationName(nameExpression)
     }
 
-    private fun findAllParams(constraintResolvedCall: ResolvedCall<*>): List<ParamDescriptor>? {
+    private fun findAllMetas(constraintResolvedCall: ResolvedCall<*>): List<MetaDescriptor>? {
 
-        val params = constraintResolvedCall.call
+        val metas = constraintResolvedCall.call
             .functionLiteralArguments
             .getOrNull(0)
             ?.getLambdaExpression()
@@ -166,67 +164,67 @@ internal class ConstraintsAnalyser(
             ?.mapNotNull {
                 it.getResolvedCall(bindingContext)
             }?.filter {
-                it.candidateDescriptor.hasAnnotation(fqNameParam)
-            }?.mapNotNull(::findParam)
+                it.candidateDescriptor.hasAnnotation(fqNameMeta)
+            }?.mapNotNull(::findMeta)
             ?: return dslValidator.reportError(
-                "Unable to resolve `violation` param",
+                "Unable to resolve violation meta",
                 constraintResolvedCall.call.callElement
             )
 
-        return dslValidator.verifyNoDuplicateParams(params).toList()
+        return dslValidator.verifyNoDuplicateMetas(metas).toList()
     }
 
-    private fun findParam(statementResolvedCall: ResolvedCall<*>): ParamDescriptor? {
+    private fun findMeta(statementResolvedCall: ResolvedCall<*>): MetaDescriptor? {
 
-        val (includedConstraint, paramTypeFqName) = findParamType(
+        val (includedConstraint, metaTypeFqName) = findMetaType(
             statementResolvedCall
         ) ?: return dslValidator.reportError(
-            "Unable to find `param` type",
+            "Unable to find `meta` type",
             statementResolvedCall.call.callElement
         )
 
         val nameIndex = statementResolvedCall.candidateDescriptor
             .valueParameters
-            .firstOrNull { it.hasAnnotation(fqNameParamName) }
+            .firstOrNull { it.hasAnnotation(fqNameMetaName) }
             ?.index
             ?: return dslValidator.reportError(
-                "Unable to find `param` name",
+                "Unable to find `meta` name",
                 statementResolvedCall.call.callElement
             )
 
-        val paramNameExpression = statementResolvedCall.call
+        val metaNameExpression = statementResolvedCall.call
             .valueArguments
             .elementAtOrNull(nameIndex)
             ?.getArgumentExpression()
             ?: return dslValidator.reportError(
-                "Unable to find `param` name",
+                "Unable to find `meta` name",
                 statementResolvedCall.call.callElement
             )
 
-        return dslValidator.verifyParamName(paramNameExpression)?.let { (paramName, _) ->
-            ParamDescriptor(
-                paramName,
-                paramNameExpression,
-                paramTypeFqName,
+        return dslValidator.verifyMetaName(metaNameExpression)?.let { (metaName, _) ->
+            MetaDescriptor(
+                metaName,
+                metaNameExpression,
+                metaTypeFqName,
                 includedConstraint
             )
         }
     }
 
-    private fun findParamType(statementResolvedCall: ResolvedCall<*>): Pair<IncludedConstraintDescriptor?, String>? {
+    private fun findMetaType(statementResolvedCall: ResolvedCall<*>): Pair<IncludedConstraintDescriptor?, String>? {
 
-        val paramType = statementResolvedCall.typeArguments.entries.firstOrNull { (param, _) ->
-            param.hasAnnotation(fqNameParamType)
+        val metaType = statementResolvedCall.typeArguments.entries.firstOrNull { (meta, _) ->
+            meta.hasAnnotation(fqNameMetaType)
         } ?: return null
 
-        return if (paramType.key.hasAnnotation(fqNameInclusionType)) {
+        return if (metaType.key.hasAnnotation(fqNameInclusionType)) {
 
-            val constrainsSuperType = paramType.value
+            val constrainsSuperType = metaType.value
                 ?.supertypes()
                 ?.firstOrNull { it.fqNameSafe == fqNameConstrains }
                 ?: return null
 
-            val constrainedAlias = paramType.value
+            val constrainedAlias = metaType.value
                 ?.constructor
                 ?.declarationDescriptor
                 ?.findAnnotation(fqNameConstrainerConfig)
@@ -242,7 +240,7 @@ internal class ConstraintsAnalyser(
 
             val constrainedAliasOrSimpleName = constrainedAlias ?: constrainedType.simpleName() ?: return null
 
-            val validationsFileFqName = paramType.value.constructor
+            val validationsFileFqName = metaType.value.constructor
                 .declarationDescriptor
                 ?.ktFile()
                 ?.packageFqName
@@ -254,13 +252,13 @@ internal class ConstraintsAnalyser(
             IncludedConstraintDescriptor(
                 validationsFileFqName,
                 constrainedType,
-                paramType.value,
+                metaType.value,
                 constrainedAliasOrSimpleName
             ) to "Set<$validationsFileFqName.$constrainedAliasOrSimpleName$SUFFIX_VIOLATIONS_SUPER_CLASS>"
 
         } else {
-            //TODO: if the paramTypeArg is a type param, inherit it from the constrainer .. or its parents?
-            null to paramType.value.deepFqName()
+            //TODO: if the metaTypeArg is a type param, inherit it from the constrainer .. or its parents?
+            null to metaType.value.deepFqName()
         }
     }
 }

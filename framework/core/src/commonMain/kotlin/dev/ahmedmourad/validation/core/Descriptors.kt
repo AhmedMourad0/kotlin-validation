@@ -26,11 +26,11 @@ data class Constraint<T : Any> internal constructor(
     val violation: String,
     val includedConstraints: List<IncludedConstraints<T, *, *>>,
     val validations: List<Validation<T>>,
-    val params: List<Parameter<T, *>>
+    val metadata: List<Metadata<T, *>>
 )
 
 data class IncludedConstraints<T : Any, T1 : Any, C : Constrains<T1>>(
-    val param: String,
+    val meta: String,
     private val constrained: (T) -> T1?,
     private val constrainer: (T, T1) -> C
 ) {
@@ -62,7 +62,7 @@ data class IncludedConstraints<T : Any, T1 : Any, C : Constrains<T1>>(
     }
 }
 
-data class Parameter<T : Any, P> internal constructor(
+data class Metadata<T : Any, P> internal constructor(
     val name: String,
     private val get: (T) -> P
 ) {

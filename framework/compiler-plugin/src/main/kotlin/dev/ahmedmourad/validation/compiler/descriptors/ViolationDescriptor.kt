@@ -5,8 +5,8 @@ import org.jetbrains.kotlin.psi.KtExpression
 internal data class ViolationDescriptor(
     val name: String,
     val nameExpression: KtExpression,
-    val params: List<ParamDescriptor>
+    val metas: List<MetaDescriptor>
 ) {
-    val regularParams by lazy { params.filter { it.includedConstraint == null } }
-    val inclusionParams by lazy { params.filter { it.includedConstraint != null } }
+    val regularMetas by lazy { metas.filter { it.includedConstraint == null } }
+    val inclusionMetas by lazy { metas.filter { it.includedConstraint != null } }
 }

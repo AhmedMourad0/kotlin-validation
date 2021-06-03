@@ -41,13 +41,13 @@ class ViolationsGeneratorTests {
     }
 
     @Test
-    fun `An object is created when there are no params and a class is created when there are params`() {
+    fun `An object is created when there are no metas and a class is created when there are metas`() {
         val successResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
             object SomeConstrainer : Constrains<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") {
-                        param("v") { 4 }
+                        meta("v") { 4 }
                      }
                     constraint("SecondViolation") { }
                 }
@@ -99,15 +99,15 @@ class ViolationsGeneratorTests {
     }
 
     @Test
-    fun `param adds a property to the violation of the corresponding constraint`() {
+    fun `meta adds a property to the violation of the corresponding constraint`() {
         val successResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
             object SomeConstrainer : Constrains<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") {
-                        param("value") { 5 }
-                        param("another") { 4 to "Hi" }
-                        param("another1") { emptyList<String>() }
+                        meta("value") { 5 }
+                        meta("another") { 4 to "Hi" }
+                        meta("another1") { emptyList<String>() }
                      }
                 }
             }
@@ -115,7 +115,7 @@ class ViolationsGeneratorTests {
             object AnotherConstrainer : Constrains<String> {
                 override val constraints by describe {
                     constraint("SecondViolation") {
-                        param("value") { 5 }
+                        meta("value") { 5 }
                      }
                 }
             }
@@ -164,7 +164,7 @@ class ViolationsGeneratorTests {
             object AnotherConstrainer : Constrains<String> {
                 override val constraints by describe {
                     constraint("SecondViolation") {
-                        param("value") { 5 }
+                        meta("value") { 5 }
                         include("value1", { 4 }) { _, _ ->
                             IntConstrainer
                         }

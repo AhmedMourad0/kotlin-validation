@@ -28,25 +28,25 @@ class ConstraintBuilderTests {
     }
 
     @Test
-    fun param_addsParameterToThisConstraint() {
+    fun meta_addsMetadataToThisConstraint() {
 
-        val expectedParam = Parameter<Int, Int>("someParam") { 4 }
+        val expectedMeta = Metadata<Int, Int>("someMeta") { 4 }
 
         val expected = Constraint(
             "SomeConstraint",
             emptyList(),
             emptyList(),
-            listOf(expectedParam)
+            listOf(expectedMeta)
         )
 
         val actual = ConstraintBuilder<Int>(expected.violation).apply {
-            param(expectedParam.name, expectedParam::get)
+            meta(expectedMeta.name, expectedMeta::get)
         }.build()
 
-        val actualParam = actual.params.first()
+        val actualMeta = actual.metadata.first()
 
-        assertEquals(expectedParam.name, actualParam.name)
-        assertEquals(expectedParam.get(5), actualParam.get(5))
+        assertEquals(expectedMeta.name, actualMeta.name)
+        assertEquals(expectedMeta.get(5), actualMeta.get(5))
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -62,7 +62,7 @@ class ConstraintBuilderTests {
         }
 
         val expectedIncludedConstraint = IncludedConstraints<Model, Int, Constrains<Int>>(
-            "someParam",
+            "someMeta",
             Model::n
         ) { _, _ -> intConstrainer }
 
@@ -75,7 +75,7 @@ class ConstraintBuilderTests {
 
         val actual = ConstraintBuilder<Model>(expected.violation).apply {
             include(
-                expectedIncludedConstraint.param,
+                expectedIncludedConstraint.meta,
                 expectedIncludedConstraint::getConstrained,
                 expectedIncludedConstraint::getConstrainer
             )
@@ -83,7 +83,7 @@ class ConstraintBuilderTests {
 
         val actualIncludedConstraint = actual.includedConstraints.first() as IncludedConstraints<Model, Int, Constrains<Int>>
 
-        assertEquals(expectedIncludedConstraint.param, actualIncludedConstraint.param)
+        assertEquals(expectedIncludedConstraint.meta, actualIncludedConstraint.meta)
         assertEquals(
             expectedIncludedConstraint.getConstrained(Model(5)),
             actualIncludedConstraint.getConstrained(Model(5))
@@ -107,7 +107,7 @@ class ConstraintBuilderTests {
         }
 
         val expectedIncludedConstraint = IncludedConstraints<Int, Int, Constrains<Int>>(
-            "someParam",
+            "someMeta",
             { 5 },
             { _, _ -> intConstrainer }
         )
@@ -121,7 +121,7 @@ class ConstraintBuilderTests {
 
         val actual = ConstraintBuilder<Int>(expected.violation).apply {
             include(
-                expectedIncludedConstraint.param,
+                expectedIncludedConstraint.meta,
                 expectedIncludedConstraint::getConstrained,
                 expectedIncludedConstraint::getConstrainer
             )
@@ -129,7 +129,7 @@ class ConstraintBuilderTests {
 
         val actualIncludedConstraint = actual.includedConstraints.first() as IncludedConstraints<Int, Int, Constrains<Int>>
 
-        assertEquals(expectedIncludedConstraint.param, actualIncludedConstraint.param)
+        assertEquals(expectedIncludedConstraint.meta, actualIncludedConstraint.meta)
         assertEquals(
             expectedIncludedConstraint.getConstrained(5),
             actualIncludedConstraint.getConstrained(5)
@@ -151,7 +151,7 @@ class ConstraintBuilderTests {
 
         val constraint = ConstraintBuilder<Int>("SomeConstraint").apply {
             include(
-                "someParam",
+                "someMeta",
                 model::n,
                 { _, _ -> intConstrainer }
             )

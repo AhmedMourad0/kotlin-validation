@@ -23,7 +23,7 @@ internal class ValidationContextGenerator : CodeSectionGenerator {
     ): String {
 
         val supertypes = constraintsDescriptor.violations.flatMap {
-            it.params
+            it.metas
         }.mapNotNull {
             it.includedConstraint
         }.map { includedConstraint ->

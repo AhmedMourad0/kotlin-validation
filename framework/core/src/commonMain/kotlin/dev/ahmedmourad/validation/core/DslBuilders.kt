@@ -11,15 +11,15 @@ private annotation class ValidationDslMarker
 
 @Target(FUNCTION)
 @Retention(BINARY)
-private annotation class Param
+private annotation class Meta
 
 @Target(VALUE_PARAMETER, TYPE)
 @Retention(BINARY)
-private annotation class ParamName
+private annotation class MetaName
 
 @Target(TYPE_PARAMETER)
 @Retention(BINARY)
-private annotation class ParamType
+private annotation class MetaType
 
 @Target(TYPE_PARAMETER)
 @Retention(BINARY)
@@ -71,34 +71,34 @@ class ConstraintBuilder<T : Any> internal constructor(
 
     private val includedConstraints: MutableList<IncludedConstraints<T, *, *>> = mutableListOf()
     private val validations: MutableList<Validation<T>> = mutableListOf()
-    private val params: MutableList<Parameter<T, *>> = mutableListOf()
+    private val metadata: MutableList<Metadata<T, *>> = mutableListOf()
 
     override fun validation(validate: (T) -> Boolean) {
         validations.add(Validation(validate))
     }
 
-    @Param
-    fun <@ParamType P> param(@ParamName name: String, get: (T) -> P) {
-        params.add(Parameter(name, get))
+    @Meta
+    fun <@MetaType P> meta(@MetaName name: String, get: (T) -> P) {
+        metadata.add(Metadata(name, get))
     }
 
     //TODO: combine both parameters of constrainer into a single object
-    @Param
-    fun <T1 : Any, @InclusionType @ParamType C : Constrains<T1>> include(
-        @ParamName param: String,
+    @Meta
+    fun <T1 : Any, @InclusionType @MetaType C : Constrains<T1>> include(
+        @MetaName meta: String,
         property: (T) -> T1?,
         constrainer: (T, T1) -> C
     ) {
-        includedConstraints.add(IncludedConstraints(param, property, constrainer))
+        includedConstraints.add(IncludedConstraints(meta, property, constrainer))
     }
 
-    @Param
-    fun <T1 : Any, @InclusionType @ParamType C : Constrains<T1>> include(
-        @ParamName param: String,
+    @Meta
+    fun <T1 : Any, @InclusionType @MetaType C : Constrains<T1>> include(
+        @MetaName meta: String,
         property: KProperty0<T1?>,
         constrainer: (T, T1) -> C
     ) {
-        include(param, { property.get() }, constrainer)
+        include(meta, { property.get() }, constrainer)
     }
 
     override fun <DT> on(
@@ -149,7 +149,7 @@ class ConstraintBuilder<T : Any> internal constructor(
         violation,
         includedConstraints,
         validations,
-        params
+        metadata
     )
 }
 

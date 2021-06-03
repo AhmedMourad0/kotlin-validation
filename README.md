@@ -10,7 +10,7 @@ Check the samples for current syntax.
 - Support for adding properties to different violations
 - Support for Generics
 - Support providing extra parameters / type parameters to use during validation
-- Support validating the extra parameters
+- Support validating the extra metadata to violations
 - Third-party classes constrainers
 - Multiple constrainers per class
 - Constrainers composition

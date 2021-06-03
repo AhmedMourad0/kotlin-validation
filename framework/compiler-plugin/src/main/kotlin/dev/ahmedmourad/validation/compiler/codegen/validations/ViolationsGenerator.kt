@@ -30,13 +30,13 @@ internal class ViolationsGenerator : CodeSectionGenerator {
         parentName: String,
         violation: ViolationDescriptor
     ): String {
-        return if (violation.params.isEmpty()) {
+        return if (violation.metas.isEmpty()) {
             "object ${violation.name} : $parentName()"
         } else {
-            val params = violation.params.joinToString(",\n\t") { param ->
-                "val ${param.name}: ${param.typeFqName}"
+            val metas = violation.metas.joinToString(",\n\t") { meta ->
+                "val ${meta.name}: ${meta.typeFqName}"
             }
-            "data class ${violation.name}(\n\t$params\n) : $parentName()"
+            "data class ${violation.name}(\n\t$metas\n) : $parentName()"
         }
     }
 }

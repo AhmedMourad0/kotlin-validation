@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.compiler.codegen.validations
 
 import dev.ahmedmourad.validation.compiler.codegen.CodeSectionGenerator
 import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
-import dev.ahmedmourad.validation.compiler.descriptors.ParamDescriptor
+import dev.ahmedmourad.validation.compiler.descriptors.MetaDescriptor
 import dev.ahmedmourad.validation.compiler.utils.*
 import dev.ahmedmourad.validation.compiler.utils.fqNameCase
 import dev.ahmedmourad.validation.compiler.utils.fqNameConstraint
@@ -26,8 +26,8 @@ internal class FunctionsGenerator : CodeSectionGenerator {
         fqNameIncludedConstraints.asString(),
         fqNameInternalValidationApi.asString()
     ) + constraintsDescriptor.violations.flatMap { violation ->
-        violation.params.flatMap { param ->
-            param.includedConstraint
+        violation.metas.flatMap { meta ->
+            meta.includedConstraint
                 ?.let { listOf(it.isValidFqName, it.validateFqName) }
                 .orEmpty()
         }
@@ -176,11 +176,11 @@ internal class FunctionsGenerator : CodeSectionGenerator {
 
         val violationCases = constraintsDescriptor.violations.map { violation ->
 
-            val instantiation = if (violation.inclusionParams.isEmpty()) {
+            val instantiation = if (violation.inclusionMetas.isEmpty()) {
                 "true"
             } else {
 
-                val inclusionParamsVals = violation.inclusionParams.mapIndexed { index, param ->
+                val inclusionParamsVals = violation.inclusionMetas.mapIndexed { index, param ->
 
                     val includedConstrainedFqName = param.includedConstraint!!.constrainedFqName
                     val includedConstrainerFqName = param.includedConstraint.constrainerFqName
@@ -201,7 +201,7 @@ internal class FunctionsGenerator : CodeSectionGenerator {
                 |
                 |$inclusionParamsVals
                 |
-                |${violation.inclusionParams.joinToString(" && ") { it.name }}
+                |${violation.inclusionMetas.joinToString(" && ") { it.name }}
                 """.trimMargin()
             }
 
@@ -232,7 +232,9 @@ internal class FunctionsGenerator : CodeSectionGenerator {
         """.trimMargin()
     }
 
-    private fun generateToViolation(constraintsDescriptor: ConstraintsDescriptor): String {
+    private fun generateToViolation(
+        constraintsDescriptor: ConstraintsDescriptor
+    ): String {
 
         val constrainedFqName = constraintsDescriptor.constrainedFqName
 
@@ -242,43 +244,43 @@ internal class FunctionsGenerator : CodeSectionGenerator {
 
         val violationCases = constraintsDescriptor.violations.map { violation ->
 
-            val instantiation = if (violation.params.isEmpty()) {
+            val instantiation = if (violation.metas.isEmpty()) {
                 "$violationsParent.${violation.name}"
             } else {
 
-                val regularParams = violation.regularParams.mapIndexed { index, param ->
-                    "${param.name} = this.params[$index].get(item.value) as ${param.typeFqName}"
+                val regularArgs = violation.regularMetas.mapIndexed { index, arg ->
+                    "${arg.name} = this.metadata[$index].get(item.value) as ${arg.typeFqName}"
                 }
 
-                val inclusionParamsList = violation.inclusionParams
-                    .takeIf(List<ParamDescriptor>::isNotEmpty)
+                val inclusionArgsList = violation.inclusionMetas
+                    .takeIf(List<MetaDescriptor>::isNotEmpty)
 
-                val inclusionParamsVals = inclusionParamsList?.mapIndexed { index, param ->
+                val inclusionArgsVals = inclusionArgsList?.mapIndexed { index, arg ->
 
-                    val includedConstrainedFqName = param.includedConstraint!!.constrainedFqName
-                    val includedConstrainerFqName = param.includedConstraint.constrainerFqName
+                    val includedConstrainedFqName = arg.includedConstraint!!.constrainedFqName
+                    val includedConstrainerFqName = arg.includedConstraint.constrainerFqName
 
                     val includedConstraintTypeArgs =
                         "<$constrainedFqName, $includedConstrainedFqName, $includedConstrainerFqName>"
 
-                    val valName = "${param.name}Descriptor"
+                    val valName = "${arg.name}Descriptor"
 
                     """
                     |val $valName = this.includedConstraints[$index] as ${fqNameIncludedConstraints.asString()}$includedConstraintTypeArgs
-                    |val ${param.name} = $valName.findViolations(item.value) {
+                    |val ${arg.name} = $valName.findViolations(item.value) {
                     |    this.validate { it }
                     |}
                     """.trimMargin()
                 }?.joinToString(separator = "\n\n", prefix = "\n", postfix = "\n").orEmpty()
 
-                val inclusionParams = inclusionParamsList?.map { param ->
-                    "${param.name} = ${param.name}"
+                val inclusionArgs = inclusionArgsList?.map { arg ->
+                    "${arg.name} = ${arg.name}"
                 }.orEmpty()
 
                 """
-                |$inclusionParamsVals
+                |$inclusionArgsVals
                 |$violationsParent.${violation.name}(
-                |    ${(regularParams + inclusionParams).joinToString(",\n\t")}
+                |    ${(regularArgs + inclusionArgs).joinToString(",\n\t")}
                 |)
                 """.trimMargin()
             }
