@@ -16,7 +16,7 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     implementation("dev.ahmedmourad.validation:validation-core")
-    implementation("dev.ahmedmourad.validation:validation-constrainers")
+    implementation("dev.ahmedmourad.validation:validation-validators")
     kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-script-util:1.5.0") {
         exclude("org.jetbrains.kotlin", "kotlin-stdlib")
         exclude("org.jetbrains.kotlin", "kotlin-compiler")

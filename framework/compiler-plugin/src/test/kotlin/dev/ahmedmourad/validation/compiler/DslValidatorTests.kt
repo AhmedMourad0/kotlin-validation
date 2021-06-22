@@ -23,7 +23,7 @@ class DslValidatorTests {
             @MustBeValid
             class Model internal constructor(val n: Int) {
                 internal constructor() : this(5)
-                companion object : Constrains<Model> {
+                companion object : Validator<Model> {
                     override val constraints by describe {
                         constraint("TooLow") {
                             on(Model::n) {
@@ -82,7 +82,7 @@ class DslValidatorTests {
         val successResult = compile(
             kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
                 class Model(val n: Int) {
-                    companion object : Constrains<Model> {
+                    companion object : Validator<Model> {
                         override val constraints by describe {
                             constraint("Something") {
                                 meta("legal") { 4 }
@@ -100,10 +100,10 @@ class DslValidatorTests {
 
         val failedResult = compile(
             kotlin("FailedTest.kt", """$PACKAGE_AND_IMPORTS
-                $MINIMAL_INT_CONSTRAINER
+                $MINIMAL_INT_VALIDATOR
                 data class Model(val n: Int)
                 fun ConstraintBuilder<Model>.something() {
-                    include("legalInclude", Model::n) { _, _ -> IntConstrainer }
+                    include("legalInclude", Model::n) { _, _ -> IntValidator }
                 }
             """)
         )
@@ -114,12 +114,12 @@ class DslValidatorTests {
 
         val successResult = compile(
             kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
-                $MINIMAL_INT_CONSTRAINER
+                $MINIMAL_INT_VALIDATOR
                 class Model(val n: Int) {
-                    companion object : Constrains<Model> {
+                    companion object : Validator<Model> {
                         override val constraints by describe {
                             constraint("TooLow") {
-                                include("legal", Model::n) { _, _ -> IntConstrainer }
+                                include("legal", Model::n) { _, _ -> IntValidator }
                             }
                         }
                     }
@@ -146,7 +146,7 @@ class DslValidatorTests {
 
         val successResult = compile(
             kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
-                object SomeConstrainer : Constrains<Int> {
+                object SomeValidator : Validator<Int> {
                     override val constraints by describe {
                         constraint("Something") { }
                     }
@@ -157,11 +157,11 @@ class DslValidatorTests {
     }
 
     @Test
-    fun `violation names inside a constrainer must be unique`() {
+    fun `violation names inside a validator must be unique`() {
 
         val failedResult = compile(
             kotlin("FailedTest.kt", """$PACKAGE_AND_IMPORTS
-                object SomeConstrainer : Constrains<Int> {
+                object SomeValidator : Validator<Int> {
                     override val constraints by describe {
                         constraint("Something") { }
                         constraint("Something") { }
@@ -174,14 +174,14 @@ class DslValidatorTests {
 
         val successResult = compile(
             kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
-                @ConstrainerConfig(constrainedAlias = "SomeInt")
-                object SomeConstrainer : Constrains<Int> {
+                @ValidatorConfig(subjectAlias = "SomeInt")
+                object SomeValidator : Validator<Int> {
                     override val constraints by describe {
                         constraint("Something") { }
                     }
                 }
-                @ConstrainerConfig(constrainedAlias = "AnotherInt")
-                object AnotherConstrainer : Constrains<Int> {
+                @ValidatorConfig(subjectAlias = "AnotherInt")
+                object AnotherValidator : Validator<Int> {
                     override val constraints by describe {
                         constraint("Something") { }
                     }
@@ -197,9 +197,9 @@ class DslValidatorTests {
 
         val failedResult = compile(
             kotlin("FailedTest.kt", """$PACKAGE_AND_IMPORTS
-                $MINIMAL_INT_CONSTRAINER
-                @ConstrainerConfig(constrainedAlias = "SomeInt")
-                class SomeConstrainer : Constrains<Int> {
+                $MINIMAL_INT_VALIDATOR
+                @ValidatorConfig(subjectAlias = "SomeInt")
+                class SomeValidator : Validator<Int> {
                     override val constraints by describe {
                         constraint("Something") {
 
@@ -209,11 +209,11 @@ class DslValidatorTests {
                             meta("aname") { "Ahmed" }
                             meta("aname") { 5 }
 
-                            include("bname", { 22 }) { _, _ -> IntConstrainer }
-                            include("bname", { 4 }) { _, _ -> IntConstrainer }
+                            include("bname", { 22 }) { _, _ -> IntValidator }
+                            include("bname", { 4 }) { _, _ -> IntValidator }
 
                             meta("cname") { "Ahmed" }
-                            include("cname", { 4 }) { _, _ -> IntConstrainer }
+                            include("cname", { 4 }) { _, _ -> IntValidator }
 
                             meta("dname") { "Ahmed" }
                         }
@@ -232,21 +232,21 @@ class DslValidatorTests {
 
         val successResult = compile(
             kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
-                $MINIMAL_INT_CONSTRAINER
-                @ConstrainerConfig(constrainedAlias = "SomeInt")
-                object SomeConstrainer : Constrains<Int> {
+                $MINIMAL_INT_VALIDATOR
+                @ValidatorConfig(subjectAlias = "SomeInt")
+                object SomeValidator : Validator<Int> {
                     override val constraints by describe {
                         constraint("Something") {
                             meta("name") { "Ahmed" }
                             meta("country") { "Egypt" }
-                            include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
-                            include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
+                            include("ageViolations", { 22 }) { _, _ -> IntValidator }
+                            include("heightViolations", { 185 }) { _, _ -> IntValidator }
                         }
                         constraint("AnotherThing") {
                             meta("name") { "Ahmed" }
                             meta("country") { "Egypt" }
-                            include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
-                            include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
+                            include("ageViolations", { 22 }) { _, _ -> IntValidator }
+                            include("heightViolations", { 185 }) { _, _ -> IntValidator }
                         }
                     }
                 }
@@ -261,7 +261,7 @@ class DslValidatorTests {
 
         fun case(index: Int, violation: String): String {
             return """
-                object SomeConstrainer$index : Constrains<Int> {
+                object SomeValidator$index : Validator<Int> {
                     override val constraints by describe {
                         val text = "Hello"
                         constraint($violation) { }
@@ -301,7 +301,7 @@ class DslValidatorTests {
     fun `compilation passes for all valid violation name identifiers`() {
         val successResult = compile(
             kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
-                object SomeConstrainer : Constrains<Int> {
+                object SomeValidator : Validator<Int> {
                     override val constraints by describe {
                         constraint("Something") { }
                         constraint("anotherThing") { }
@@ -321,7 +321,7 @@ class DslValidatorTests {
 
         fun case(index: Int, meta: String): String {
             return """
-                object SomeConstrainer$index : Constrains<Int> {
+                object SomeValidator$index : Validator<Int> {
                     override val constraints by describe {
                         val text = "Hello"
                         constraint("SomeConstraint") {
@@ -363,7 +363,7 @@ class DslValidatorTests {
     fun `compilation passes for all valid meta name identifiers`() {
         val successResult = compile(
             kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
-                object SomeConstrainer : Constrains<Int> {
+                object SomeValidator : Validator<Int> {
                     override val constraints by describe {
                         constraint("SomeConstraint") {
                             meta("Something") { 4 }
@@ -381,12 +381,12 @@ class DslValidatorTests {
     }
 
     @Test
-    fun `compilation fails for all invalid constrained alias identifiers`() {
+    fun `compilation fails for all invalid subject alias identifiers`() {
 
         fun case(index: Int, alias: String): String {
             return """
-                @ConstrainerConfig(constrainedAlias = $alias)
-                object SomeConstrainer$index : Constrains<Int> {
+                @ValidatorConfig(subjectAlias = $alias)
+                object SomeValidator$index : Validator<Int> {
                     override val constraints by describe {
                         constraint("SomeConstraint") { }
                     }
@@ -411,12 +411,12 @@ class DslValidatorTests {
     }
 
     @Test
-    fun `compilation passes for all valid constrained alias identifiers`() {
+    fun `compilation passes for all valid subject alias identifiers`() {
         
         fun case(index: Int, alias: String): String {
             return """
-                @ConstrainerConfig(constrainedAlias = $alias)
-                object SomeConstrainer$index : Constrains<Int> {
+                @ValidatorConfig(subjectAlias = $alias)
+                object SomeValidator$index : Validator<Int> {
                     override val constraints by describe {
                         constraint("SomeConstraint") { }
                     }

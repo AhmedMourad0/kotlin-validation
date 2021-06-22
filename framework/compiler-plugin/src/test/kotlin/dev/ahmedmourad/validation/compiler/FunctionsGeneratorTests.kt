@@ -14,10 +14,10 @@ class FunctionsGeneratorTests {
     var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
     @Test
-    fun `A ValidationContext interface is generated for each constrainer`() {
+    fun `A ValidationContext interface is generated for each validator`() {
         val successResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
-            object SomeConstrainer : Constrains<Int> {
+            object SomeValidator : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") { }
                 }

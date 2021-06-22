@@ -3,22 +3,22 @@ package dev.ahmedmourad.validation.core
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ConstraintsBuilderTests : Constrains<Int> {
+class ConstraintsBuilderTests : Validator<Int> {
 
     override val constraints get() = TODO()
 
     @Test
     fun describe_createsConstraintsDescriptorWithTheDeclaredConstraints() {
 
-        assertEquals(ConstraintsDescriptor<Int>(emptyList()), describe { }.value)
+        assertEquals(ValidatorDescriptor<Int>(emptyList()), describe { }.value)
 
-        val expectedConstraint =  Constraint<Int>(
+        val expectedConstraint =  ConstraintDescriptor<Int>(
             "SomeViolation",
             emptyList(),
             emptyList(),
             emptyList()
         )
-        val expected = ConstraintsDescriptor(listOf(expectedConstraint))
+        val expected = ValidatorDescriptor(listOf(expectedConstraint))
 
         val actual = describe {
             constraint(expectedConstraint.violation) { }
@@ -30,9 +30,9 @@ class ConstraintsBuilderTests : Constrains<Int> {
     @Test
     fun constraint_declaresConstraintAsPartOfThisConstraintsDescriptor() {
 
-        val expectedMeta = Metadata<Int, Int>("someMeta") { 2 }
+        val expectedMeta = MetadataDescriptor<Int, Int>("someMeta") { 2 }
 
-        val expected = Constraint(
+        val expected = ConstraintDescriptor(
             "SomeViolation",
             emptyList(),
             emptyList(),

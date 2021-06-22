@@ -12,10 +12,10 @@ class ConstraintBuilderTests {
     @Test
     fun validation_addsDirectValidationToThisConstraint() {
 
-        val expected = Constraint<Boolean>(
+        val expected = ConstraintDescriptor<Boolean>(
             "SomeConstraint",
             emptyList(),
-            listOf(Validation { it }),
+            listOf(ValidationDescriptor { it }),
             emptyList()
         )
 
@@ -30,9 +30,9 @@ class ConstraintBuilderTests {
     @Test
     fun meta_addsMetadataToThisConstraint() {
 
-        val expectedMeta = Metadata<Int, Int>("someMeta") { 4 }
+        val expectedMeta = MetadataDescriptor<Int, Int>("someMeta") { 4 }
 
-        val expected = Constraint(
+        val expected = ConstraintDescriptor(
             "SomeConstraint",
             emptyList(),
             emptyList(),
@@ -51,9 +51,9 @@ class ConstraintBuilderTests {
 
     @Suppress("UNCHECKED_CAST")
     @Test
-    fun include_addsIncludedConstraintToThisConstraint() {
+    fun include_addsIncludedValidatorToThisConstraint() {
 
-        val intConstrainer = object : Constrains<Int> {
+        val intValidator = object : Validator<Int> {
             override val constraints by describe {
                 constraint("TooHigh") {
                     max(5)
@@ -61,44 +61,44 @@ class ConstraintBuilderTests {
             }
         }
 
-        val expectedIncludedConstraint = IncludedConstraints<Model, Int, Constrains<Int>>(
+        val expectedIncludedValidator = IncludedValidatorDescriptor<Model, Int, Validator<Int>>(
             "someMeta",
             Model::n
-        ) { _, _ -> intConstrainer }
+        ) { _, _ -> intValidator }
 
-        val expected = Constraint(
+        val expected = ConstraintDescriptor(
             "SomeConstraint",
-            listOf(expectedIncludedConstraint),
+            listOf(expectedIncludedValidator),
             emptyList(),
             emptyList()
         )
 
         val actual = ConstraintBuilder<Model>(expected.violation).apply {
             include(
-                expectedIncludedConstraint.meta,
-                expectedIncludedConstraint::getConstrained,
-                expectedIncludedConstraint::getConstrainer
+                expectedIncludedValidator.meta,
+                expectedIncludedValidator::getSubject,
+                expectedIncludedValidator::getValidator
             )
         }.build()
 
-        val actualIncludedConstraint = actual.includedConstraints.first() as IncludedConstraints<Model, Int, Constrains<Int>>
+        val actualIncludedValidator = actual.includedValidator.first() as IncludedValidatorDescriptor<Model, Int, Validator<Int>>
 
-        assertEquals(expectedIncludedConstraint.meta, actualIncludedConstraint.meta)
+        assertEquals(expectedIncludedValidator.meta, actualIncludedValidator.meta)
         assertEquals(
-            expectedIncludedConstraint.getConstrained(Model(5)),
-            actualIncludedConstraint.getConstrained(Model(5))
+            expectedIncludedValidator.getSubject(Model(5)),
+            actualIncludedValidator.getSubject(Model(5))
         )
         assertEquals(
-            expectedIncludedConstraint.getConstrainer(Model(5), 5),
-            actualIncludedConstraint.getConstrainer(Model(5), 5)
+            expectedIncludedValidator.getValidator(Model(5), 5),
+            actualIncludedValidator.getValidator(Model(5), 5)
         )
     }
 
     @Suppress("UNCHECKED_CAST")
     @Test
-    fun include1_addsIncludedConstraintToThisConstraint() {
+    fun include1_addsIncludedValidatorToThisConstraint() {
 
-        val intConstrainer = object : Constrains<Int> {
+        val intValidator = object : Validator<Int> {
             override val constraints by describe {
                 constraint("TooHigh") {
                     max(5)
@@ -106,44 +106,44 @@ class ConstraintBuilderTests {
             }
         }
 
-        val expectedIncludedConstraint = IncludedConstraints<Int, Int, Constrains<Int>>(
+        val expectedIncludedValidator = IncludedValidatorDescriptor<Int, Int, Validator<Int>>(
             "someMeta",
             { 5 },
-            { _, _ -> intConstrainer }
+            { _, _ -> intValidator }
         )
 
-        val expected = Constraint(
+        val expected = ConstraintDescriptor(
             "SomeConstraint",
-            listOf(expectedIncludedConstraint),
+            listOf(expectedIncludedValidator),
             emptyList(),
             emptyList()
         )
 
         val actual = ConstraintBuilder<Int>(expected.violation).apply {
             include(
-                expectedIncludedConstraint.meta,
-                expectedIncludedConstraint::getConstrained,
-                expectedIncludedConstraint::getConstrainer
+                expectedIncludedValidator.meta,
+                expectedIncludedValidator::getSubject,
+                expectedIncludedValidator::getValidator
             )
         }.build()
 
-        val actualIncludedConstraint = actual.includedConstraints.first() as IncludedConstraints<Int, Int, Constrains<Int>>
+        val actualIncludedValidator = actual.includedValidator.first() as IncludedValidatorDescriptor<Int, Int, Validator<Int>>
 
-        assertEquals(expectedIncludedConstraint.meta, actualIncludedConstraint.meta)
+        assertEquals(expectedIncludedValidator.meta, actualIncludedValidator.meta)
         assertEquals(
-            expectedIncludedConstraint.getConstrained(5),
-            actualIncludedConstraint.getConstrained(5)
+            expectedIncludedValidator.getSubject(5),
+            actualIncludedValidator.getSubject(5)
         )
         assertEquals(
-            expectedIncludedConstraint.getConstrainer(5, 5),
-            actualIncludedConstraint.getConstrainer(5, 5)
+            expectedIncludedValidator.getValidator(5, 5),
+            actualIncludedValidator.getValidator(5, 5)
         )
     }
 
     @Test
-    fun include2_addsIncludedConstraintToThisConstraint() {
+    fun include2_addsIncludedValidatorToThisConstraint() {
 
-        val intConstrainer = object : Constrains<Int> {
+        val intValidator = object : Validator<Int> {
             override val constraints by describe { }
         }
 
@@ -153,16 +153,16 @@ class ConstraintBuilderTests {
             include(
                 "someMeta",
                 model::n,
-                { _, _ -> intConstrainer }
+                { _, _ -> intValidator }
             )
         }.build()
 
-        assertTrue(constraint.includedConstraints.all { ic -> ic.isValid(7) { (it as Int) < 6 } })
-        assertFalse(constraint.includedConstraints.all { ic -> ic.isValid(7) { (it as Int) > 6 } })
+        assertTrue(constraint.includedValidator.all { ic -> ic.isValid(7) { (it as Int) < 6 } })
+        assertFalse(constraint.includedValidator.all { ic -> ic.isValid(7) { (it as Int) > 6 } })
     }
 
     @Test
-    fun on_changesTheValidatorScopeFromTheConstrainedTypeToTheGivenItem() {
+    fun on_changesTheConstraintScopeFromTheSubjectTypeToTheGivenItem() {
 
         val constraint = ConstraintBuilder<String>("SomeConstraint").apply {
             on(String::length) {
@@ -175,7 +175,7 @@ class ConstraintBuilderTests {
     }
 
     @Test
-    fun on1_changesTheValidatorScopeFromTheConstrainedTypeToTheGivenItem() {
+    fun on1_changesTheConstraintScopeFromTheSubjectTypeToTheGivenItem() {
 
         val constraint = ConstraintBuilder<String>("SomeConstraint").apply {
             on({ it.length }) {
@@ -188,7 +188,7 @@ class ConstraintBuilderTests {
     }
 
     @Test
-    fun on2_changesTheValidatorScopeFromTheConstrainedTypeToTheGivenItem() {
+    fun on2_changesTheConstraintScopeFromTheSubjectTypeToTheGivenItem() {
 
         val constraint = ConstraintBuilder<String>("SomeConstraint").apply {
             on("123"::length) {

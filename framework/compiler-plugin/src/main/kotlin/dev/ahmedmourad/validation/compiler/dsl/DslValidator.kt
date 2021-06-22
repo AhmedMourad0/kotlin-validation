@@ -1,6 +1,6 @@
 package dev.ahmedmourad.validation.compiler.dsl
 
-import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
+import dev.ahmedmourad.validation.compiler.descriptors.ValidatorDescriptor
 import dev.ahmedmourad.validation.compiler.descriptors.MetaDescriptor
 import dev.ahmedmourad.validation.compiler.utils.fqNameConstraintFun
 import dev.ahmedmourad.validation.compiler.utils.fqNameDescribeFun
@@ -23,14 +23,14 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
-//TODO: validate constrainer is not an inner class or anything that can use the type params of something else
+//TODO: validate validator is not an inner class or anything that can use the type params of something else
 internal class DslValidator(
     private val bindingContext: BindingContext,
     private val messageCollector: MessageCollector
 ) {
 
     internal fun isConstructorCallIsAllowed(
-        constraintsDescriptor: ConstraintsDescriptor,
+        validatorDescriptor: ValidatorDescriptor,
         constructorResolvedCall: ResolvedCall<*>
     ): Boolean {
 
@@ -50,14 +50,14 @@ internal class DslValidator(
             ?.safeAs<KtFunction>()
             ?.fqName
 
-        val constrainedClass = constraintsDescriptor.constrainedClass
+        val subjectClass = validatorDescriptor.subjectClass
 
-        if (secondaryConstructorOwnerFqName == constrainedClass?.fqNameOrNull()) {
+        if (secondaryConstructorOwnerFqName == subjectClass?.fqNameOrNull()) {
             return true
         }
 
         val allowedCaller =
-            "${constraintsDescriptor.packageName}.$OUTPUT_FOLDER.${constraintsDescriptor.constrainedType.simpleName()}"
+            "${validatorDescriptor.packageName}.$OUTPUT_FOLDER.${validatorDescriptor.subjectType.simpleName()}"
 
         return callerFqName?.asString() == allowedCaller
     }
@@ -83,9 +83,9 @@ internal class DslValidator(
     }
 
     internal fun verifyNoDuplicateViolations(
-        constraintsDescriptor: ConstraintsDescriptor
-    ): ConstraintsDescriptor {
-        constraintsDescriptor.violations.groupBy { it.name }.forEach { (name, entries) ->
+        validatorDescriptor: ValidatorDescriptor
+    ): ValidatorDescriptor {
+        validatorDescriptor.violations.groupBy { it.name }.forEach { (name, entries) ->
             if (entries.size > 1) {
                 entries.forEach { entry ->
                     reportError(
@@ -95,7 +95,7 @@ internal class DslValidator(
                 }
             }
         }
-        return constraintsDescriptor
+        return validatorDescriptor
     }
 
     internal fun verifyNoDuplicateMetas(metas: Sequence<MetaDescriptor>): Sequence<MetaDescriptor> {
@@ -129,7 +129,7 @@ internal class DslValidator(
         )
     }
 
-    internal fun verifyConstrainedAlias(alias: String, element: PsiElement?): String? {
+    internal fun verifySubjectAlias(alias: String, element: PsiElement?): String? {
         return verifyValidIdentifier(
             alias,
             element,

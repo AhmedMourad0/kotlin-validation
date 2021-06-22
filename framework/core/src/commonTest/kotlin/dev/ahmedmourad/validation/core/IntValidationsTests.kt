@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class IntValidationsTests {
 
     @Test
     fun isDivisibleBy_meansThisIntIsDivisibleByTheGivenInt() {
-        validator<Int> {
+        constraint<Int> {
             isDivisibleBy(3)
         }.allMatch(
             0,
@@ -29,7 +29,7 @@ class IntValidationsTests {
 
     @Test
     fun isDivisibleByL_meansThisIntIsDivisibleByTheGivenInt() {
-        validator<Int> {
+        constraint<Int> {
             isDivisibleBy { 3 }
         }.allMatch(
             0,
@@ -48,7 +48,7 @@ class IntValidationsTests {
 
     @Test
     fun isNotDivisibleBy_meansThisIntIsNotDivisibleByTheGivenInt() {
-        validator<Int> {
+        constraint<Int> {
             isNotDivisibleBy(3)
         }.allMatch(
             1,
@@ -67,7 +67,7 @@ class IntValidationsTests {
 
     @Test
     fun isNotDivisibleByL_meansThisIntIsNotDivisibleByTheGivenInt() {
-        validator<Int> {
+        constraint<Int> {
             isNotDivisibleBy { 3 }
         }.allMatch(
             1,
@@ -86,7 +86,7 @@ class IntValidationsTests {
 
     @Test
     fun isEven_meansThisIntIsEven() {
-        validator<Int> {
+        constraint<Int> {
             isEven()
         }.allMatch(
             0,
@@ -106,7 +106,7 @@ class IntValidationsTests {
 
     @Test
     fun isOdd_meansThisIntIsOdd() {
-        validator<Int> {
+        constraint<Int> {
             isOdd()
         }.allMatch(
             1,
@@ -127,7 +127,7 @@ class IntValidationsTests {
     @Test
     fun isPositive_meansThisIntIsPositive() {
 
-        validator<Int> {
+        constraint<Int> {
             isPositive(false)
         }.allMatch(
             1,
@@ -144,7 +144,7 @@ class IntValidationsTests {
             -125
         )
 
-        validator<Int> {
+        constraint<Int> {
             isPositive(true)
         }.allMatch(
             0,
@@ -165,7 +165,7 @@ class IntValidationsTests {
     @Test
     fun isNegative_meansThisIntIsNegative() {
 
-        validator<Int> {
+        constraint<Int> {
             isNegative(false)
         }.allMatch(
             -1,
@@ -182,7 +182,7 @@ class IntValidationsTests {
             125
         )
 
-        validator<Int> {
+        constraint<Int> {
             isNegative(true)
         }.allMatch(
             0,
@@ -202,7 +202,7 @@ class IntValidationsTests {
 
     @Test
     fun isZero_meansThisIntEqualsZero() {
-        validator<Int> {
+        constraint<Int> {
             isZero()
         }.allMatch(
             0
@@ -222,7 +222,7 @@ class IntValidationsTests {
 
     @Test
     fun isNotZero_meansThisIntDoesNotEqualZero() {
-        validator<Int> {
+        constraint<Int> {
             isNotZero()
         }.allMatch(
             -125,
@@ -242,7 +242,7 @@ class IntValidationsTests {
 
     @Test
     fun isPrime_meansThisIntIsPrime() {
-        validator<Int> {
+        constraint<Int> {
             isPrime()
         }.allMatch(
             2,
@@ -280,7 +280,7 @@ class IntValidationsTests {
 
     @Test
     fun isNotPrime_meansThisIntIsNotPrime() {
-        validator<Int> {
+        constraint<Int> {
             isNotPrime()
         }.allMatch(
             -5,

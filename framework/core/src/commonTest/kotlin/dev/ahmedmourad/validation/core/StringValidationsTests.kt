@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class StringValidationsTests {
 
     @Test
     fun isNumber_meansThisStringQualifiesAsANumber() {
-        validator<String> {
+        constraint<String> {
             isNumber()
         }.allMatch(
             "1475",
@@ -40,7 +40,7 @@ class StringValidationsTests {
 
     @Test
     fun isInteger_meansThisStringQualifiesAsAnInteger() {
-        validator<String> {
+        constraint<String> {
             isInteger()
         }.allMatch(
             "1475",
@@ -71,7 +71,7 @@ class StringValidationsTests {
     @Test
     fun isPositiveInteger_meansThisStringQualifiesAsAPositiveInteger() {
 
-        validator<String> {
+        constraint<String> {
             isPositiveInteger(true)
         }.allMatch(
             "1475",
@@ -101,7 +101,7 @@ class StringValidationsTests {
             "-178"
         )
 
-        validator<String> {
+        constraint<String> {
             isPositiveInteger(false)
         }.allMatch(
             "1475",
@@ -135,7 +135,7 @@ class StringValidationsTests {
     @Test
     fun isNegativeInteger_meansThisStringQualifiesAsANegativeInteger() {
 
-        validator<String> {
+        constraint<String> {
             isNegativeInteger(true)
         }.allMatch(
             "-1475",
@@ -168,7 +168,7 @@ class StringValidationsTests {
             "2"
         )
 
-        validator<String> {
+        constraint<String> {
             isNegativeInteger(false)
         }.allMatch(
             "-1475",
@@ -205,7 +205,7 @@ class StringValidationsTests {
     @Test
     fun isPositiveNumber_meansThisStringQualifiesAsAPositiveNumber() {
 
-        validator<String> {
+        constraint<String> {
             isPositiveNumber(true)
         }.allMatch(
             "1475",
@@ -240,7 +240,7 @@ class StringValidationsTests {
             Double.NaN.toString()
         )
 
-        validator<String> {
+        constraint<String> {
             isPositiveNumber(false)
         }.allMatch(
             "1475",
@@ -279,7 +279,7 @@ class StringValidationsTests {
     @Test
     fun isNegativeNumber_meansThisStringQualifiesAsANegativeNumber() {
 
-        validator<String> {
+        constraint<String> {
             isNegativeNumber(true)
         }.allMatch(
             "-1475",
@@ -315,7 +315,7 @@ class StringValidationsTests {
             Double.NaN.toString()
         )
 
-        validator<String> {
+        constraint<String> {
             isNegativeNumber(false)
         }.allMatch(
             "-1475",
@@ -354,7 +354,7 @@ class StringValidationsTests {
 
     @Test
     fun isZero_meansThisStringQualifiesAsZero() {
-        validator<String> {
+        constraint<String> {
             isZero()
         }.allMatch(
             "0",
@@ -393,7 +393,7 @@ class StringValidationsTests {
 
     @Test
     fun isNotZero_meansThisStringDoesNotQualifyAsZero() {
-        validator<String> {
+        constraint<String> {
             isNotZero()
         }.allMatch(
             "",
@@ -433,7 +433,7 @@ class StringValidationsTests {
     @Test
     fun isEqualTo_meansThisStringEqualsTheGivenString() {
 
-        validator<String> {
+        constraint<String> {
             isEqualTo("Ahmed Mourad", false)
         }.allMatch(
             "Ahmed Mourad"
@@ -448,7 +448,7 @@ class StringValidationsTests {
             "ahmedmourad"
         )
 
-        validator<String> {
+        constraint<String> {
             isEqualTo("Ahmed Mourad", true)
         }.allMatch(
             "Ahmed Mourad",
@@ -472,7 +472,7 @@ class StringValidationsTests {
     @Test
     fun isEqualToL_meansThisStringEqualsTheGivenString() {
 
-        validator<String> {
+        constraint<String> {
             isEqualTo(false) { "Ahmed Mourad" }
         }.allMatch(
             "Ahmed Mourad"
@@ -487,7 +487,7 @@ class StringValidationsTests {
             "ahmedmourad"
         )
 
-        validator<String> {
+        constraint<String> {
             isEqualTo(true) { "Ahmed Mourad" }
         }.allMatch(
             "Ahmed Mourad",
@@ -511,7 +511,7 @@ class StringValidationsTests {
     @Test
     fun isNotEqualTo_meansThisStringDoesNotEqualTheGivenString() {
 
-        validator<String> {
+        constraint<String> {
             isNotEqualTo("Ahmed Mourad", false)
         }.allMatch(
             "",
@@ -526,7 +526,7 @@ class StringValidationsTests {
             "Ahmed Mourad"
         )
 
-        validator<String> {
+        constraint<String> {
             isNotEqualTo("Ahmed Mourad", true)
         }.allMatch(
             "",
@@ -550,7 +550,7 @@ class StringValidationsTests {
     @Test
     fun isNotEqualToL_meansThisStringDoesNotEqualTheGivenString() {
 
-        validator<String> {
+        constraint<String> {
             isNotEqualTo(false) { "Ahmed Mourad" }
         }.allMatch(
             "",
@@ -565,7 +565,7 @@ class StringValidationsTests {
             "Ahmed Mourad"
         )
 
-        validator<String> {
+        constraint<String> {
             isNotEqualTo(true) { "Ahmed Mourad" }
         }.allMatch(
             "",

@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.BindingContext
 import java.io.File
 
-//TODO: every one should follow the visibility of the least of the constrainer and constrained (public or internal only)
+//TODO: every one should follow the visibility of the least of the validator and subject (public or internal only)
 internal class ValidationsCodeGenerator(
     private val bindingContext: BindingContext,
     private val dslValidator: DslValidator

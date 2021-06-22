@@ -7,6 +7,6 @@ internal data class ViolationDescriptor(
     val nameExpression: KtExpression,
     val metas: List<MetaDescriptor>
 ) {
-    val regularMetas by lazy { metas.filter { it.includedConstraint == null } }
-    val inclusionMetas by lazy { metas.filter { it.includedConstraint != null } }
+    val regularMetas by lazy { metas.filter { it.includedValidator == null } }
+    val inclusionMetas by lazy { metas.filter { it.includedValidator != null } }
 }

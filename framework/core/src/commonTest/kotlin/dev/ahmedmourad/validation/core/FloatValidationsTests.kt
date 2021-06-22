@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class FloatValidationsTests {
 
     @Test
     fun isDivisibleBy_meansThisFloatIsDivisibleByTheGivenFloat() {
-        validator<Float> {
+        constraint<Float> {
             isDivisibleBy(3f)
         }.allMatch(
             0f,
@@ -30,7 +30,7 @@ class FloatValidationsTests {
 
     @Test
     fun isDivisibleByL_meansThisFloatIsDivisibleByTheGivenFloat() {
-        validator<Float> {
+        constraint<Float> {
             isDivisibleBy { 3f }
         }.allMatch(
             0f,
@@ -50,7 +50,7 @@ class FloatValidationsTests {
 
     @Test
     fun isNotDivisibleBy_meansThisFloatIsNotDivisibleByTheGivenFloat() {
-        validator<Float> {
+        constraint<Float> {
             isNotDivisibleBy(3f)
         }.allMatch(
             1f,
@@ -69,7 +69,7 @@ class FloatValidationsTests {
 
     @Test
     fun isNotDivisibleByL_meansThisFloatIsNotDivisibleByTheGivenFloat() {
-        validator<Float> {
+        constraint<Float> {
             isNotDivisibleBy { 3f }
         }.allMatch(
             1f,
@@ -89,7 +89,7 @@ class FloatValidationsTests {
     @Test
     fun isPositive_meansThisFloatIsPositive() {
 
-        validator<Float> {
+        constraint<Float> {
             isPositive(false)
         }.allMatch(
             1f,
@@ -107,7 +107,7 @@ class FloatValidationsTests {
             -125f
         )
 
-        validator<Float> {
+        constraint<Float> {
             isPositive(true)
         }.allMatch(
             0f,
@@ -129,7 +129,7 @@ class FloatValidationsTests {
     @Test
     fun isNegative_meansThisFloatIsNegative() {
 
-        validator<Float> {
+        constraint<Float> {
             isNegative(false)
         }.allMatch(
             -1f,
@@ -147,7 +147,7 @@ class FloatValidationsTests {
             125f
         )
 
-        validator<Float> {
+        constraint<Float> {
             isNegative(true)
         }.allMatch(
             0f,
@@ -168,7 +168,7 @@ class FloatValidationsTests {
 
     @Test
     fun isZero_meansThisFloatEqualsZero() {
-        validator<Float> {
+        constraint<Float> {
             isZero()
         }.allMatch(
             0f
@@ -189,7 +189,7 @@ class FloatValidationsTests {
 
     @Test
     fun isNotZero_meansThisFloatDoesNotEqualZero() {
-        validator<Float> {
+        constraint<Float> {
             isNotZero()
         }.allMatch(
             -125f,
@@ -209,7 +209,7 @@ class FloatValidationsTests {
 
     @Test
     fun isNaN_meansThisFloatIsNaN() {
-        validator<Float> {
+        constraint<Float> {
             isNaN()
         }.allMatch(
             Float.NaN
@@ -227,7 +227,7 @@ class FloatValidationsTests {
 
     @Test
     fun isNotNaN_meansThisFloatIsNaN() {
-        validator<Float> {
+        constraint<Float> {
             isNotNaN()
         }.allMatch(
             -1f,
@@ -245,7 +245,7 @@ class FloatValidationsTests {
 
     @Test
     fun isInfinite_meansThisFloatIsInfinite() {
-        validator<Float> {
+        constraint<Float> {
             isInfinite()
         }.allMatch(
             Float.NEGATIVE_INFINITY,
@@ -263,7 +263,7 @@ class FloatValidationsTests {
 
     @Test
     fun isFinite_meansThisFloatIsFinite() {
-        validator<Float> {
+        constraint<Float> {
             isFinite()
         }.allMatch(
             -1f,

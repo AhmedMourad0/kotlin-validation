@@ -14,10 +14,10 @@ class ValidationContextGeneratorTests {
     var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
     @Test
-    fun `A ValidationContext interface is generated for each constrainer`() {
+    fun `A ValidationContext interface is generated for each validator`() {
         val successResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
-            object SomeConstrainer : Constrains<Int> {
+            object SomeValidator : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") { }
                 }
@@ -31,11 +31,11 @@ class ValidationContextGeneratorTests {
     }
 
     @Test
-    fun `constrainedAlias applies an alias to the constrained type`() {
+    fun `subjectAlias applies an alias to the subject type`() {
         val successResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
-            @ConstrainerConfig(constrainedAlias = "DeluxeInt")
-            object SomeConstrainer : Constrains<Int> {
+            @ValidatorConfig(subjectAlias = "DeluxeInt")
+            object SomeValidator : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") { }
                 }
@@ -50,11 +50,11 @@ class ValidationContextGeneratorTests {
     }
 
     @Test
-    fun `The ValidationContext interface inherits the type params of the constrainer`() {
+    fun `The ValidationContext interface inherits the type params of the validator`() {
 
         val failedResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
-            class SomeConstrainer<T : Any, L : List<T>, M> : Constrains<Int> {
+            class SomeValidator<T : Any, L : List<T>, M> : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") { }
                 }
@@ -69,7 +69,7 @@ class ValidationContextGeneratorTests {
 
         val failedResult1 = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
-            class SomeConstrainer<T : Any, L : List<T>, M> : Constrains<Int> {
+            class SomeValidator<T : Any, L : List<T>, M> : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") { }
                 }
@@ -84,7 +84,7 @@ class ValidationContextGeneratorTests {
 
         val successResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
-            class SomeConstrainer<T : Any, L : List<T>, M> : Constrains<Int> {
+            class SomeValidator<T : Any, L : List<T>, M> : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") { }
                 }
@@ -99,52 +99,52 @@ class ValidationContextGeneratorTests {
     }
 
     @Test
-    fun `The ValidationContext interface inherits the ValidationContext of every included constrainer`() {
+    fun `The ValidationContext interface inherits the ValidationContext of every included validator`() {
         val successResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
-            object StringConstrainer : Constrains<String> {
+            object StringValidator : Validator<String> {
                 override val constraints by describe {
                     constraint("FirstViolation") { }
                 }
             }
 
-            class IntConstrainer<T : Any> : Constrains<Int> {
+            class IntValidator<T : Any> : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") { }
                 }
             }
             
-            @ConstrainerConfig(constrainedAlias = "Int1")
-            class Int1Constrainer<A : Any, B : List<A>> : Constrains<Int> {
+            @ValidatorConfig(subjectAlias = "Int1")
+            class Int1Validator<A : Any, B : List<A>> : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") {
                         include("v", { 4 }) { _, _ ->
-                            IntConstrainer<A>()
+                            IntValidator<A>()
                         }
                     }
                 }
             }
 
-            @ConstrainerConfig(constrainedAlias = "Int2")
-            class Int2Constrainer<A : Any, A1 : List<A>> : Constrains<Int> {
+            @ValidatorConfig(subjectAlias = "Int2")
+            class Int2Validator<A : Any, A1 : List<A>> : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") {
                         include("v", { 4 }) { _, _ ->
-                            Int1Constrainer<A, A1>()
+                            Int1Validator<A, A1>()
                         }
                     }
                 }
             }
 
-            @ConstrainerConfig(constrainedAlias = "Int3")
-            class Int3Constrainer<T : Any, L : List<T>> : Constrains<Int> {
+            @ValidatorConfig(subjectAlias = "Int3")
+            class Int3Validator<T : Any, L : List<T>> : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") {
                         include("i", { 4 }) { _, _ ->
-                            Int2Constrainer<T, L>()
+                            Int2Validator<T, L>()
                         }
                         include("s", { "4" }) { _, _ ->
-                            StringConstrainer
+                            StringValidator
                         }
                     }
                 }

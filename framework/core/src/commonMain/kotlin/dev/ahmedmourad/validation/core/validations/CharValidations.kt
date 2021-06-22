@@ -1,71 +1,71 @@
 package dev.ahmedmourad.validation.core.validations
 
-import dev.ahmedmourad.validation.core.Validator
+import dev.ahmedmourad.validation.core.Constraint
 
-fun Validator<Char>.isDefined() = validation {
+fun Constraint<Char>.isDefined() = validation {
     it.isDefined()
 }
 
-fun Validator<Char>.isLetter() = validation {
+fun Constraint<Char>.isLetter() = validation {
     it.isLetter()
 }
 
-fun Validator<Char>.isLetterOrDigit() = validation {
+fun Constraint<Char>.isLetterOrDigit() = validation {
     it.isLetterOrDigit()
 }
 
-fun Validator<Char>.isDigit() = validation {
+fun Constraint<Char>.isDigit() = validation {
     it.isDigit()
 }
 
-fun Validator<Char>.isISOControl() = validation {
+fun Constraint<Char>.isISOControl() = validation {
     it.isISOControl()
 }
 
-fun Validator<Char>.isWhitespace() = validation {
+fun Constraint<Char>.isWhitespace() = validation {
     it.isWhitespace()
 }
 
-fun Validator<Char>.isUpperCase() = validation {
+fun Constraint<Char>.isUpperCase() = validation {
     it.isUpperCase()
 }
 
-fun Validator<Char>.isLowerCase() = validation {
+fun Constraint<Char>.isLowerCase() = validation {
     it.isLowerCase()
 }
 
-fun Validator<Char>.isTitleCase() = validation {
+fun Constraint<Char>.isTitleCase() = validation {
     it.isTitleCase()
 }
 
-fun Validator<Char>.isHighSurrogate() = validation {
+fun Constraint<Char>.isHighSurrogate() = validation {
     it.isHighSurrogate()
 }
 
-fun Validator<Char>.isLowSurrogate() = validation {
+fun Constraint<Char>.isLowSurrogate() = validation {
     it.isLowSurrogate()
 }
 
-inline fun Validator<Char>.isEqualTo(
+inline fun Constraint<Char>.isEqualTo(
     ignoreCase: Boolean,
     crossinline other: (Char) -> Char
 ) = validation {
     it.equals(other(it), ignoreCase)
 }
 
-fun Validator<Char>.isEqualTo(
+fun Constraint<Char>.isEqualTo(
     ignoreCase: Boolean,
     other: Char
 ) = isEqualTo(ignoreCase) { other }
 
-inline fun Validator<Char>.isNotEqualTo(
+inline fun Constraint<Char>.isNotEqualTo(
     ignoreCase: Boolean,
     crossinline other: (Char) -> Char
 ) = validation {
     !it.equals(other(it), ignoreCase)
 }
 
-fun Validator<Char>.isNotEqualTo(
+fun Constraint<Char>.isNotEqualTo(
     ignoreCase: Boolean,
     other: Char
 ) = isNotEqualTo(ignoreCase) { other }

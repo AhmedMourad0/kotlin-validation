@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class DoubleValidationsTests {
 
     @Test
     fun isDivisibleBy_meansThisDoubleIsDivisibleByTheGivenDouble() {
-        validator<Double> {
+        constraint<Double> {
             isDivisibleBy(3.0)
         }.allMatch(
             0.0,
@@ -30,7 +30,7 @@ class DoubleValidationsTests {
 
     @Test
     fun isDivisibleByL_meansThisDoubleIsDivisibleByTheGivenDouble() {
-        validator<Double> {
+        constraint<Double> {
             isDivisibleBy { 3.0 }
         }.allMatch(
             0.0,
@@ -50,7 +50,7 @@ class DoubleValidationsTests {
 
     @Test
     fun isNotDivisibleBy_meansThisDoubleIsNotDivisibleByTheGivenDouble() {
-        validator<Double> {
+        constraint<Double> {
             isNotDivisibleBy(3.0)
         }.allMatch(
             1.0,
@@ -69,7 +69,7 @@ class DoubleValidationsTests {
 
     @Test
     fun isNotDivisibleByL_meansThisDoubleIsNotDivisibleByTheGivenDouble() {
-        validator<Double> {
+        constraint<Double> {
             isNotDivisibleBy { 3.0 }
         }.allMatch(
             1.0,
@@ -89,7 +89,7 @@ class DoubleValidationsTests {
     @Test
     fun isPositive_meansThisDoubleIsPositive() {
 
-        validator<Double> {
+        constraint<Double> {
             isPositive(false)
         }.allMatch(
             1.0,
@@ -107,7 +107,7 @@ class DoubleValidationsTests {
             -125.0
         )
 
-        validator<Double> {
+        constraint<Double> {
             isPositive(true)
         }.allMatch(
             0.0,
@@ -129,7 +129,7 @@ class DoubleValidationsTests {
     @Test
     fun isNegative_meansThisDoubleIsNegative() {
 
-        validator<Double> {
+        constraint<Double> {
             isNegative(false)
         }.allMatch(
             -1.0,
@@ -147,7 +147,7 @@ class DoubleValidationsTests {
             125.0
         )
 
-        validator<Double> {
+        constraint<Double> {
             isNegative(true)
         }.allMatch(
             0.0,
@@ -168,7 +168,7 @@ class DoubleValidationsTests {
 
     @Test
     fun isZero_meansThisDoubleEqualsZero() {
-        validator<Double> {
+        constraint<Double> {
             isZero()
         }.allMatch(
             0.0
@@ -189,7 +189,7 @@ class DoubleValidationsTests {
 
     @Test
     fun isNotZero_meansThisDoubleDoesNotEqualZero() {
-        validator<Double> {
+        constraint<Double> {
             isNotZero()
         }.allMatch(
             -125.0,
@@ -209,7 +209,7 @@ class DoubleValidationsTests {
 
     @Test
     fun isNaN_meansThisDoubleIsNaN() {
-        validator<Double> {
+        constraint<Double> {
             isNaN()
         }.allMatch(
             Double.NaN
@@ -227,7 +227,7 @@ class DoubleValidationsTests {
 
     @Test
     fun isNotNaN_meansThisDoubleIsNaN() {
-        validator<Double> {
+        constraint<Double> {
             isNotNaN()
         }.allMatch(
             -1.0,
@@ -245,7 +245,7 @@ class DoubleValidationsTests {
 
     @Test
     fun isInfinite_meansThisDoubleIsInfinite() {
-        validator<Double> {
+        constraint<Double> {
             isInfinite()
         }.allMatch(
             Double.NEGATIVE_INFINITY,
@@ -263,7 +263,7 @@ class DoubleValidationsTests {
 
     @Test
     fun isFinite_meansThisDoubleIsFinite() {
-        validator<Double> {
+        constraint<Double> {
             isFinite()
         }.allMatch(
             -1.0,

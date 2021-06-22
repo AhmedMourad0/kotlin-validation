@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class TripleValidationsTests {
 
     @Test
     fun first_meansTheGivenValidationsMatchTheFirstElementOfTheTriple() {
-        validator<Triple<Int, Unit, Unit>> {
+        constraint<Triple<Int, Unit, Unit>> {
             first {
                 max(3)
             }
@@ -28,7 +28,7 @@ class TripleValidationsTests {
 
     @Test
     fun second_meansTheGivenValidationsMatchTheSecondElementOfTheTriple() {
-        validator<Triple<Unit, Int, Unit>> {
+        constraint<Triple<Unit, Int, Unit>> {
             second {
                 max(3)
             }
@@ -46,7 +46,7 @@ class TripleValidationsTests {
 
     @Test
     fun third_meansTheGivenValidationsMatchTheThirdElementOfTheTriple() {
-        validator<Triple<Unit, Unit, Int>> {
+        constraint<Triple<Unit, Unit, Int>> {
             third {
                 max(3)
             }

@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class ComparableValidationsTests {
 
     @Test
     fun min_meansThisComparableIsLargerThanOrEqualToTheGivenComparable() {
-        validator<Int> {
+        constraint<Int> {
             min(3)
         }.allMatch(
             3,
@@ -27,7 +27,7 @@ class ComparableValidationsTests {
 
     @Test
     fun minL_meansThisComparableIsLargerThanOrEqualToTheGivenComparable() {
-        validator<Int> {
+        constraint<Int> {
             min<Int> { 3 }
         }.allMatch(
             3,
@@ -44,7 +44,7 @@ class ComparableValidationsTests {
 
     @Test
     fun max_meansThisComparableIsLessThanOrEqualToTheGivenComparable() {
-        validator<Int> {
+        constraint<Int> {
             max(3)
         }.allMatch(
             -1,
@@ -62,7 +62,7 @@ class ComparableValidationsTests {
 
     @Test
     fun maxL_meansThisComparableIsLessThanOrEqualToTheGivenComparable() {
-        validator<Int> {
+        constraint<Int> {
             max<Int> { 3 }
         }.allMatch(
             -1,
@@ -80,7 +80,7 @@ class ComparableValidationsTests {
 
     @Test
     fun lessThan_meansThisComparableIsLessThanTheGivenComparable() {
-        validator<Int> {
+        constraint<Int> {
             lessThan(3)
         }.allMatch(
             -1,
@@ -97,7 +97,7 @@ class ComparableValidationsTests {
 
     @Test
     fun lessThanL_meansThisComparableIsLessThanTheGivenComparable() {
-        validator<Int> {
+        constraint<Int> {
             lessThan<Int> { 3 }
         }.allMatch(
             -1,
@@ -114,7 +114,7 @@ class ComparableValidationsTests {
 
     @Test
     fun largerThan_meansThisComparableIsLargerThanTheGivenComparable() {
-        validator<Int> {
+        constraint<Int> {
             largerThan(3)
         }.allMatch(
             4,
@@ -132,7 +132,7 @@ class ComparableValidationsTests {
 
     @Test
     fun largerThanL_meansThisComparableIsLargerThanTheGivenComparable() {
-        validator<Int> {
+        constraint<Int> {
             largerThan<Int> { 3 }
         }.allMatch(
             4,
@@ -150,7 +150,7 @@ class ComparableValidationsTests {
 
     @Test
     fun inRange_meansThisComparableIsInTheGivenRange() {
-        validator<Int> {
+        constraint<Int> {
             inRange(3, 5)
         }.allMatch(
             3,
@@ -168,7 +168,7 @@ class ComparableValidationsTests {
 
     @Test
     fun inRangeR_meansThisComparableIsInTheGivenRange() {
-        validator<Int> {
+        constraint<Int> {
             inRange(3..5)
         }.allMatch(
             3,
@@ -186,7 +186,7 @@ class ComparableValidationsTests {
 
     @Test
     fun inRangeRL_meansThisComparableIsInTheGivenRange() {
-        validator<Int> {
+        constraint<Int> {
             inRange { 3..5 }
         }.allMatch(
             3,
@@ -204,7 +204,7 @@ class ComparableValidationsTests {
 
     @Test
     fun notInRange_meansThisComparableIsNotInTheGivenRange() {
-        validator<Int> {
+        constraint<Int> {
             notInRange(3, 5)
         }.allMatch(
             -1,
@@ -222,7 +222,7 @@ class ComparableValidationsTests {
 
     @Test
     fun notInRangeR_meansThisComparableIsNotInTheGivenRange() {
-        validator<Int> {
+        constraint<Int> {
             notInRange(3..5)
         }.allMatch(
             -1,
@@ -240,7 +240,7 @@ class ComparableValidationsTests {
 
     @Test
     fun notInRangeRL_meansThisComparableIsNotInTheGivenRange() {
-        validator<Int> {
+        constraint<Int> {
             notInRange { 3..5 }
         }.allMatch(
             -1,

@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class SequenceValidationsTests {
 
     @Test
     fun forAll_meansTheGivenValidationsMatchAllTheElementsOfTheSequence() {
-        validator<Sequence<Boolean>> {
+        constraint<Sequence<Boolean>> {
             forAll {
                 isTrue()
             }
@@ -33,7 +33,7 @@ class SequenceValidationsTests {
 
     @Test
     fun forAny_meansTheGivenValidationsMatchAtLeastOneOfTheElementsOfTheSequence() {
-        validator<Sequence<Boolean>> {
+        constraint<Sequence<Boolean>> {
             forAny {
                 isTrue()
             }
@@ -57,7 +57,7 @@ class SequenceValidationsTests {
 
     @Test
     fun forNone_meansTheGivenValidationsMatchNoneOfTheElementsOfTheSequence() {
-        validator<Sequence<Boolean>> {
+        constraint<Sequence<Boolean>> {
             forNone {
                 isTrue()
             }
@@ -80,7 +80,7 @@ class SequenceValidationsTests {
 
     @Test
     fun isEmpty_meansTheSequenceIsEmpty() {
-        validator<Sequence<Unit>> {
+        constraint<Sequence<Unit>> {
             isEmpty()
         }.allMatch(
             emptySequence()
@@ -93,7 +93,7 @@ class SequenceValidationsTests {
 
     @Test
     fun isNotEmpty_meansTheSequenceIsNotEmpty() {
-        validator<Sequence<Unit>> {
+        constraint<Sequence<Unit>> {
             isNotEmpty()
         }.allMatch(
             sequenceOf(Unit),
@@ -106,7 +106,7 @@ class SequenceValidationsTests {
 
     @Test
     fun isDistinct_meansAllTheElementsOfTheSequenceAreDistinct() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             isDistinct()
         }.allMatch(
             emptySequence(),
@@ -124,7 +124,7 @@ class SequenceValidationsTests {
 
     @Test
     fun minSize_meansTheSequenceMustHaveAtLeastTheGivenNumberOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             minSize(4)
         }.allMatch(
             sequenceOf(1, 2, 3, 4),
@@ -142,7 +142,7 @@ class SequenceValidationsTests {
 
     @Test
     fun minSizeL_meansTheSequenceMustHaveAtLeastTheGivenNumberOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             minSize { 4 }
         }.allMatch(
             sequenceOf(1, 2, 3, 4),
@@ -160,7 +160,7 @@ class SequenceValidationsTests {
 
     @Test
     fun maxSize_meansTheSequenceMustHaveAtMostTheGivenNumberOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             maxSize(4)
         }.allMatch(
             emptySequence(),
@@ -178,7 +178,7 @@ class SequenceValidationsTests {
 
     @Test
     fun maxSizeL_meansTheSequenceMustHaveAtMostTheGivenNumberOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             maxSize { 4 }
         }.allMatch(
             emptySequence(),
@@ -196,7 +196,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeLessThan_meansTheSequenceMustHaveLessThanTheGivenNumberOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeLessThan(4)
         }.allMatch(
             emptySequence(),
@@ -214,7 +214,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeLessThanL_meansTheSequenceMustHaveLessThanTheGivenNumberOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeLessThan { 4 }
         }.allMatch(
             emptySequence(),
@@ -232,7 +232,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeLargerThan_meansTheSequenceMustHaveMoreThanTheGivenNumberOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeLargerThan(4)
         }.allMatch(
             sequenceOf(1, 2, 3, 4, 5),
@@ -250,7 +250,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeLargerThanL_meansTheSequenceMustHaveMoreThanTheGivenNumberOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeLargerThan { 4 }
         }.allMatch(
             sequenceOf(1, 2, 3, 4, 5),
@@ -268,7 +268,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeIn_meansTheSequenceMustHaveTheGivenRangeOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeIn(3, 5)
         }.allMatch(
             sequenceOf(1, 2, 3),
@@ -286,7 +286,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeInR_meansTheSequenceMustHaveTheGivenRangeOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeIn(3..5)
         }.allMatch(
             sequenceOf(1, 2, 3),
@@ -304,7 +304,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeInRL_meansTheSequenceMustHaveTheGivenRangeOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeIn { 3..5 }
         }.allMatch(
             sequenceOf(1, 2, 3),
@@ -322,7 +322,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeNotIn_meansTheSequenceMustNotHaveTheGivenRangeOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeNotIn(3, 5)
         }.allMatch(
             emptySequence(),
@@ -340,7 +340,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeNotInR_meansTheSequenceMustNotHaveTheGivenRangeOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeNotIn(3..5)
         }.allMatch(
             emptySequence(),
@@ -358,7 +358,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeNotInRL_meansTheSequenceMustNotHaveTheGivenRangeOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeNotIn { 3..5 }
         }.allMatch(
             emptySequence(),
@@ -376,7 +376,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeEqualTo_meansTheSequenceMustHaveTheGivenNumberOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeEqualTo(3)
         }.allMatch(
             sequenceOf(1, 2, 3)
@@ -391,7 +391,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeEqualToL_meansTheSequenceMustHaveTheGivenNumberOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeEqualTo { 3 }
         }.allMatch(
             sequenceOf(1, 2, 3)
@@ -406,7 +406,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeNotEqualTo_meansTheSequenceMustNotHaveTheGivenNumberOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeNotEqualTo(3)
         }.allMatch(
             emptySequence(),
@@ -421,7 +421,7 @@ class SequenceValidationsTests {
 
     @Test
     fun sizeNotEqualToL_meansTheSequenceMustNotHaveTheGivenNumberOfElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             sizeNotEqualTo { 3 }
         }.allMatch(
             emptySequence(),
@@ -436,7 +436,7 @@ class SequenceValidationsTests {
 
     @Test
     fun contains_meansTheSequenceMustContainTheGivenElement() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contains(3)
         }.allMatch(
             sequenceOf(3),
@@ -455,7 +455,7 @@ class SequenceValidationsTests {
 
     @Test
     fun containsL_meansTheSequenceMustContainTheGivenElement() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contains { 3 }
         }.allMatch(
             sequenceOf(3),
@@ -474,7 +474,7 @@ class SequenceValidationsTests {
 
     @Test
     fun doesNotContain_meansTheSequenceMustContainTheGivenElement() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             doesNotContain(3)
         }.allMatch(
             emptySequence(),
@@ -493,7 +493,7 @@ class SequenceValidationsTests {
 
     @Test
     fun doesNotContainL_meansTheSequenceMustContainTheGivenElement() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             doesNotContain { 3 }
         }.allMatch(
             emptySequence(),
@@ -512,7 +512,7 @@ class SequenceValidationsTests {
 
     @Test
     fun containsAt_meansTheSequenceMustContainTheGivenElementAtTheGivenPosition() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             containsAt(1, 8)
         }.allMatch(
             sequenceOf(8, 8),
@@ -533,7 +533,7 @@ class SequenceValidationsTests {
 
     @Test
     fun containsAtL_meansTheSequenceMustContainTheGivenElementAtTheGivenPosition() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             containsAt(1) { 8 }
         }.allMatch(
             sequenceOf(8, 8),
@@ -554,7 +554,7 @@ class SequenceValidationsTests {
 
     @Test
     fun startsWith_meansTheSequenceMustStartWithTheGivenElement() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             startsWith(8)
         }.allMatch(
             sequenceOf(8),
@@ -575,7 +575,7 @@ class SequenceValidationsTests {
 
     @Test
     fun startsWithL_meansTheSequenceMustStartWithTheGivenElement() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             startsWith { 8 }
         }.allMatch(
             sequenceOf(8),
@@ -596,7 +596,7 @@ class SequenceValidationsTests {
 
     @Test
     fun endsWith_meansTheSequenceMustEndWithTheGivenElement() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             endsWith(8)
         }.allMatch(
             sequenceOf(8),
@@ -617,7 +617,7 @@ class SequenceValidationsTests {
 
     @Test
     fun endsWithL_meansTheSequenceMustEndWithTheGivenElement() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             endsWith { 8 }
         }.allMatch(
             sequenceOf(8),
@@ -638,7 +638,7 @@ class SequenceValidationsTests {
 
     @Test
     fun containsAll_meansTheSequenceMustContainAllTheGivenElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             containsAll(2, 3)
         }.allMatch(
             sequenceOf(2, 3),
@@ -657,7 +657,7 @@ class SequenceValidationsTests {
 
     @Test
     fun containsAllS_meansTheSequenceMustContainAllTheGivenElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             containsAll(sequenceOf(2, 3))
         }.allMatch(
             sequenceOf(2, 3),
@@ -676,7 +676,7 @@ class SequenceValidationsTests {
 
     @Test
     fun containsAllSL_meansTheSequenceMustContainAllTheGivenElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             containsAll { sequenceOf(2, 3) }
         }.allMatch(
             sequenceOf(2, 3),
@@ -695,7 +695,7 @@ class SequenceValidationsTests {
 
     @Test
     fun isPartOf_meansAllTheElementsOfTheSequenceMustExistInTheGivenElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             isPartOf(1, 2, 3, 4, 5)
         }.allMatch(
             emptySequence(),
@@ -715,7 +715,7 @@ class SequenceValidationsTests {
 
     @Test
     fun isPartOfS_meansAllTheElementsOfTheSequenceMustExistInTheGivenElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             isPartOf(sequenceOf(1, 2, 3, 4, 5))
         }.allMatch(
             emptySequence(),
@@ -735,7 +735,7 @@ class SequenceValidationsTests {
 
     @Test
     fun isPartOfSL_meansAllTheElementsOfTheSequenceMustExistInTheGivenElements() {
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             isPartOf { sequenceOf(1, 2, 3, 4, 5) }
         }.allMatch(
             emptySequence(),
@@ -755,7 +755,7 @@ class SequenceValidationsTests {
 
     @Test
     fun allTrue_meansAllTheBooleansInTheSequenceAreTrue() {
-        validator<Sequence<Boolean>> {
+        constraint<Sequence<Boolean>> {
             allTrue()
         }.allMatch(
             emptySequence(),
@@ -776,7 +776,7 @@ class SequenceValidationsTests {
 
     @Test
     fun anyTrue_meansAtLeastOneOfTheBooleansInTheSequenceIsTrue() {
-        validator<Sequence<Boolean>> {
+        constraint<Sequence<Boolean>> {
             anyTrue()
         }.allMatch(
             sequenceOf(true),
@@ -798,7 +798,7 @@ class SequenceValidationsTests {
 
     @Test
     fun anyFalse_meansAtLeastOneOfTheBooleansInTheSequenceIsFalse() {
-        validator<Sequence<Boolean>> {
+        constraint<Sequence<Boolean>> {
             anyFalse()
         }.allMatch(
             sequenceOf(false),
@@ -820,7 +820,7 @@ class SequenceValidationsTests {
 
     @Test
     fun allFalse_meansAllOfTheBooleansInTheSequenceAreFalse() {
-        validator<Sequence<Boolean>> {
+        constraint<Sequence<Boolean>> {
             allFalse()
         }.allMatch(
             emptySequence(),
@@ -842,7 +842,7 @@ class SequenceValidationsTests {
     @Test
     fun contentEquals_meansAllTheElementsOfTheSequenceMustExistInTheGivenElements() {
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = false,
@@ -863,7 +863,7 @@ class SequenceValidationsTests {
             sequenceOf(5, 4, 3, 2, 1)
         )
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = false,
@@ -895,7 +895,7 @@ class SequenceValidationsTests {
             sequenceOf(5, 4, 3, 2, 1)
         )
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = true,
@@ -917,7 +917,7 @@ class SequenceValidationsTests {
             sequenceOf(1, 2, 3, 5, 4, 5)
         )
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = true,
@@ -954,7 +954,7 @@ class SequenceValidationsTests {
     @Test
     fun contentEqualsL_meansAllTheElementsOfTheSequenceMustExistInTheGivenElements() {
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = false
@@ -974,7 +974,7 @@ class SequenceValidationsTests {
             sequenceOf(5, 4, 3, 2, 1)
         )
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = false
@@ -1003,7 +1003,7 @@ class SequenceValidationsTests {
             sequenceOf(5, 4, 3, 2, 1)
         )
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = true
@@ -1024,7 +1024,7 @@ class SequenceValidationsTests {
             sequenceOf(1, 2, 3, 5, 4, 5)
         )
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = true
@@ -1058,7 +1058,7 @@ class SequenceValidationsTests {
     @Test
     fun contentNotEquals_meansAllTheElementsOfTheSequenceMustNotEqualTheGivenElements() {
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentNotEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = false,
@@ -1079,7 +1079,7 @@ class SequenceValidationsTests {
             sequenceOf(1, 2, 3, 4, 5)
         )
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentNotEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = false,
@@ -1111,7 +1111,7 @@ class SequenceValidationsTests {
             sequenceOf(1, 2, 2, 3, 4, 4, 5)
         )
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentNotEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = true,
@@ -1133,7 +1133,7 @@ class SequenceValidationsTests {
             sequenceOf(5, 4, 3, 2, 1)
         )
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentNotEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = true,
@@ -1170,7 +1170,7 @@ class SequenceValidationsTests {
     @Test
     fun contentNotEqualsL_meansAllTheElementsOfTheSequenceMustNotEqualTheGivenElements() {
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentNotEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = false
@@ -1190,7 +1190,7 @@ class SequenceValidationsTests {
             sequenceOf(1, 2, 3, 4, 5)
         )
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentNotEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = false
@@ -1219,7 +1219,7 @@ class SequenceValidationsTests {
             sequenceOf(1, 2, 2, 3, 4, 4, 5)
         )
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentNotEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = true
@@ -1240,7 +1240,7 @@ class SequenceValidationsTests {
             sequenceOf(5, 4, 3, 2, 1)
         )
 
-        validator<Sequence<Int>> {
+        constraint<Sequence<Int>> {
             contentNotEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = true

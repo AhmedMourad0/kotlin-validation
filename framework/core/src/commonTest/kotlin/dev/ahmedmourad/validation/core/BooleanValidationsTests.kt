@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.isFalse
 import dev.ahmedmourad.validation.core.validations.isTrue
 import kotlin.test.Test
@@ -11,7 +11,7 @@ class BooleanValidationsTests {
 
     @Test
     fun isTrue_meansThisBooleanEqualsTrue() {
-        validator<Boolean> {
+        constraint<Boolean> {
             isTrue()
         }.allMatch(
             true
@@ -22,7 +22,7 @@ class BooleanValidationsTests {
 
     @Test
     fun isFalse_meansThisBooleanEqualsFalse() {
-        validator<Boolean> {
+        constraint<Boolean> {
             isFalse()
         }.allMatch(
             false

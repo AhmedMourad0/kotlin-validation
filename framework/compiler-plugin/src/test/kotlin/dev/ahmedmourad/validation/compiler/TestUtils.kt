@@ -17,8 +17,8 @@ const val PACKAGE_AND_IMPORTS = """
 """
 
 @Language("kotlin")
-const val MINIMAL_INT_CONSTRAINER = """
-    object IntConstrainer : Constrains<Int> {
+const val MINIMAL_INT_VALIDATOR = """
+    object IntValidator : Validator<Int> {
         override val constraints by describe {
             constraint(violation = "TooShort") { }
         }

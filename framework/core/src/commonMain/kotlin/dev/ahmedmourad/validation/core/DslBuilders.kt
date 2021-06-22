@@ -26,14 +26,14 @@ private annotation class MetaType
 private annotation class InclusionType
 
 @ValidationDslMarker
-interface Constrains<T : Any> {
-    val constraints: ConstraintsDescriptor<T>
+interface Validator<T : Any> {
+    val constraints: ValidatorDescriptor<T>
 }
 
 @ValidationDslMarker
 class ConstraintsBuilder<T : Any> internal constructor() {
 
-    private val constraints: MutableList<Constraint<T>> = mutableListOf()
+    private val constraints: MutableList<ConstraintDescriptor<T>> = mutableListOf()
 
     fun constraint(
         violation: String,
@@ -42,165 +42,165 @@ class ConstraintsBuilder<T : Any> internal constructor() {
         constraints.add(ConstraintBuilder<T>(violation).apply(description).build())
     }
 
-    internal fun build(): ConstraintsDescriptor<T> = ConstraintsDescriptor(constraints)
+    internal fun build(): ValidatorDescriptor<T> = ValidatorDescriptor(constraints)
 }
 
 @ValidationDslMarker
-interface Validator<DT> {
+interface Constraint<DT> {
 
     fun validation(validate: (DT) -> Boolean)
 
-    fun <DT1> on(property: (DT) -> DT1, validator: Validator<DT1>.() -> Unit)
-    fun <DT1> on(property: KProperty0<DT1>, validator: Validator<DT1>.() -> Unit)
-    fun <DT1 : Any> on(property: (DT) -> DT1?): PropertyNullableValidator<DT, DT1>
-    fun <DT1 : Any> on(property: KProperty0<DT1?>): PropertyNullableValidator<DT, DT1>
+    fun <DT1> on(property: (DT) -> DT1, constraint: Constraint<DT1>.() -> Unit)
+    fun <DT1> on(property: KProperty0<DT1>, constraint: Constraint<DT1>.() -> Unit)
+    fun <DT1 : Any> on(property: (DT) -> DT1?): NullablePropertyScopedConstraint<DT, DT1>
+    fun <DT1 : Any> on(property: KProperty0<DT1?>): NullablePropertyScopedConstraint<DT, DT1>
 
-    infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.ifExists(
-        validations: Validator<DT1>.() -> Unit
+    infix fun <DT1 : Any> NullablePropertyScopedConstraint<DT, DT1>.ifExists(
+        validations: Constraint<DT1>.() -> Unit
     )
 
-    infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.mustExist(
-        validations: Validator<DT1>.() -> Unit
+    infix fun <DT1 : Any> NullablePropertyScopedConstraint<DT, DT1>.mustExist(
+        validations: Constraint<DT1>.() -> Unit
     )
 }
 
 @ValidationDslMarker
 class ConstraintBuilder<T : Any> internal constructor(
     private val violation: String
-) : Validator<T> {
+) : Constraint<T> {
 
-    private val includedConstraints: MutableList<IncludedConstraints<T, *, *>> = mutableListOf()
-    private val validations: MutableList<Validation<T>> = mutableListOf()
-    private val metadata: MutableList<Metadata<T, *>> = mutableListOf()
+    private val includedValidator: MutableList<IncludedValidatorDescriptor<T, *, *>> = mutableListOf()
+    private val validations: MutableList<ValidationDescriptor<T>> = mutableListOf()
+    private val metadata: MutableList<MetadataDescriptor<T, *>> = mutableListOf()
 
     override fun validation(validate: (T) -> Boolean) {
-        validations.add(Validation(validate))
+        validations.add(ValidationDescriptor(validate))
     }
 
     @Meta
     fun <@MetaType P> meta(@MetaName name: String, get: (T) -> P) {
-        metadata.add(Metadata(name, get))
+        metadata.add(MetadataDescriptor(name, get))
     }
 
-    //TODO: combine both parameters of constrainer into a single object
+    //TODO: combine both parameters of validator into a single object
     @Meta
-    fun <T1 : Any, @InclusionType @MetaType C : Constrains<T1>> include(
+    fun <T1 : Any, @InclusionType @MetaType C : Validator<T1>> include(
         @MetaName meta: String,
         property: (T) -> T1?,
-        constrainer: (T, T1) -> C
+        validator: (T, T1) -> C
     ) {
-        includedConstraints.add(IncludedConstraints(meta, property, constrainer))
+        includedValidator.add(IncludedValidatorDescriptor(meta, property, validator))
     }
 
     @Meta
-    fun <T1 : Any, @InclusionType @MetaType C : Constrains<T1>> include(
+    fun <T1 : Any, @InclusionType @MetaType C : Validator<T1>> include(
         @MetaName meta: String,
         property: KProperty0<T1?>,
-        constrainer: (T, T1) -> C
+        validator: (T, T1) -> C
     ) {
-        include(meta, { property.get() }, constrainer)
+        include(meta, { property.get() }, validator)
     }
 
     override fun <DT> on(
         property: (T) -> DT,
-        validator: Validator<DT>.() -> Unit
+        constraint: Constraint<DT>.() -> Unit
     ) = validation {
-        ValidatorImpl<DT>().apply(validator).validateAll(property.invoke(it))
+        ScopedConstraintBuilder<DT>().apply(constraint).validateAll(property.invoke(it))
     }
 
     override fun <DT> on(
         property: KProperty0<DT>,
-        validator: Validator<DT>.() -> Unit
+        constraint: Constraint<DT>.() -> Unit
     ) = validation {
-        ValidatorImpl<DT>().apply(validator).validateAll(property.get())
+        ScopedConstraintBuilder<DT>().apply(constraint).validateAll(property.get())
     }
 
-    override fun <DT : Any> on(property: (T) -> DT?): PropertyNullableValidator<T, DT> {
-        return PropertyNullableValidator(property)
+    override fun <DT : Any> on(property: (T) -> DT?): NullablePropertyScopedConstraint<T, DT> {
+        return NullablePropertyScopedConstraint(property)
     }
 
-    override fun <DT : Any> on(property: KProperty0<DT?>): PropertyNullableValidator<T, DT> {
+    override fun <DT : Any> on(property: KProperty0<DT?>): NullablePropertyScopedConstraint<T, DT> {
         return on { property.get() }
     }
 
-    override infix fun <DT : Any> PropertyNullableValidator<T, DT>.ifExists(
-        validations: Validator<DT>.() -> Unit
+    override infix fun <DT : Any> NullablePropertyScopedConstraint<T, DT>.ifExists(
+        validations: Constraint<DT>.() -> Unit
     ) = this@ConstraintBuilder.validation {
         val item = this@ifExists.get(it)
         if (item != null) {
-            ValidatorImpl<DT>().apply(validations).validateAll(item)
+            ScopedConstraintBuilder<DT>().apply(validations).validateAll(item)
         } else {
             true
         }
     }
 
-    override infix fun <DT : Any> PropertyNullableValidator<T, DT>.mustExist(
-        validations: Validator<DT>.() -> Unit
+    override infix fun <DT : Any> NullablePropertyScopedConstraint<T, DT>.mustExist(
+        validations: Constraint<DT>.() -> Unit
     ) = this@ConstraintBuilder.validation {
         val item = this@mustExist.get(it)
         if (item != null) {
-            ValidatorImpl<DT>().apply(validations).validateAll(item)
+            ScopedConstraintBuilder<DT>().apply(validations).validateAll(item)
         } else {
             false
         }
     }
 
-    internal fun build(): Constraint<T> = Constraint(
+    internal fun build(): ConstraintDescriptor<T> = ConstraintDescriptor(
         violation,
-        includedConstraints,
+        includedValidator,
         validations,
         metadata
     )
 }
 
 @ValidationDslMarker
-class ValidatorImpl<DT> : Validator<DT> {
+class ScopedConstraintBuilder<DT> : Constraint<DT> {
 
-    private val validations: MutableList<Validation<DT>> = mutableListOf()
+    private val validations: MutableList<ValidationDescriptor<DT>> = mutableListOf()
 
     override fun validation(validate: (DT) -> Boolean) {
-        validations.add(Validation(validate))
+        validations.add(ValidationDescriptor(validate))
     }
 
     override fun <DT1> on(
         property: (DT) -> DT1,
-        validator: Validator<DT1>.() -> Unit
+        constraint: Constraint<DT1>.() -> Unit
     ) = validation {
-        ValidatorImpl<DT1>().apply(validator).validateAll(property.invoke(it))
+        ScopedConstraintBuilder<DT1>().apply(constraint).validateAll(property.invoke(it))
     }
 
     override fun <DT1> on(
         property: KProperty0<DT1>,
-        validator: Validator<DT1>.() -> Unit
+        constraint: Constraint<DT1>.() -> Unit
     ) = validation {
-        ValidatorImpl<DT1>().apply(validator).validateAll(property.get())
+        ScopedConstraintBuilder<DT1>().apply(constraint).validateAll(property.get())
     }
 
-    override fun <DT1 : Any> on(property: (DT) -> DT1?): PropertyNullableValidator<DT, DT1> {
-        return PropertyNullableValidator(property)
+    override fun <DT1 : Any> on(property: (DT) -> DT1?): NullablePropertyScopedConstraint<DT, DT1> {
+        return NullablePropertyScopedConstraint(property)
     }
 
-    override fun <DT1 : Any> on(property: KProperty0<DT1?>): PropertyNullableValidator<DT, DT1> {
+    override fun <DT1 : Any> on(property: KProperty0<DT1?>): NullablePropertyScopedConstraint<DT, DT1> {
         return on { property.get() }
     }
 
-    override infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.ifExists(
-        validations: Validator<DT1>.() -> Unit
-    ) = this@ValidatorImpl.validation {
+    override infix fun <DT1 : Any> NullablePropertyScopedConstraint<DT, DT1>.ifExists(
+        validations: Constraint<DT1>.() -> Unit
+    ) = this@ScopedConstraintBuilder.validation {
         val item = this@ifExists.get(it)
         if (item != null) {
-            ValidatorImpl<DT1>().apply(validations).validateAll(item)
+            ScopedConstraintBuilder<DT1>().apply(validations).validateAll(item)
         } else {
             true
         }
     }
 
-    override infix fun <DT1 : Any> PropertyNullableValidator<DT, DT1>.mustExist(
-        validations: Validator<DT1>.() -> Unit
-    ) = this@ValidatorImpl.validation {
+    override infix fun <DT1 : Any> NullablePropertyScopedConstraint<DT, DT1>.mustExist(
+        validations: Constraint<DT1>.() -> Unit
+    ) = this@ScopedConstraintBuilder.validation {
         val item = this@mustExist.get(it)
         if (item != null) {
-            ValidatorImpl<DT1>().apply(validations).validateAll(item)
+            ScopedConstraintBuilder<DT1>().apply(validations).validateAll(item)
         } else {
             false
         }
@@ -220,7 +220,7 @@ class ValidatorImpl<DT> : Validator<DT> {
 }
 
 @ValidationDslMarker
-class PropertyNullableValidator<T, DT : Any> internal constructor(
+class NullablePropertyScopedConstraint<T, DT : Any> internal constructor(
     private val get: (T) -> DT?
 ) {
     internal fun get(owner: T)  = get.invoke(owner)
@@ -229,8 +229,8 @@ class PropertyNullableValidator<T, DT : Any> internal constructor(
 @Suppress("unused")
 // The receiver is needed to ensure dsl integrity
 // This lives outside of the interface to prevent overriding it
-fun <T : Any> Constrains<T>.describe(
+fun <T : Any> Validator<T>.describe(
     description: ConstraintsBuilder<T>.() -> Unit
-): Lazy<ConstraintsDescriptor<T>> {
+): Lazy<ValidatorDescriptor<T>> {
     return lazy { ConstraintsBuilder<T>().apply(description).build() }
 }

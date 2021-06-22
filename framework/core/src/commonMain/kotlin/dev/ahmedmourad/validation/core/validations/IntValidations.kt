@@ -1,32 +1,32 @@
 package dev.ahmedmourad.validation.core.validations
 
-import dev.ahmedmourad.validation.core.Validator
+import dev.ahmedmourad.validation.core.Constraint
 
-inline fun Validator<Int>.isDivisibleBy(
+inline fun Constraint<Int>.isDivisibleBy(
     crossinline other: (Int) -> Int
 ) = validation {
     it % other(it) == 0
 }
 
-fun Validator<Int>.isDivisibleBy(other: Int) = isDivisibleBy { other }
+fun Constraint<Int>.isDivisibleBy(other: Int) = isDivisibleBy { other }
 
-inline fun Validator<Int>.isNotDivisibleBy(
+inline fun Constraint<Int>.isNotDivisibleBy(
     crossinline other: (Int) -> Int
 ) = validation {
     it % other(it) != 0
 }
 
-fun Validator<Int>.isNotDivisibleBy(other: Int) = isNotDivisibleBy { other }
+fun Constraint<Int>.isNotDivisibleBy(other: Int) = isNotDivisibleBy { other }
 
-fun Validator<Int>.isEven() = validation {
+fun Constraint<Int>.isEven() = validation {
     it % 2 == 0
 }
 
-fun Validator<Int>.isOdd() = validation {
+fun Constraint<Int>.isOdd() = validation {
     it % 2 != 0
 }
 
-fun Validator<Int>.isPositive(orZero: Boolean) = validation {
+fun Constraint<Int>.isPositive(orZero: Boolean) = validation {
     if (orZero) {
         it >= 0
     } else {
@@ -34,7 +34,7 @@ fun Validator<Int>.isPositive(orZero: Boolean) = validation {
     }
 }
 
-fun Validator<Int>.isNegative(orZero: Boolean) = validation {
+fun Constraint<Int>.isNegative(orZero: Boolean) = validation {
     if (orZero) {
         it <= 0
     } else {
@@ -42,22 +42,22 @@ fun Validator<Int>.isNegative(orZero: Boolean) = validation {
     }
 }
 
-fun Validator<Int>.isZero() = validation {
+fun Constraint<Int>.isZero() = validation {
     it == 0
 }
 
-fun Validator<Int>.isNotZero() = validation {
+fun Constraint<Int>.isNotZero() = validation {
     it != 0
 }
 
-fun Validator<Int>.isPrime() = validation {
+fun Constraint<Int>.isPrime() = validation {
     if (it < 2) return@validation false
     (2..(it / 2)).none { n ->
         it % n == 0
     }
 }
 
-fun Validator<Int>.isNotPrime() = validation {
+fun Constraint<Int>.isNotPrime() = validation {
     if (it < 2) return@validation true
     (2..(it / 2)).any { n ->
         it % n == 0

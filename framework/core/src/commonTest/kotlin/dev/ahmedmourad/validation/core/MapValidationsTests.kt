@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class MapValidationsTests {
 
     @Test
     fun isEmpty_meansTheMapIsEmpty() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             isEmpty()
         }.allMatch(
             emptyMap()
@@ -23,7 +23,7 @@ class MapValidationsTests {
 
     @Test
     fun isNotEmpty_meansTheMapIsNotEmpty() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             isNotEmpty()
         }.allMatch(
             mapOf(1 to Unit),
@@ -36,7 +36,7 @@ class MapValidationsTests {
 
     @Test
     fun minSize_meansTheMapMustHaveAtLeastTheGivenNumberOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             minSize(4)
         }.allMatch(
             mapOf(1 to Unit, 2 to Unit, 3 to Unit, 4 to Unit),
@@ -54,7 +54,7 @@ class MapValidationsTests {
 
     @Test
     fun minSizeL_meansTheMapMustHaveAtLeastTheGivenNumberOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             minSize { 4 }
         }.allMatch(
             mapOf(1 to Unit, 2 to Unit, 3 to Unit, 4 to Unit),
@@ -72,7 +72,7 @@ class MapValidationsTests {
 
     @Test
     fun maxSize_meansTheMapMustHaveAtMostTheGivenNumberOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             maxSize(4)
         }.allMatch(
             emptyMap(),
@@ -90,7 +90,7 @@ class MapValidationsTests {
 
     @Test
     fun maxSizeL_meansTheMapMustHaveAtMostTheGivenNumberOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             maxSize { 4 }
         }.allMatch(
             emptyMap(),
@@ -108,7 +108,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeLessThan_meansTheMapMustHaveLessThanTheGivenNumberOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeLessThan(4)
         }.allMatch(
             emptyMap(),
@@ -126,7 +126,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeLessThanL_meansTheMapMustHaveLessThanTheGivenNumberOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeLessThan { 4 }
         }.allMatch(
             emptyMap(),
@@ -144,7 +144,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeLargerThan_meansTheMapMustHaveMoreThanTheGivenNumberOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeLargerThan(4)
         }.allMatch(
             mapOf(1 to Unit, 2 to Unit, 3 to Unit, 4 to Unit, 5 to Unit),
@@ -162,7 +162,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeLargerThanL_meansTheMapMustHaveMoreThanTheGivenNumberOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeLargerThan { 4 }
         }.allMatch(
             mapOf(1 to Unit, 2 to Unit, 3 to Unit, 4 to Unit, 5 to Unit),
@@ -180,7 +180,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeIn_meansTheMapMustHaveTheGivenRangeOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeIn(3, 5)
         }.allMatch(
             mapOf(1 to Unit, 2 to Unit, 3 to Unit),
@@ -198,7 +198,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeInR_meansTheMapMustHaveTheGivenRangeOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeIn(3..5)
         }.allMatch(
             mapOf(1 to Unit, 2 to Unit, 3 to Unit),
@@ -216,7 +216,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeInRL_meansTheMapMustHaveTheGivenRangeOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeIn { 3..5 }
         }.allMatch(
             mapOf(1 to Unit, 2 to Unit, 3 to Unit),
@@ -234,7 +234,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeNotIn_meansTheMapMustNotHaveTheGivenRangeOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeNotIn(3, 5)
         }.allMatch(
             emptyMap(),
@@ -252,7 +252,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeNotInR_meansTheMapMustNotHaveTheGivenRangeOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeNotIn(3..5)
         }.allMatch(
             emptyMap(),
@@ -270,7 +270,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeNotInRL_meansTheMapMustNotHaveTheGivenRangeOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeNotIn { 3..5 }
         }.allMatch(
             emptyMap(),
@@ -288,7 +288,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeEqualTo_meansTheMapMustHaveTheGivenNumberOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeEqualTo(3)
         }.allMatch(
             mapOf(1 to Unit, 2 to Unit, 3 to Unit)
@@ -303,7 +303,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeEqualToL_meansTheMapMustHaveTheGivenNumberOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeEqualTo { 3 }
         }.allMatch(
             mapOf(1 to Unit, 2 to Unit, 3 to Unit)
@@ -318,7 +318,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeNotEqualTo_meansTheMapMustNotHaveTheGivenNumberOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeNotEqualTo(3)
         }.allMatch(
             emptyMap(),
@@ -333,7 +333,7 @@ class MapValidationsTests {
 
     @Test
     fun sizeNotEqualToL_meansTheMapMustNotHaveTheGivenNumberOfElements() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             sizeNotEqualTo { 3 }
         }.allMatch(
             emptyMap(),
@@ -348,7 +348,7 @@ class MapValidationsTests {
 
     @Test
     fun keys_meansTheGivenValidationsMatchAllTheKeysSetOfTheMap() {
-        validator<Map<Int, Unit>> {
+        constraint<Map<Int, Unit>> {
             keys {
                 forAll {
                     inValues(1, 3, 4, 5)
@@ -371,7 +371,7 @@ class MapValidationsTests {
 
     @Test
     fun values_meansTheGivenValidationsMatchAllTheValuesCollectionOfTheMap() {
-        validator<Map<Int, Int?>> {
+        constraint<Map<Int, Int?>> {
             values {
                 forAll {
                     inValues(null, 1, 3, 4, 5)
@@ -395,7 +395,7 @@ class MapValidationsTests {
 
     @Test
     fun entries_meansTheGivenValidationsMatchAllTheEntriesSetOfTheMap() {
-        validator<Map<Int, Int?>> {
+        constraint<Map<Int, Int?>> {
             entries {
                 forAll {
                     validation { it.key == it.value }
@@ -419,7 +419,7 @@ class MapValidationsTests {
 
     @Test
     fun key_meansTheGivenValidationsMatchTheKeyOfTheMapEntry() {
-        validator<Map.Entry<Int, Unit>> {
+        constraint<Map.Entry<Int, Unit>> {
             key {
                 max(3)
             }
@@ -437,7 +437,7 @@ class MapValidationsTests {
 
     @Test
     fun value_meansTheGivenValidationsMatchTheValueOfTheMapEntry() {
-        validator<Map.Entry<Unit, Int>> {
+        constraint<Map.Entry<Unit, Int>> {
             value {
                 max(3)
             }

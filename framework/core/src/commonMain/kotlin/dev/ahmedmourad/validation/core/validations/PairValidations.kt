@@ -1,16 +1,16 @@
 package dev.ahmedmourad.validation.core.validations
 
-import dev.ahmedmourad.validation.core.Validator
-import dev.ahmedmourad.validation.core.ValidatorImpl
+import dev.ahmedmourad.validation.core.Constraint
+import dev.ahmedmourad.validation.core.ScopedConstraintBuilder
 
-inline fun <A, B> Validator<Pair<A, B>>.first(
-    crossinline firstValidator: Validator<A>.() -> Unit
+inline fun <A, B> Constraint<Pair<A, B>>.first(
+    crossinline firstConstraint: Constraint<A>.() -> Unit
 ) = validation {
-    ValidatorImpl<A>().apply(firstValidator).validateAll(it.first)
+    ScopedConstraintBuilder<A>().apply(firstConstraint).validateAll(it.first)
 }
 
-inline fun <A, B> Validator<Pair<A, B>>.second(
-    crossinline secondValidator: Validator<B>.() -> Unit
+inline fun <A, B> Constraint<Pair<A, B>>.second(
+    crossinline secondConstraint: Constraint<B>.() -> Unit
 ) = validation {
-    ValidatorImpl<B>().apply(secondValidator).validateAll(it.second)
+    ScopedConstraintBuilder<B>().apply(secondConstraint).validateAll(it.second)
 }

@@ -1,13 +1,13 @@
 package dev.ahmedmourad.validation.core.utils
 
-import dev.ahmedmourad.validation.core.Validator
-import dev.ahmedmourad.validation.core.ValidatorImpl
+import dev.ahmedmourad.validation.core.Constraint
+import dev.ahmedmourad.validation.core.ScopedConstraintBuilder
 
-fun <DT> validator(validations: Validator<DT>.() -> Unit): ValidatorImpl<DT> {
-    return ValidatorImpl<DT>().apply(validations)
+fun <DT> constraint(constraint: Constraint<DT>.() -> Unit): ScopedConstraintBuilder<DT> {
+    return ScopedConstraintBuilder<DT>().apply(constraint)
 }
 
-fun <DT> ValidatorImpl<DT>.allMatch(vararg items: DT): ValidatorImpl<DT> {
+fun <DT> ScopedConstraintBuilder<DT>.allMatch(vararg items: DT): ScopedConstraintBuilder<DT> {
     val failed = items.filterNot {
         this.validateAll(it)
     }
@@ -19,7 +19,7 @@ fun <DT> ValidatorImpl<DT>.allMatch(vararg items: DT): ValidatorImpl<DT> {
     return this
 }
 
-fun <DT> ValidatorImpl<DT>.allFail(vararg items: DT): ValidatorImpl<DT> {
+fun <DT> ScopedConstraintBuilder<DT>.allFail(vararg items: DT): ScopedConstraintBuilder<DT> {
     val matching = items.filter {
         this.validateAll(it)
     }

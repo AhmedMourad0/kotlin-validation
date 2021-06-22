@@ -14,10 +14,10 @@ class ViolationsGeneratorTests {
     var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
     @Test
-    fun `A violations sealed class should be created for the constrainer with a child for each constraint`() {
+    fun `A violations sealed class should be created for the validator with a child for each constraint`() {
         val successResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
-            object SomeConstrainer : Constrains<Int> {
+            object SomeValidator : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") { }
                     constraint("SecondViolation") { }
@@ -44,7 +44,7 @@ class ViolationsGeneratorTests {
     fun `An object is created when there are no metas and a class is created when there are metas`() {
         val successResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
-            object SomeConstrainer : Constrains<Int> {
+            object SomeValidator : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") {
                         meta("v") { 4 }
@@ -67,17 +67,17 @@ class ViolationsGeneratorTests {
     }
 
     @Test
-    fun `constrainedAlias applies an alias to the constrained type`() {
+    fun `subjectAlias applies an alias to the subject type`() {
         val successResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
-            object SomeConstrainer : Constrains<Int> {
+            object SomeValidator : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") { }
                 }
             }
 
-            @ConstrainerConfig(constrainedAlias = "DeluxeInt")
-            object AnotherConstrainer : Constrains<Int> {
+            @ValidatorConfig(subjectAlias = "DeluxeInt")
+            object AnotherValidator : Validator<Int> {
                 override val constraints by describe {
                     constraint("SecondViolation") { }
                 }
@@ -102,7 +102,7 @@ class ViolationsGeneratorTests {
     fun `meta adds a property to the violation of the corresponding constraint`() {
         val successResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
-            object SomeConstrainer : Constrains<Int> {
+            object SomeValidator : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") {
                         meta("value") { 5 }
@@ -112,7 +112,7 @@ class ViolationsGeneratorTests {
                 }
             }
 
-            object AnotherConstrainer : Constrains<String> {
+            object AnotherValidator : Validator<String> {
                 override val constraints by describe {
                     constraint("SecondViolation") {
                         meta("value") { 5 }
@@ -145,31 +145,31 @@ class ViolationsGeneratorTests {
     }
 
     @Test
-    fun `include adds a list of the violations of the included constrainer as a property of the violation of the corresponding constraint`() {
+    fun `include adds a list of the violations of the included validator as a property of the violation of the corresponding constraint`() {
         val successResult = compile(SourceFile.kotlin("Test.kt", """$PACKAGE_AND_IMPORTS
             
-            object IntConstrainer : Constrains<Int> {
+            object IntValidator : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") { }
                 }
             }
 
-            @ConstrainerConfig(constrainedAlias = "LongInt")
-            object LongIntConstrainer : Constrains<Int> {
+            @ValidatorConfig(subjectAlias = "LongInt")
+            object LongIntValidator : Validator<Int> {
                 override val constraints by describe {
                     constraint("FirstViolation") { }
                 }
             }
 
-            object AnotherConstrainer : Constrains<String> {
+            object AnotherValidator : Validator<String> {
                 override val constraints by describe {
                     constraint("SecondViolation") {
                         meta("value") { 5 }
                         include("value1", { 4 }) { _, _ ->
-                            IntConstrainer
+                            IntValidator
                         }
                         include("value2", { 54 }) { _, _ ->
-                            LongIntConstrainer
+                            LongIntValidator
                         }
                     }
                 }

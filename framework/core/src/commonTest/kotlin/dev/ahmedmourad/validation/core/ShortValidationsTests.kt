@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class ShortValidationsTests {
 
     @Test
     fun isDivisibleBy_meansThisShortIsDivisibleByTheGivenShort() {
-        validator<Short> {
+        constraint<Short> {
             isDivisibleBy(3)
         }.allMatch(
             0,
@@ -29,7 +29,7 @@ class ShortValidationsTests {
 
     @Test
     fun isDivisibleByL_meansThisShortIsDivisibleByTheGivenShort() {
-        validator<Short> {
+        constraint<Short> {
             isDivisibleBy { 3 }
         }.allMatch(
             0,
@@ -48,7 +48,7 @@ class ShortValidationsTests {
 
     @Test
     fun isNotDivisibleBy_meansThisShortIsNotDivisibleByTheGivenShort() {
-        validator<Short> {
+        constraint<Short> {
             isNotDivisibleBy(3)
         }.allMatch(
             1,
@@ -67,7 +67,7 @@ class ShortValidationsTests {
 
     @Test
     fun isNotDivisibleByL_meansThisShortIsNotDivisibleByTheGivenShort() {
-        validator<Short> {
+        constraint<Short> {
             isNotDivisibleBy { 3 }
         }.allMatch(
             1,
@@ -86,7 +86,7 @@ class ShortValidationsTests {
 
     @Test
     fun isEven_meansThisShortIsEven() {
-        validator<Short> {
+        constraint<Short> {
             isEven()
         }.allMatch(
             0,
@@ -106,7 +106,7 @@ class ShortValidationsTests {
 
     @Test
     fun isOdd_meansThisShortIsOdd() {
-        validator<Short> {
+        constraint<Short> {
             isOdd()
         }.allMatch(
             1,
@@ -127,7 +127,7 @@ class ShortValidationsTests {
     @Test
     fun isPositive_meansThisShortIsPositive() {
 
-        validator<Short> {
+        constraint<Short> {
             isPositive(false)
         }.allMatch(
             1,
@@ -144,7 +144,7 @@ class ShortValidationsTests {
             -125
         )
 
-        validator<Short> {
+        constraint<Short> {
             isPositive(true)
         }.allMatch(
             0,
@@ -165,7 +165,7 @@ class ShortValidationsTests {
     @Test
     fun isNegative_meansThisShortIsNegative() {
 
-        validator<Short> {
+        constraint<Short> {
             isNegative(false)
         }.allMatch(
             -1,
@@ -182,7 +182,7 @@ class ShortValidationsTests {
             125
         )
 
-        validator<Short> {
+        constraint<Short> {
             isNegative(true)
         }.allMatch(
             0,
@@ -202,7 +202,7 @@ class ShortValidationsTests {
 
     @Test
     fun isZero_meansThisShortEqualsZero() {
-        validator<Short> {
+        constraint<Short> {
             isZero()
         }.allMatch(
             0
@@ -222,7 +222,7 @@ class ShortValidationsTests {
 
     @Test
     fun isNotZero_meansThisShortDoesNotEqualZero() {
-        validator<Short> {
+        constraint<Short> {
             isNotZero()
         }.allMatch(
             -125,
@@ -242,7 +242,7 @@ class ShortValidationsTests {
 
     @Test
     fun isPrime_meansThisShortIsPrime() {
-        validator<Short> {
+        constraint<Short> {
             isPrime()
         }.allMatch(
             2,
@@ -280,7 +280,7 @@ class ShortValidationsTests {
 
     @Test
     fun isNotPrime_meansThisShortIsNotPrime() {
-        validator<Short> {
+        constraint<Short> {
             isNotPrime()
         }.allMatch(
             -5,

@@ -19,7 +19,7 @@ internal class ConstraintsAnalyser(
     private val bindingContext: BindingContext,
     private val dslValidator: DslValidator
 ) {
-    fun analyse(projectFiles: Collection<KtFile>): Sequence<ConstraintsDescriptor> {
+    fun analyse(projectFiles: Collection<KtFile>): Sequence<ValidatorDescriptor> {
 
         val unverifiedConstructorCalls = /*mutableListOf<ResolvedCall<*>>()*/bindingContext.getSliceContents(BindingContext.RESOLVED_CALL)
             .asSequence()
@@ -48,18 +48,18 @@ internal class ConstraintsAnalyser(
 //        }.toList().toString())
         val constraintsDescriptors = projectFiles.asSequence().flatMap {
             it.classesAndInnerClasses().filter { classOrObject ->
-                classOrObject.hasSuperType(bindingContext, fqNameConstrains)
+                classOrObject.hasSuperType(bindingContext, fqNameValidator)
             }
         }/*.also {
             throw RuntimeException("XXXXXXXXXXXX${it.count()}")
-        }*/.mapNotNull { constrainer ->
+        }*/.mapNotNull { validator ->
 
-            dslValidator.reportError(constrainer.nameAsSafeName.asString(), null)
+            dslValidator.reportError(validator.nameAsSafeName.asString(), null)
 
             val constraintCalls = mutableListOf<ResolvedCall<*>>()
             val metaCalls = mutableListOf<ResolvedCall<*>>()
 
-            constrainer.getOrCreateBody().properties.firstOrNull {
+            validator.getOrCreateBody().properties.firstOrNull {
                 it.nameAsSafeName == propertyConstraints
             }?.delegate //TODO: this should be segregated with an error conditions
                 ?.expression
@@ -82,7 +82,7 @@ internal class ConstraintsAnalyser(
                     }
                 } ?: return@mapNotNull null
 
-            val constrainedType = findConstrainedType(constrainer) ?: return@mapNotNull null
+            val subjectType = findSubjectType(validator) ?: return@mapNotNull null
 
             val violationsDescriptors = constraintCalls.mapNotNull innerMap@{ violationResolvedCall ->
                 val (name, nameExpression) = findViolationName(violationResolvedCall) ?: return@innerMap null
@@ -95,11 +95,11 @@ internal class ConstraintsAnalyser(
             }
 
             dslValidator.verifyNoDuplicateViolations(
-                ConstraintsDescriptor(
+                ValidatorDescriptor(
                     bindingContext,
                     dslValidator,
-                    constrainedType,
-                    constrainer,
+                    subjectType,
+                    validator,
                     violationsDescriptors
                 )
             )
@@ -110,13 +110,13 @@ internal class ConstraintsAnalyser(
         }
 
         unverifiedConstructorCalls.forEach { call ->
-            val constrainedName = call.candidateDescriptor
+            val subjectName = call.candidateDescriptor
                 .containingDeclaration
                 .fqNameOrNull()
                 ?.shortName()
                 ?.asString()
             dslValidator.reportError(
-                "Only validated instances of $constrainedName can be created",
+                "Only validated instances of $subjectName can be created",
                 call.call.callElement
             )
         }
@@ -124,18 +124,18 @@ internal class ConstraintsAnalyser(
         return constraintsDescriptors
     }
 
-    private fun findConstrainedType(constrainer: KtClassOrObject): KotlinType? {
+    private fun findSubjectType(validator: KtClassOrObject): KotlinType? {
 
-        val constrainsSuperType = constrainer.findSuperType(bindingContext, fqNameConstrains)
+        val validatorSuperType = validator.findSuperType(bindingContext, fqNameValidator)
 
-        return constrainsSuperType?.typeAsUserType
+        return validatorSuperType?.typeAsUserType
             ?.typeArguments
             ?.elementAtOrNull(0)
             ?.typeReference
             ?.kotlinType(bindingContext)
             ?: dslValidator.reportError(
-                "Failed to resolve constrained type",
-                constrainsSuperType
+                "Failed to resolve subject type",
+                validatorSuperType
             )
     }
 
@@ -176,7 +176,7 @@ internal class ConstraintsAnalyser(
 
     private fun findMeta(statementResolvedCall: ResolvedCall<*>): MetaDescriptor? {
 
-        val (includedConstraint, metaTypeFqName) = findMetaType(
+        val (includedValidator, metaTypeFqName) = findMetaType(
             statementResolvedCall
         ) ?: return dslValidator.reportError(
             "Unable to find `meta` type",
@@ -206,12 +206,12 @@ internal class ConstraintsAnalyser(
                 metaName,
                 metaNameExpression,
                 metaTypeFqName,
-                includedConstraint
+                includedValidator
             )
         }
     }
 
-    private fun findMetaType(statementResolvedCall: ResolvedCall<*>): Pair<IncludedConstraintDescriptor?, String>? {
+    private fun findMetaType(statementResolvedCall: ResolvedCall<*>): Pair<IncludedValidatorDescriptor?, String>? {
 
         val metaType = statementResolvedCall.typeArguments.entries.firstOrNull { (meta, _) ->
             meta.hasAnnotation(fqNameMetaType)
@@ -219,26 +219,26 @@ internal class ConstraintsAnalyser(
 
         return if (metaType.key.hasAnnotation(fqNameInclusionType)) {
 
-            val constrainsSuperType = metaType.value
+            val validatorSuperType = metaType.value
                 ?.supertypes()
-                ?.firstOrNull { it.fqNameSafe == fqNameConstrains }
+                ?.firstOrNull { it.fqNameSafe == fqNameValidator }
                 ?: return null
 
-            val constrainedAlias = metaType.value
+            val subjectAlias = metaType.value
                 ?.constructor
                 ?.declarationDescriptor
-                ?.findAnnotation(fqNameConstrainerConfig)
+                ?.findAnnotation(fqNameValidatorConfig)
                 ?.allValueArguments
-                ?.get(paramConstrainedAlias)
+                ?.get(paramSubjectAlias)
                 ?.value
                 ?.safeAs<String>()
 
-            val constrainedType = constrainsSuperType.arguments
+            val subjectType = validatorSuperType.arguments
                 .firstOrNull()
                 ?.type
                 ?: return null
 
-            val constrainedAliasOrSimpleName = constrainedAlias ?: constrainedType.simpleName() ?: return null
+            val subjectAliasOrSimpleName = subjectAlias ?: subjectType.simpleName() ?: return null
 
             val validationsFileFqName = metaType.value.constructor
                 .declarationDescriptor
@@ -249,15 +249,15 @@ internal class ConstraintsAnalyser(
                 ?.plus(OUTPUT_FOLDER)
                 ?: return null
 
-            IncludedConstraintDescriptor(
+            IncludedValidatorDescriptor(
                 validationsFileFqName,
-                constrainedType,
+                subjectType,
                 metaType.value,
-                constrainedAliasOrSimpleName
-            ) to "Set<$validationsFileFqName.$constrainedAliasOrSimpleName$SUFFIX_VIOLATIONS_SUPER_CLASS>"
+                subjectAliasOrSimpleName
+            ) to "Set<$validationsFileFqName.$subjectAliasOrSimpleName$SUFFIX_VIOLATIONS_SUPER_CLASS>"
 
         } else {
-            //TODO: if the metaTypeArg is a type param, inherit it from the constrainer .. or its parents?
+            //TODO: if the metaTypeArg is a type param, inherit it from the validator .. or its parents?
             null to metaType.value.deepFqName()
         }
     }

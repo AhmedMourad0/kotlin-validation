@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class ByteValidationsTests {
 
     @Test
     fun isDivisibleBy_meansThisByteIsDivisibleByTheGivenByte() {
-        validator<Byte> {
+        constraint<Byte> {
             isDivisibleBy(3)
         }.allMatch(
             0,
@@ -29,7 +29,7 @@ class ByteValidationsTests {
 
     @Test
     fun isDivisibleByL_meansThisByteIsDivisibleByTheGivenByte() {
-        validator<Byte> {
+        constraint<Byte> {
             isDivisibleBy { 3 }
         }.allMatch(
             0,
@@ -48,7 +48,7 @@ class ByteValidationsTests {
 
     @Test
     fun isNotDivisibleBy_meansThisByteIsNotDivisibleByTheGivenByte() {
-        validator<Byte> {
+        constraint<Byte> {
             isNotDivisibleBy(3)
         }.allMatch(
             1,
@@ -67,7 +67,7 @@ class ByteValidationsTests {
 
     @Test
     fun isNotDivisibleByL_meansThisByteIsNotDivisibleByTheGivenByte() {
-        validator<Byte> {
+        constraint<Byte> {
             isNotDivisibleBy { 3 }
         }.allMatch(
             1,
@@ -86,7 +86,7 @@ class ByteValidationsTests {
 
     @Test
     fun isEven_meansThisByteIsEven() {
-        validator<Byte> {
+        constraint<Byte> {
             isEven()
         }.allMatch(
             0,
@@ -106,7 +106,7 @@ class ByteValidationsTests {
 
     @Test
     fun isOdd_meansThisByteIsOdd() {
-        validator<Byte> {
+        constraint<Byte> {
             isOdd()
         }.allMatch(
             1,
@@ -127,7 +127,7 @@ class ByteValidationsTests {
     @Test
     fun isPositive_meansThisByteIsPositive() {
 
-        validator<Byte> {
+        constraint<Byte> {
             isPositive(false)
         }.allMatch(
             1,
@@ -144,7 +144,7 @@ class ByteValidationsTests {
             -125
         )
 
-        validator<Byte> {
+        constraint<Byte> {
             isPositive(true)
         }.allMatch(
             0,
@@ -165,7 +165,7 @@ class ByteValidationsTests {
     @Test
     fun isNegative_meansThisByteIsNegative() {
 
-        validator<Byte> {
+        constraint<Byte> {
             isNegative(false)
         }.allMatch(
             -1,
@@ -182,7 +182,7 @@ class ByteValidationsTests {
             125
         )
 
-        validator<Byte> {
+        constraint<Byte> {
             isNegative(true)
         }.allMatch(
             0,
@@ -202,7 +202,7 @@ class ByteValidationsTests {
 
     @Test
     fun isZero_meansThisByteEqualsZero() {
-        validator<Byte> {
+        constraint<Byte> {
             isZero()
         }.allMatch(
             0
@@ -222,7 +222,7 @@ class ByteValidationsTests {
 
     @Test
     fun isNotZero_meansThisByteDoesNotEqualZero() {
-        validator<Byte> {
+        constraint<Byte> {
             isNotZero()
         }.allMatch(
             -125,
@@ -242,7 +242,7 @@ class ByteValidationsTests {
 
     @Test
     fun isPrime_meansThisByteIsPrime() {
-        validator<Byte> {
+        constraint<Byte> {
             isPrime()
         }.allMatch(
             2,
@@ -280,7 +280,7 @@ class ByteValidationsTests {
 
     @Test
     fun isNotPrime_meansThisByteIsNotPrime() {
-        validator<Byte> {
+        constraint<Byte> {
             isNotPrime()
         }.allMatch(
             -5,

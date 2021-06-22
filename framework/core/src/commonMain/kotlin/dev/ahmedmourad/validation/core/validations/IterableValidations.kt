@@ -1,133 +1,133 @@
 package dev.ahmedmourad.validation.core.validations
 
-import dev.ahmedmourad.validation.core.Validator
-import dev.ahmedmourad.validation.core.ValidatorImpl
+import dev.ahmedmourad.validation.core.Constraint
+import dev.ahmedmourad.validation.core.ScopedConstraintBuilder
 
-inline fun <DT> Validator<out Iterable<DT>>.forAll(
-    crossinline itemValidator: Validator<DT>.() -> Unit
+inline fun <DT> Constraint<out Iterable<DT>>.forAll(
+    crossinline itemConstraint: Constraint<DT>.() -> Unit
 ) = validation { validated ->
     validated.all {
-        ValidatorImpl<DT>().apply(itemValidator).validateAll(it)
+        ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
     }
 }
 
-inline fun <DT> Validator<out Iterable<DT>>.forAny(
-    crossinline itemValidator: Validator<DT>.() -> Unit
+inline fun <DT> Constraint<out Iterable<DT>>.forAny(
+    crossinline itemConstraint: Constraint<DT>.() -> Unit
 ) = validation { validated ->
     validated.any {
-        ValidatorImpl<DT>().apply(itemValidator).validateAll(it)
+        ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
     }
 }
 
-inline fun <DT> Validator<out Iterable<DT>>.forNone(
-    crossinline itemValidator: Validator<DT>.() -> Unit
+inline fun <DT> Constraint<out Iterable<DT>>.forNone(
+    crossinline itemConstraint: Constraint<DT>.() -> Unit
 ) = validation { validated ->
     validated.none {
-        ValidatorImpl<DT>().apply(itemValidator).validateAll(it)
+        ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
     }
 }
 
-fun <DT> Validator<out Iterable<DT>>.isEmpty() = validation {
+fun <DT> Constraint<out Iterable<DT>>.isEmpty() = validation {
     it.count() == 0
 }
 
-fun <DT> Validator<out Iterable<DT>>.isNotEmpty() = validation {
+fun <DT> Constraint<out Iterable<DT>>.isNotEmpty() = validation {
     it.count() > 0
 }
 
-fun <DT> Validator<out Iterable<DT>>.isDistinct() = validation {
+fun <DT> Constraint<out Iterable<DT>>.isDistinct() = validation {
     it.distinct().count() == it.count()
 }
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.minSize(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.minSize(
     crossinline min: (DTI) -> Int
 ) = validation {
     it.count() >= min(it)
 }
 
-fun <DT> Validator<out Iterable<DT>>.minSize(min: Int) = minSize { min }
+fun <DT> Constraint<out Iterable<DT>>.minSize(min: Int) = minSize { min }
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.maxSize(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.maxSize(
     crossinline max: (DTI) -> Int
 ) = validation {
     it.count() <= max(it)
 }
 
-fun <DT> Validator<out Iterable<DT>>.maxSize(max: Int) = maxSize { max }
+fun <DT> Constraint<out Iterable<DT>>.maxSize(max: Int) = maxSize { max }
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeLessThan(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.sizeLessThan(
     crossinline maxExclusive: (DTI) -> Int
 ) = validation {
     it.count() < maxExclusive(it)
 }
 
-fun <DT> Validator<out Iterable<DT>>.sizeLessThan(maxExclusive: Int) = sizeLessThan { maxExclusive }
+fun <DT> Constraint<out Iterable<DT>>.sizeLessThan(maxExclusive: Int) = sizeLessThan { maxExclusive }
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeLargerThan(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.sizeLargerThan(
     crossinline minExclusive: (DTI) -> Int
 ) = validation {
     it.count() > minExclusive(it)
 }
 
-fun <DT> Validator<out Iterable<DT>>.sizeLargerThan(minExclusive: Int) = sizeLargerThan { minExclusive }
+fun <DT> Constraint<out Iterable<DT>>.sizeLargerThan(minExclusive: Int) = sizeLargerThan { minExclusive }
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeIn(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.sizeIn(
     crossinline range: (DTI) -> IntRange
 ) = validation {
     it.count() in range(it)
 }
 
-fun <DT> Validator<out Iterable<DT>>.sizeIn(range: IntRange) = sizeIn { range }
+fun <DT> Constraint<out Iterable<DT>>.sizeIn(range: IntRange) = sizeIn { range }
 
-fun <DT> Validator<out Iterable<DT>>.sizeIn(min: Int, max: Int) = sizeIn(min..max)
+fun <DT> Constraint<out Iterable<DT>>.sizeIn(min: Int, max: Int) = sizeIn(min..max)
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeNotIn(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.sizeNotIn(
     crossinline range: (DTI) -> IntRange
 ) = validation {
     it.count() !in range(it)
 }
 
-fun <DT> Validator<out Iterable<DT>>.sizeNotIn(range: IntRange) = sizeNotIn { range }
+fun <DT> Constraint<out Iterable<DT>>.sizeNotIn(range: IntRange) = sizeNotIn { range }
 
-fun <DT> Validator<out Iterable<DT>>.sizeNotIn(min: Int, max: Int) = sizeNotIn(min..max)
+fun <DT> Constraint<out Iterable<DT>>.sizeNotIn(min: Int, max: Int) = sizeNotIn(min..max)
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeEqualTo(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.sizeEqualTo(
     crossinline value: (DTI) -> Int
 ) = validation {
     it.count() == value(it)
 }
 
-fun <DT> Validator<out Iterable<DT>>.sizeEqualTo(value: Int) = sizeEqualTo { value }
+fun <DT> Constraint<out Iterable<DT>>.sizeEqualTo(value: Int) = sizeEqualTo { value }
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.sizeNotEqualTo(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.sizeNotEqualTo(
     crossinline value: (DTI) -> Int
 ) = validation {
     it.count() != value(it)
 }
 
-fun <DT> Validator<out Iterable<DT>>.sizeNotEqualTo(value: Int) = sizeNotEqualTo { value }
+fun <DT> Constraint<out Iterable<DT>>.sizeNotEqualTo(value: Int) = sizeNotEqualTo { value }
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.contains(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.contains(
     crossinline element: (DTI) -> DT
 ) = validation {
     it.contains(element(it))
 }
 
-fun <DT> Validator<out Iterable<DT>>.contains(
+fun <DT> Constraint<out Iterable<DT>>.contains(
     element: DT
 ) = contains { element }
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.doesNotContain(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.doesNotContain(
     crossinline element: (DTI) -> DT
 ) = validation {
     !it.contains(element(it))
 }
 
-fun <DT> Validator<out Iterable<DT>>.doesNotContain(
+fun <DT> Constraint<out Iterable<DT>>.doesNotContain(
     element: DT
 ) = doesNotContain { element }
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.containsAt(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.containsAt(
     index: Int,
     crossinline element: (DTI) -> DT
 ) = validation {
@@ -138,12 +138,12 @@ inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.containsAt(
     }
 }
 
-fun <DT> Validator<out Iterable<DT>>.containsAt(
+fun <DT> Constraint<out Iterable<DT>>.containsAt(
     index: Int,
     element: DT
 ) = containsAt(index) { element }
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.startsWith(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.startsWith(
     crossinline element: (DTI) -> DT
 ) = validation {
     try {
@@ -153,11 +153,11 @@ inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.startsWith(
     }
 }
 
-fun <DT> Validator<out Iterable<DT>>.startsWith(
+fun <DT> Constraint<out Iterable<DT>>.startsWith(
     element: DT
 ) = startsWith { element }
 
-inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.endsWith(
+inline fun <DT, DTI : Iterable<DT>> Constraint<DTI>.endsWith(
     crossinline element: (DTI) -> DT
 ) = validation {
     try {
@@ -167,56 +167,56 @@ inline fun <DT, DTI : Iterable<DT>> Validator<DTI>.endsWith(
     }
 }
 
-fun <DT> Validator<out Iterable<DT>>.endsWith(
+fun <DT> Constraint<out Iterable<DT>>.endsWith(
     element: DT
 ) = endsWith { element }
 
-fun <DT, DTI : Iterable<DT>> Validator<DTI>.containsAll(
+fun <DT, DTI : Iterable<DT>> Constraint<DTI>.containsAll(
     elements: (DTI) -> Iterable<DT>
 ) = validation { validated ->
     elements(validated).all { validated.contains(it) }
 }
 
-fun <DT, DTI : Iterable<DT>> Validator<DTI>.containsAll(
+fun <DT, DTI : Iterable<DT>> Constraint<DTI>.containsAll(
     vararg elements: DT
 ) = containsAll { elements.toList() }
 
-fun <DT, DTI : Iterable<DT>> Validator<DTI>.containsAll(
+fun <DT, DTI : Iterable<DT>> Constraint<DTI>.containsAll(
     elements: Iterable<DT>
 ) = containsAll { elements }
 
-fun <DT, DTI : Iterable<DT>> Validator<DTI>.isPartOf(
+fun <DT, DTI : Iterable<DT>> Constraint<DTI>.isPartOf(
     elements: (DTI) -> Iterable<DT>
 ) = validation { validated ->
     val elementsList = elements(validated)
     validated.all { elementsList.contains(it) }
 }
 
-fun <DT, DTI : Iterable<DT>> Validator<DTI>.isPartOf(
+fun <DT, DTI : Iterable<DT>> Constraint<DTI>.isPartOf(
     vararg elements: DT
 ) = isPartOf { elements.toList() }
 
-fun <DT, DTI : Iterable<DT>> Validator<DTI>.isPartOf(
+fun <DT, DTI : Iterable<DT>> Constraint<DTI>.isPartOf(
     elements: Iterable<DT>
 ) = isPartOf { elements }
 
-fun Validator<out Iterable<Boolean>>.allTrue() = validation { validated ->
+fun Constraint<out Iterable<Boolean>>.allTrue() = validation { validated ->
     validated.all { it }
 }
 
-fun Validator<out Iterable<Boolean>>.anyTrue() = validation { validated ->
+fun Constraint<out Iterable<Boolean>>.anyTrue() = validation { validated ->
     validated.any { it }
 }
 
-fun Validator<out Iterable<Boolean>>.anyFalse() = validation { validated ->
+fun Constraint<out Iterable<Boolean>>.anyFalse() = validation { validated ->
     validated.any { !it }
 }
 
-fun Validator<out Iterable<Boolean>>.allFalse() = validation { validated ->
+fun Constraint<out Iterable<Boolean>>.allFalse() = validation { validated ->
     validated.none { it }
 }
 
-fun <DT, DTI : Iterable<DT>> Validator<DTI>.contentEquals(
+fun <DT, DTI : Iterable<DT>> Constraint<DTI>.contentEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: (DTI) -> Iterable<DT>
@@ -228,13 +228,13 @@ fun <DT, DTI : Iterable<DT>> Validator<DTI>.contentEquals(
     )
 }
 
-fun <DT> Validator<out Iterable<DT>>.contentEquals(
+fun <DT> Constraint<out Iterable<DT>>.contentEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: Iterable<DT>
 ) = contentEquals(ignoreDuplicates, ignoreOrder) { other }
 
-fun <DT, DTI : Iterable<DT>> Validator<DTI>.contentNotEquals(
+fun <DT, DTI : Iterable<DT>> Constraint<DTI>.contentNotEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: (DTI) -> Iterable<DT>
@@ -246,7 +246,7 @@ fun <DT, DTI : Iterable<DT>> Validator<DTI>.contentNotEquals(
     )
 }
 
-fun <DT> Validator<out Iterable<DT>>.contentNotEquals(
+fun <DT> Constraint<out Iterable<DT>>.contentNotEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: Iterable<DT>

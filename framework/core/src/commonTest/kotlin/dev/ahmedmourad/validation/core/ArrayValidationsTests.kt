@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class ArrayValidationsTests {
 
     @Test
     fun forAll_meansTheGivenValidationsMatchAllTheElementsOfTheArray() {
-        validator<Array<Boolean>> {
+        constraint<Array<Boolean>> {
             forAll {
                 isTrue()
             }
@@ -33,7 +33,7 @@ class ArrayValidationsTests {
 
     @Test
     fun forAny_meansTheGivenValidationsMatchAtLeastOneOfTheElementsOfTheArray() {
-        validator<Array<Boolean>> {
+        constraint<Array<Boolean>> {
             forAny {
                 isTrue()
             }
@@ -57,7 +57,7 @@ class ArrayValidationsTests {
 
     @Test
     fun forNone_meansTheGivenValidationsMatchNoneOfTheElementsOfTheArray() {
-        validator<Array<Boolean>> {
+        constraint<Array<Boolean>> {
             forNone {
                 isTrue()
             }
@@ -80,7 +80,7 @@ class ArrayValidationsTests {
 
     @Test
     fun isEmpty_meansTheArrayIsEmpty() {
-        validator<Array<Unit>> {
+        constraint<Array<Unit>> {
             isEmpty()
         }.allMatch(
             emptyArray()
@@ -93,7 +93,7 @@ class ArrayValidationsTests {
 
     @Test
     fun isNotEmpty_meansTheArrayIsNotEmpty() {
-        validator<Array<Unit>> {
+        constraint<Array<Unit>> {
             isNotEmpty()
         }.allMatch(
             arrayOf(Unit),
@@ -106,7 +106,7 @@ class ArrayValidationsTests {
 
     @Test
     fun isDistinct_meansAllTheElementsOfTheArrayAreDistinct() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             isDistinct()
         }.allMatch(
             emptyArray(),
@@ -124,7 +124,7 @@ class ArrayValidationsTests {
 
     @Test
     fun minSize_meansTheArrayMustHaveAtLeastTheGivenNumberOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             minSize(4)
         }.allMatch(
             arrayOf(1, 2, 3, 4),
@@ -142,7 +142,7 @@ class ArrayValidationsTests {
 
     @Test
     fun minSizeL_meansTheArrayMustHaveAtLeastTheGivenNumberOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             minSize { 4 }
         }.allMatch(
             arrayOf(1, 2, 3, 4),
@@ -160,7 +160,7 @@ class ArrayValidationsTests {
 
     @Test
     fun maxSize_meansTheArrayMustHaveAtMostTheGivenNumberOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             maxSize(4)
         }.allMatch(
             emptyArray(),
@@ -178,7 +178,7 @@ class ArrayValidationsTests {
 
     @Test
     fun maxSizeL_meansTheArrayMustHaveAtMostTheGivenNumberOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             maxSize { 4 }
         }.allMatch(
             emptyArray(),
@@ -196,7 +196,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeLessThan_meansTheArrayMustHaveLessThanTheGivenNumberOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeLessThan(4)
         }.allMatch(
             emptyArray(),
@@ -214,7 +214,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeLessThanL_meansTheArrayMustHaveLessThanTheGivenNumberOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeLessThan { 4 }
         }.allMatch(
             emptyArray(),
@@ -232,7 +232,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeLargerThan_meansTheArrayMustHaveMoreThanTheGivenNumberOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeLargerThan(4)
         }.allMatch(
             arrayOf(1, 2, 3, 4, 5),
@@ -250,7 +250,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeLargerThanL_meansTheArrayMustHaveMoreThanTheGivenNumberOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeLargerThan { 4 }
         }.allMatch(
             arrayOf(1, 2, 3, 4, 5),
@@ -268,7 +268,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeIn_meansTheArrayMustHaveTheGivenRangeOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeIn(3, 5)
         }.allMatch(
             arrayOf(1, 2, 3),
@@ -286,7 +286,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeInR_meansTheArrayMustHaveTheGivenRangeOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeIn(3..5)
         }.allMatch(
             arrayOf(1, 2, 3),
@@ -304,7 +304,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeInRL_meansTheArrayMustHaveTheGivenRangeOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeIn { 3..5 }
         }.allMatch(
             arrayOf(1, 2, 3),
@@ -322,7 +322,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeNotIn_meansTheArrayMustNotHaveTheGivenRangeOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeNotIn(3, 5)
         }.allMatch(
             emptyArray(),
@@ -340,7 +340,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeNotInR_meansTheArrayMustNotHaveTheGivenRangeOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeNotIn(3..5)
         }.allMatch(
             emptyArray(),
@@ -358,7 +358,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeNotInRL_meansTheArrayMustNotHaveTheGivenRangeOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeNotIn { 3..5 }
         }.allMatch(
             emptyArray(),
@@ -376,7 +376,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeEqualTo_meansTheArrayMustHaveTheGivenNumberOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeEqualTo(3)
         }.allMatch(
             arrayOf(1, 2, 3)
@@ -391,7 +391,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeEqualToL_meansTheArrayMustHaveTheGivenNumberOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeEqualTo { 3 }
         }.allMatch(
             arrayOf(1, 2, 3)
@@ -406,7 +406,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeNotEqualTo_meansTheArrayMustNotHaveTheGivenNumberOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeNotEqualTo(3)
         }.allMatch(
             emptyArray(),
@@ -421,7 +421,7 @@ class ArrayValidationsTests {
 
     @Test
     fun sizeNotEqualToL_meansTheArrayMustNotHaveTheGivenNumberOfElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             sizeNotEqualTo { 3 }
         }.allMatch(
             emptyArray(),
@@ -436,7 +436,7 @@ class ArrayValidationsTests {
 
     @Test
     fun contains_meansTheArrayMustContainTheGivenElement() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contains(3)
         }.allMatch(
             arrayOf(3),
@@ -455,7 +455,7 @@ class ArrayValidationsTests {
 
     @Test
     fun containsL_meansTheArrayMustContainTheGivenElement() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contains<Int> { 3 }
         }.allMatch(
             arrayOf(3),
@@ -474,7 +474,7 @@ class ArrayValidationsTests {
 
     @Test
     fun doesNotContain_meansTheArrayMustContainTheGivenElement() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             doesNotContain(3)
         }.allMatch(
             emptyArray(),
@@ -493,7 +493,7 @@ class ArrayValidationsTests {
 
     @Test
     fun doesNotContainL_meansTheArrayMustContainTheGivenElement() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             doesNotContain<Int> { 3 }
         }.allMatch(
             emptyArray(),
@@ -512,7 +512,7 @@ class ArrayValidationsTests {
 
     @Test
     fun containsAt_meansTheArrayMustContainTheGivenElementAtTheGivenPosition() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             containsAt(1, 8)
         }.allMatch(
             arrayOf(8, 8),
@@ -533,7 +533,7 @@ class ArrayValidationsTests {
 
     @Test
     fun containsAtL_meansTheArrayMustContainTheGivenElementAtTheGivenPosition() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             containsAt<Int>(1) { 8 }
         }.allMatch(
             arrayOf(8, 8),
@@ -554,7 +554,7 @@ class ArrayValidationsTests {
 
     @Test
     fun startsWith_meansTheArrayMustStartWithTheGivenElement() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             startsWith(8)
         }.allMatch(
             arrayOf(8),
@@ -575,7 +575,7 @@ class ArrayValidationsTests {
 
     @Test
     fun startsWithL_meansTheArrayMustStartWithTheGivenElement() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             startsWith<Int> { 8 }
         }.allMatch(
             arrayOf(8),
@@ -596,7 +596,7 @@ class ArrayValidationsTests {
 
     @Test
     fun endsWith_meansTheArrayMustEndWithTheGivenElement() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             endsWith(8)
         }.allMatch(
             arrayOf(8),
@@ -617,7 +617,7 @@ class ArrayValidationsTests {
 
     @Test
     fun endsWithL_meansTheArrayMustEndWithTheGivenElement() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             endsWith<Int> { 8 }
         }.allMatch(
             arrayOf(8),
@@ -638,7 +638,7 @@ class ArrayValidationsTests {
 
     @Test
     fun containsAll_meansTheArrayMustContainAllTheGivenElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             containsAll(2, 3)
         }.allMatch(
             arrayOf(2, 3),
@@ -657,7 +657,7 @@ class ArrayValidationsTests {
 
     @Test
     fun containsAllL_meansTheArrayMustContainAllTheGivenElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             containsAll { arrayOf(2, 3) }
         }.allMatch(
             arrayOf(2, 3),
@@ -676,7 +676,7 @@ class ArrayValidationsTests {
 
     @Test
     fun isPartOf_meansAllTheElementsOfTheArrayMustExistInTheGivenElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             isPartOf(1, 2, 3, 4, 5)
         }.allMatch(
             emptyArray(),
@@ -696,7 +696,7 @@ class ArrayValidationsTests {
 
     @Test
     fun isPartOfL_meansAllTheElementsOfTheArrayMustExistInTheGivenElements() {
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             isPartOf { arrayOf(1, 2, 3, 4, 5) }
         }.allMatch(
             emptyArray(),
@@ -716,7 +716,7 @@ class ArrayValidationsTests {
 
     @Test
     fun allTrue_meansAllTheBooleansInTheArrayAreTrue() {
-        validator<Array<Boolean>> {
+        constraint<Array<Boolean>> {
             allTrue()
         }.allMatch(
             emptyArray(),
@@ -737,7 +737,7 @@ class ArrayValidationsTests {
 
     @Test
     fun anyTrue_meansAtLeastOneOfTheBooleansInTheArrayIsTrue() {
-        validator<Array<Boolean>> {
+        constraint<Array<Boolean>> {
             anyTrue()
         }.allMatch(
             arrayOf(true),
@@ -759,7 +759,7 @@ class ArrayValidationsTests {
 
     @Test
     fun anyFalse_meansAtLeastOneOfTheBooleansInTheArrayIsFalse() {
-        validator<Array<Boolean>> {
+        constraint<Array<Boolean>> {
             anyFalse()
         }.allMatch(
             arrayOf(false),
@@ -781,7 +781,7 @@ class ArrayValidationsTests {
 
     @Test
     fun allFalse_meansAllOfTheBooleansInTheArrayAreFalse() {
-        validator<Array<Boolean>> {
+        constraint<Array<Boolean>> {
             allFalse()
         }.allMatch(
             emptyArray(),
@@ -803,7 +803,7 @@ class ArrayValidationsTests {
     @Test
     fun contentEquals_meansAllTheElementsOfTheArrayMustExistInTheGivenElements() {
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = false,
@@ -824,7 +824,7 @@ class ArrayValidationsTests {
             arrayOf(5, 4, 3, 2, 1)
         )
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = false,
@@ -856,7 +856,7 @@ class ArrayValidationsTests {
             arrayOf(5, 4, 3, 2, 1)
         )
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = true,
@@ -878,7 +878,7 @@ class ArrayValidationsTests {
             arrayOf(1, 2, 3, 5, 4, 5)
         )
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = true,
@@ -915,7 +915,7 @@ class ArrayValidationsTests {
     @Test
     fun contentEqualsL_meansAllTheElementsOfTheArrayMustExistInTheGivenElements() {
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = false
@@ -935,7 +935,7 @@ class ArrayValidationsTests {
             arrayOf(5, 4, 3, 2, 1)
         )
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = false
@@ -964,7 +964,7 @@ class ArrayValidationsTests {
             arrayOf(5, 4, 3, 2, 1)
         )
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = true
@@ -985,7 +985,7 @@ class ArrayValidationsTests {
             arrayOf(1, 2, 3, 5, 4, 5)
         )
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = true
@@ -1019,7 +1019,7 @@ class ArrayValidationsTests {
     @Test
     fun contentNotEquals_meansAllTheElementsOfTheArrayMustNotEqualTheGivenElements() {
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentNotEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = false,
@@ -1040,7 +1040,7 @@ class ArrayValidationsTests {
             arrayOf(1, 2, 3, 4, 5)
         )
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentNotEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = false,
@@ -1072,7 +1072,7 @@ class ArrayValidationsTests {
             arrayOf(1, 2, 2, 3, 4, 4, 5)
         )
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentNotEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = true,
@@ -1094,7 +1094,7 @@ class ArrayValidationsTests {
             arrayOf(5, 4, 3, 2, 1)
         )
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentNotEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = true,
@@ -1131,7 +1131,7 @@ class ArrayValidationsTests {
     @Test
     fun contentNotEqualsL_meansAllTheElementsOfTheArrayMustNotEqualTheGivenElements() {
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentNotEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = false
@@ -1151,7 +1151,7 @@ class ArrayValidationsTests {
             arrayOf(1, 2, 3, 4, 5)
         )
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentNotEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = false
@@ -1180,7 +1180,7 @@ class ArrayValidationsTests {
             arrayOf(1, 2, 2, 3, 4, 4, 5)
         )
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentNotEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = true
@@ -1201,7 +1201,7 @@ class ArrayValidationsTests {
             arrayOf(5, 4, 3, 2, 1)
         )
 
-        validator<Array<Int>> {
+        constraint<Array<Int>> {
             contentNotEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = true

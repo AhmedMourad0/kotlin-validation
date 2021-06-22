@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class NullableValidationsTests {
 
     @Test
     fun ifExists_meansThatThisObjectMustMatchTheGivenValidationsIfAndOnlyIfItIsNotNull() {
-        validator<Int?> {
+        constraint<Int?> {
             ifExists {
                 max(3)
             }
@@ -30,7 +30,7 @@ class NullableValidationsTests {
 
     @Test
     fun mustExist_meansThatThisObjectCannotBeNullAndMustMatchTheGivenValidations() {
-        validator<Int?> {
+        constraint<Int?> {
             mustExist {
                 max(3)
             }
@@ -50,7 +50,7 @@ class NullableValidationsTests {
 
     @Test
     fun exists_meansThatThisObjectCannotBeNull() {
-        validator<Int?> {
+        constraint<Int?> {
             exists()
         }.allMatch(
             -1,
@@ -65,7 +65,7 @@ class NullableValidationsTests {
 
     @Test
     fun exists_meansThatThisObjectMustBeNull() {
-        validator<Int?> {
+        constraint<Int?> {
             doesNotExist()
         }.allMatch(
             null

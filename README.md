@@ -6,14 +6,14 @@ Check the samples for current syntax.
 
 ## Features
 - Generating sealed classes that describe violations (no string matching)
-- Generating the `validate` and `isValid` functions per constrainer
+- Generating the `validate` and `isValid` functions per validator
 - Support for adding properties to different violations
 - Support for Generics
 - Support providing extra parameters / type parameters to use during validation
 - Support validating the extra metadata to violations
-- Third-party classes constrainers
-- Multiple constrainers per class
-- Constrainers composition
+- Third-party classes validators
+- Multiple validators per class
+- Validators composition
 - Ability to enforce classes to be validated before usage
 - Declarative type-safe dsl to describe constraints
 - Property-specific and class-specific validations
@@ -25,7 +25,7 @@ Check the samples for current syntax.
 - Easy-to-create custom validations
 
 ## Roadmap
-- Providing ready-to-use constrainers (email, phone-number, ...)
+- Providing ready-to-use validators (email, phone-number, ...)
 - More Multiplatform ready-to-use validations
 - Library-specific ready-to-use validations 
 - K/Jvm ready-to-use validations
@@ -35,7 +35,7 @@ Check the samples for current syntax.
 - (Arrow, Kotest, ...) extensions
 - Jetpack Compose support?
 - To suspend or not to suspend.
-- Adding validations descriptions to be used by the IDE to describe constrainers
+- Adding validations descriptions to be used by the IDE to describe validators
 - IDE plugin to test values against constraints on the spot?
 
 License

@@ -19,7 +19,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":core"))
+                implementation("dev.ahmedmourad.validation:validation-core")
             }
         }
         val commonTest by getting {

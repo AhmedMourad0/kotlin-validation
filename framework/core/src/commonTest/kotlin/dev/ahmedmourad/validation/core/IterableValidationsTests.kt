@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class IterableValidationsTests {
 
     @Test
     fun forAll_meansTheGivenValidationsMatchAllTheElementsOfTheIterable() {
-        validator<Iterable<Boolean>> {
+        constraint<Iterable<Boolean>> {
             forAll {
                 isTrue()
             }
@@ -33,7 +33,7 @@ class IterableValidationsTests {
 
     @Test
     fun forAny_meansTheGivenValidationsMatchAtLeastOneOfTheElementsOfTheIterable() {
-        validator<Iterable<Boolean>> {
+        constraint<Iterable<Boolean>> {
             forAny {
                 isTrue()
             }
@@ -57,7 +57,7 @@ class IterableValidationsTests {
 
     @Test
     fun forNone_meansTheGivenValidationsMatchNoneOfTheElementsOfTheIterable() {
-        validator<Iterable<Boolean>> {
+        constraint<Iterable<Boolean>> {
             forNone {
                 isTrue()
             }
@@ -80,7 +80,7 @@ class IterableValidationsTests {
 
     @Test
     fun isEmpty_meansTheIterableIsEmpty() {
-        validator<Iterable<Unit>> {
+        constraint<Iterable<Unit>> {
             isEmpty()
         }.allMatch(
             emptyList()
@@ -93,7 +93,7 @@ class IterableValidationsTests {
 
     @Test
     fun isNotEmpty_meansTheIterableIsNotEmpty() {
-        validator<Iterable<Unit>> {
+        constraint<Iterable<Unit>> {
             isNotEmpty()
         }.allMatch(
             listOf(Unit),
@@ -106,7 +106,7 @@ class IterableValidationsTests {
 
     @Test
     fun isDistinct_meansAllTheElementsOfTheIterableAreDistinct() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             isDistinct()
         }.allMatch(
             emptyList(),
@@ -124,7 +124,7 @@ class IterableValidationsTests {
 
     @Test
     fun minSize_meansTheIterableMustHaveAtLeastTheGivenNumberOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             minSize(4)
         }.allMatch(
             listOf(1, 2, 3, 4),
@@ -142,7 +142,7 @@ class IterableValidationsTests {
 
     @Test
     fun minSizeL_meansTheIterableMustHaveAtLeastTheGivenNumberOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             minSize { 4 }
         }.allMatch(
             listOf(1, 2, 3, 4),
@@ -160,7 +160,7 @@ class IterableValidationsTests {
 
     @Test
     fun maxSize_meansTheIterableMustHaveAtMostTheGivenNumberOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             maxSize(4)
         }.allMatch(
             emptyList(),
@@ -178,7 +178,7 @@ class IterableValidationsTests {
 
     @Test
     fun maxSizeL_meansTheIterableMustHaveAtMostTheGivenNumberOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             maxSize { 4 }
         }.allMatch(
             emptyList(),
@@ -196,7 +196,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeLessThan_meansTheIterableMustHaveLessThanTheGivenNumberOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeLessThan(4)
         }.allMatch(
             emptyList(),
@@ -214,7 +214,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeLessThanL_meansTheIterableMustHaveLessThanTheGivenNumberOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeLessThan { 4 }
         }.allMatch(
             emptyList(),
@@ -232,7 +232,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeLargerThan_meansTheIterableMustHaveMoreThanTheGivenNumberOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeLargerThan(4)
         }.allMatch(
             listOf(1, 2, 3, 4, 5),
@@ -250,7 +250,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeLargerThanL_meansTheIterableMustHaveMoreThanTheGivenNumberOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeLargerThan { 4 }
         }.allMatch(
             listOf(1, 2, 3, 4, 5),
@@ -268,7 +268,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeIn_meansTheIterableMustHaveTheGivenRangeOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeIn(3, 5)
         }.allMatch(
             listOf(1, 2, 3),
@@ -286,7 +286,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeInR_meansTheIterableMustHaveTheGivenRangeOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeIn(3..5)
         }.allMatch(
             listOf(1, 2, 3),
@@ -304,7 +304,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeInRL_meansTheIterableMustHaveTheGivenRangeOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeIn { 3..5 }
         }.allMatch(
             listOf(1, 2, 3),
@@ -322,7 +322,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeNotIn_meansTheIterableMustNotHaveTheGivenRangeOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeNotIn(3, 5)
         }.allMatch(
             emptyList(),
@@ -340,7 +340,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeNotInR_meansTheIterableMustNotHaveTheGivenRangeOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeNotIn(3..5)
         }.allMatch(
             emptyList(),
@@ -358,7 +358,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeNotInRL_meansTheIterableMustNotHaveTheGivenRangeOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeNotIn { 3..5 }
         }.allMatch(
             emptyList(),
@@ -376,7 +376,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeEqualTo_meansTheIterableMustHaveTheGivenNumberOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeEqualTo(3)
         }.allMatch(
             listOf(1, 2, 3)
@@ -391,7 +391,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeEqualToL_meansTheIterableMustHaveTheGivenNumberOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeEqualTo { 3 }
         }.allMatch(
             listOf(1, 2, 3)
@@ -406,7 +406,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeNotEqualTo_meansTheIterableMustNotHaveTheGivenNumberOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeNotEqualTo(3)
         }.allMatch(
             emptyList(),
@@ -421,7 +421,7 @@ class IterableValidationsTests {
 
     @Test
     fun sizeNotEqualToL_meansTheIterableMustNotHaveTheGivenNumberOfElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             sizeNotEqualTo { 3 }
         }.allMatch(
             emptyList(),
@@ -436,7 +436,7 @@ class IterableValidationsTests {
 
     @Test
     fun contains_meansTheIterableMustContainTheGivenElement() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contains(3)
         }.allMatch(
             listOf(3),
@@ -455,7 +455,7 @@ class IterableValidationsTests {
 
     @Test
     fun containsL_meansTheIterableMustContainTheGivenElement() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contains { 3 }
         }.allMatch(
             listOf(3),
@@ -474,7 +474,7 @@ class IterableValidationsTests {
 
     @Test
     fun doesNotContain_meansTheIterableMustContainTheGivenElement() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             doesNotContain(3)
         }.allMatch(
             emptyList(),
@@ -493,7 +493,7 @@ class IterableValidationsTests {
 
     @Test
     fun doesNotContainL_meansTheIterableMustContainTheGivenElement() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             doesNotContain { 3 }
         }.allMatch(
             emptyList(),
@@ -512,7 +512,7 @@ class IterableValidationsTests {
 
     @Test
     fun containsAt_meansTheIterableMustContainTheGivenElementAtTheGivenPosition() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             containsAt(1, 8)
         }.allMatch(
             listOf(8, 8),
@@ -533,7 +533,7 @@ class IterableValidationsTests {
 
     @Test
     fun containsAtL_meansTheIterableMustContainTheGivenElementAtTheGivenPosition() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             containsAt(1) { 8 }
         }.allMatch(
             listOf(8, 8),
@@ -554,7 +554,7 @@ class IterableValidationsTests {
 
     @Test
     fun startsWith_meansTheIterableMustStartWithTheGivenElement() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             startsWith(8)
         }.allMatch(
             listOf(8),
@@ -575,7 +575,7 @@ class IterableValidationsTests {
 
     @Test
     fun startsWithL_meansTheIterableMustStartWithTheGivenElement() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             startsWith { 8 }
         }.allMatch(
             listOf(8),
@@ -596,7 +596,7 @@ class IterableValidationsTests {
 
     @Test
     fun endsWith_meansTheIterableMustEndWithTheGivenElement() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             endsWith(8)
         }.allMatch(
             listOf(8),
@@ -617,7 +617,7 @@ class IterableValidationsTests {
 
     @Test
     fun endsWithL_meansTheIterableMustEndWithTheGivenElement() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             endsWith { 8 }
         }.allMatch(
             listOf(8),
@@ -638,7 +638,7 @@ class IterableValidationsTests {
 
     @Test
     fun containsAll_meansTheIterableMustContainAllTheGivenElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             containsAll(2, 3)
         }.allMatch(
             listOf(2, 3),
@@ -657,7 +657,7 @@ class IterableValidationsTests {
 
     @Test
     fun containsAllL_meansTheIterableMustContainAllTheGivenElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             containsAll(listOf(2, 3))
         }.allMatch(
             listOf(2, 3),
@@ -676,7 +676,7 @@ class IterableValidationsTests {
 
     @Test
     fun containsAllLL_meansTheIterableMustContainAllTheGivenElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             containsAll { listOf(2, 3) }
         }.allMatch(
             listOf(2, 3),
@@ -695,7 +695,7 @@ class IterableValidationsTests {
 
     @Test
     fun isPartOf_meansAllTheElementsOfTheIterableMustExistInTheGivenElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             isPartOf(1, 2, 3, 4, 5)
         }.allMatch(
             emptyList(),
@@ -715,7 +715,7 @@ class IterableValidationsTests {
 
     @Test
     fun isPartOfL_meansAllTheElementsOfTheIterableMustExistInTheGivenElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             isPartOf(listOf(1, 2, 3, 4, 5))
         }.allMatch(
             emptyList(),
@@ -735,7 +735,7 @@ class IterableValidationsTests {
 
     @Test
     fun isPartOfLL_meansAllTheElementsOfTheIterableMustExistInTheGivenElements() {
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             isPartOf { listOf(1, 2, 3, 4, 5) }
         }.allMatch(
             emptyList(),
@@ -755,7 +755,7 @@ class IterableValidationsTests {
 
     @Test
     fun allTrue_meansAllTheBooleansInTheIterableAreTrue() {
-        validator<Iterable<Boolean>> {
+        constraint<Iterable<Boolean>> {
             allTrue()
         }.allMatch(
             emptyList(),
@@ -776,7 +776,7 @@ class IterableValidationsTests {
 
     @Test
     fun anyTrue_meansAtLeastOneOfTheBooleansInTheIterableIsTrue() {
-        validator<Iterable<Boolean>> {
+        constraint<Iterable<Boolean>> {
             anyTrue()
         }.allMatch(
             listOf(true),
@@ -798,7 +798,7 @@ class IterableValidationsTests {
 
     @Test
     fun anyFalse_meansAtLeastOneOfTheBooleansInTheIterableIsFalse() {
-        validator<Iterable<Boolean>> {
+        constraint<Iterable<Boolean>> {
             anyFalse()
         }.allMatch(
             listOf(false),
@@ -820,7 +820,7 @@ class IterableValidationsTests {
 
     @Test
     fun allFalse_meansAllOfTheBooleansInTheIterableAreFalse() {
-        validator<Iterable<Boolean>> {
+        constraint<Iterable<Boolean>> {
             allFalse()
         }.allMatch(
             emptyList(),
@@ -842,7 +842,7 @@ class IterableValidationsTests {
     @Test
     fun contentEquals_meansAllTheElementsOfTheIterableMustExistInTheGivenElements() {
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = false,
@@ -863,7 +863,7 @@ class IterableValidationsTests {
             listOf(5, 4, 3, 2, 1)
         )
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = false,
@@ -895,7 +895,7 @@ class IterableValidationsTests {
             listOf(5, 4, 3, 2, 1)
         )
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = true,
@@ -917,7 +917,7 @@ class IterableValidationsTests {
             listOf(1, 2, 3, 5, 4, 5)
         )
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = true,
@@ -954,7 +954,7 @@ class IterableValidationsTests {
     @Test
     fun contentEqualsL_meansAllTheElementsOfTheIterableMustExistInTheGivenElements() {
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = false
@@ -974,7 +974,7 @@ class IterableValidationsTests {
             listOf(5, 4, 3, 2, 1)
         )
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = false
@@ -1003,7 +1003,7 @@ class IterableValidationsTests {
             listOf(5, 4, 3, 2, 1)
         )
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = true
@@ -1024,7 +1024,7 @@ class IterableValidationsTests {
             listOf(1, 2, 3, 5, 4, 5)
         )
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = true
@@ -1058,7 +1058,7 @@ class IterableValidationsTests {
     @Test
     fun contentNotEquals_meansAllTheElementsOfTheIterableMustNotEqualTheGivenElements() {
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentNotEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = false,
@@ -1079,7 +1079,7 @@ class IterableValidationsTests {
             listOf(1, 2, 3, 4, 5)
         )
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentNotEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = false,
@@ -1111,7 +1111,7 @@ class IterableValidationsTests {
             listOf(1, 2, 2, 3, 4, 4, 5)
         )
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentNotEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = true,
@@ -1133,7 +1133,7 @@ class IterableValidationsTests {
             listOf(5, 4, 3, 2, 1)
         )
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentNotEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = true,
@@ -1170,7 +1170,7 @@ class IterableValidationsTests {
     @Test
     fun contentNotEqualsL_meansAllTheElementsOfTheIterableMustNotEqualTheGivenElements() {
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentNotEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = false
@@ -1190,7 +1190,7 @@ class IterableValidationsTests {
             listOf(1, 2, 3, 4, 5)
         )
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentNotEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = false
@@ -1219,7 +1219,7 @@ class IterableValidationsTests {
             listOf(1, 2, 2, 3, 4, 4, 5)
         )
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentNotEquals(
                 ignoreDuplicates = false,
                 ignoreOrder = true
@@ -1240,7 +1240,7 @@ class IterableValidationsTests {
             listOf(5, 4, 3, 2, 1)
         )
 
-        validator<Iterable<Int>> {
+        constraint<Iterable<Int>> {
             contentNotEquals(
                 ignoreDuplicates = true,
                 ignoreOrder = true

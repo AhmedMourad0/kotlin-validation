@@ -1,11 +1,11 @@
 package dev.ahmedmourad.validation.core.validations
 
-import dev.ahmedmourad.validation.core.Validator
+import dev.ahmedmourad.validation.core.Constraint
 
-fun Validator<Boolean>.isTrue() = validation {
+fun Constraint<Boolean>.isTrue() = validation {
     it
 }
 
-fun Validator<Boolean>.isFalse() = validation {
+fun Constraint<Boolean>.isFalse() = validation {
     !it
 }

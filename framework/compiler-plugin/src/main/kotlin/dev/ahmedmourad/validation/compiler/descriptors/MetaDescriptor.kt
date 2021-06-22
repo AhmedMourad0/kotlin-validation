@@ -6,5 +6,5 @@ internal data class MetaDescriptor(
     val name: String,
     val nameExpression: KtExpression,
     val typeFqName: String,
-    val includedConstraint: IncludedConstraintDescriptor?
+    val includedValidator: IncludedValidatorDescriptor?
 )

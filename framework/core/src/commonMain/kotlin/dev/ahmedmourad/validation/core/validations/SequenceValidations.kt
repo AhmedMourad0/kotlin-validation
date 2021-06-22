@@ -1,133 +1,133 @@
 package dev.ahmedmourad.validation.core.validations
 
-import dev.ahmedmourad.validation.core.Validator
-import dev.ahmedmourad.validation.core.ValidatorImpl
+import dev.ahmedmourad.validation.core.Constraint
+import dev.ahmedmourad.validation.core.ScopedConstraintBuilder
 
-inline fun <DT> Validator<out Sequence<DT>>.forAll(
-    crossinline itemValidator: Validator<DT>.() -> Unit
+inline fun <DT> Constraint<out Sequence<DT>>.forAll(
+    crossinline itemConstraint: Constraint<DT>.() -> Unit
 ) = validation { validated ->
     validated.all {
-        ValidatorImpl<DT>().apply(itemValidator).validateAll(it)
+        ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
     }
 }
 
-inline fun <DT> Validator<out Sequence<DT>>.forAny(
-    crossinline itemValidator: Validator<DT>.() -> Unit
+inline fun <DT> Constraint<out Sequence<DT>>.forAny(
+    crossinline itemConstraint: Constraint<DT>.() -> Unit
 ) = validation { validated ->
     validated.any {
-        ValidatorImpl<DT>().apply(itemValidator).validateAll(it)
+        ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
     }
 }
 
-inline fun <DT> Validator<out Sequence<DT>>.forNone(
-    crossinline itemValidator: Validator<DT>.() -> Unit
+inline fun <DT> Constraint<out Sequence<DT>>.forNone(
+    crossinline itemConstraint: Constraint<DT>.() -> Unit
 ) = validation { validated ->
     validated.none {
-        ValidatorImpl<DT>().apply(itemValidator).validateAll(it)
+        ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
     }
 }
 
-fun <DT> Validator<out Sequence<DT>>.isEmpty() = validation {
+fun <DT> Constraint<out Sequence<DT>>.isEmpty() = validation {
     it.count() == 0
 }
 
-fun <DT> Validator<out Sequence<DT>>.isNotEmpty() = validation {
+fun <DT> Constraint<out Sequence<DT>>.isNotEmpty() = validation {
     it.count() > 0
 }
 
-fun <DT> Validator<out Sequence<DT>>.isDistinct() = validation {
+fun <DT> Constraint<out Sequence<DT>>.isDistinct() = validation {
     it.distinct().count() == it.count()
 }
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.minSize(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.minSize(
     crossinline min: (DTS) -> Int
 ) = validation {
     it.count() >= min(it)
 }
 
-fun <DT> Validator<out Sequence<DT>>.minSize(min: Int) = minSize { min }
+fun <DT> Constraint<out Sequence<DT>>.minSize(min: Int) = minSize { min }
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.maxSize(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.maxSize(
     crossinline max: (DTS) -> Int
 ) = validation {
     it.count() <= max(it)
 }
 
-fun <DT> Validator<out Sequence<DT>>.maxSize(max: Int) = maxSize { max }
+fun <DT> Constraint<out Sequence<DT>>.maxSize(max: Int) = maxSize { max }
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeLessThan(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.sizeLessThan(
     crossinline maxExclusive: (DTS) -> Int
 ) = validation {
     it.count() < maxExclusive(it)
 }
 
-fun <DT> Validator<out Sequence<DT>>.sizeLessThan(maxExclusive: Int) = sizeLessThan { maxExclusive }
+fun <DT> Constraint<out Sequence<DT>>.sizeLessThan(maxExclusive: Int) = sizeLessThan { maxExclusive }
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeLargerThan(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.sizeLargerThan(
     crossinline minExclusive: (DTS) -> Int
 ) = validation {
     it.count() > minExclusive(it)
 }
 
-fun <DT> Validator<out Sequence<DT>>.sizeLargerThan(minExclusive: Int) = sizeLargerThan { minExclusive }
+fun <DT> Constraint<out Sequence<DT>>.sizeLargerThan(minExclusive: Int) = sizeLargerThan { minExclusive }
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeIn(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.sizeIn(
     crossinline range: (DTS) -> IntRange
 ) = validation {
     it.count() in range(it)
 }
 
-fun <DT> Validator<out Sequence<DT>>.sizeIn(range: IntRange) = sizeIn { range }
+fun <DT> Constraint<out Sequence<DT>>.sizeIn(range: IntRange) = sizeIn { range }
 
-fun <DT> Validator<out Sequence<DT>>.sizeIn(min: Int, max: Int) = sizeIn(min..max)
+fun <DT> Constraint<out Sequence<DT>>.sizeIn(min: Int, max: Int) = sizeIn(min..max)
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeNotIn(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.sizeNotIn(
     crossinline range: (DTS) -> IntRange
 ) = validation {
     it.count() !in range(it)
 }
 
-fun <DT> Validator<out Sequence<DT>>.sizeNotIn(range: IntRange) = sizeNotIn { range }
+fun <DT> Constraint<out Sequence<DT>>.sizeNotIn(range: IntRange) = sizeNotIn { range }
 
-fun <DT> Validator<out Sequence<DT>>.sizeNotIn(min: Int, max: Int) = sizeNotIn(min..max)
+fun <DT> Constraint<out Sequence<DT>>.sizeNotIn(min: Int, max: Int) = sizeNotIn(min..max)
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeEqualTo(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.sizeEqualTo(
     crossinline value: (DTS) -> Int
 ) = validation {
     it.count() == value(it)
 }
 
-fun <DT> Validator<out Sequence<DT>>.sizeEqualTo(value: Int) = sizeEqualTo { value }
+fun <DT> Constraint<out Sequence<DT>>.sizeEqualTo(value: Int) = sizeEqualTo { value }
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.sizeNotEqualTo(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.sizeNotEqualTo(
     crossinline value: (DTS) -> Int
 ) = validation {
     it.count() != value(it)
 }
 
-fun <DT> Validator<out Sequence<DT>>.sizeNotEqualTo(value: Int) = sizeNotEqualTo { value }
+fun <DT> Constraint<out Sequence<DT>>.sizeNotEqualTo(value: Int) = sizeNotEqualTo { value }
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.contains(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.contains(
     crossinline element: (DTS) -> DT
 ) = validation {
     it.contains(element(it))
 }
 
-fun <DT> Validator<out Sequence<DT>>.contains(
+fun <DT> Constraint<out Sequence<DT>>.contains(
     element: DT
 ) = contains { element }
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.doesNotContain(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.doesNotContain(
     crossinline element: (DTS) -> DT
 ) = validation {
     !it.contains(element(it))
 }
 
-fun <DT> Validator<out Sequence<DT>>.doesNotContain(
+fun <DT> Constraint<out Sequence<DT>>.doesNotContain(
     element: DT
 ) = doesNotContain { element }
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.containsAt(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.containsAt(
     index: Int,
     crossinline element: (DTS) -> DT
 ) = validation {
@@ -138,12 +138,12 @@ inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.containsAt(
     }
 }
 
-fun <DT> Validator<out Sequence<DT>>.containsAt(
+fun <DT> Constraint<out Sequence<DT>>.containsAt(
     index: Int,
     element: DT
 ) = containsAt(index) { element }
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.startsWith(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.startsWith(
     crossinline element: (DTS) -> DT
 ) = validation {
     try {
@@ -153,11 +153,11 @@ inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.startsWith(
     }
 }
 
-fun <DT> Validator<out Sequence<DT>>.startsWith(
+fun <DT> Constraint<out Sequence<DT>>.startsWith(
     element: DT
 ) = startsWith { element }
 
-inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.endsWith(
+inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.endsWith(
     crossinline element: (DTS) -> DT
 ) = validation {
     try {
@@ -167,56 +167,56 @@ inline fun <DT, DTS : Sequence<DT>> Validator<DTS>.endsWith(
     }
 }
 
-fun <DT> Validator<out Sequence<DT>>.endsWith(
+fun <DT> Constraint<out Sequence<DT>>.endsWith(
     element: DT
 ) = endsWith { element }
 
-fun <DT, DTS : Sequence<DT>> Validator<DTS>.containsAll(
+fun <DT, DTS : Sequence<DT>> Constraint<DTS>.containsAll(
     elements: (DTS) -> Sequence<DT>
 ) = validation { validated ->
     elements(validated).all { validated.contains(it) }
 }
 
-fun <DT, DTS : Sequence<DT>> Validator<DTS>.containsAll(
+fun <DT, DTS : Sequence<DT>> Constraint<DTS>.containsAll(
     vararg elements: DT
 ) = containsAll { elements.asSequence() }
 
-fun <DT, DTS : Sequence<DT>> Validator<DTS>.containsAll(
+fun <DT, DTS : Sequence<DT>> Constraint<DTS>.containsAll(
     elements: Sequence<DT>
 ) = containsAll { elements }
 
-fun <DT, DTS : Sequence<DT>> Validator<DTS>.isPartOf(
+fun <DT, DTS : Sequence<DT>> Constraint<DTS>.isPartOf(
     elements: (DTS) -> Sequence<DT>
 ) = validation { validated ->
     val elementsList = elements(validated)
     validated.all { elementsList.contains(it) }
 }
 
-fun <DT, DTS : Sequence<DT>> Validator<DTS>.isPartOf(
+fun <DT, DTS : Sequence<DT>> Constraint<DTS>.isPartOf(
     vararg elements: DT
 ) = isPartOf { elements.asSequence() }
 
-fun <DT, DTS : Sequence<DT>> Validator<DTS>.isPartOf(
+fun <DT, DTS : Sequence<DT>> Constraint<DTS>.isPartOf(
     elements: Sequence<DT>
 ) = isPartOf { elements }
 
-fun Validator<out Sequence<Boolean>>.allTrue() = validation { validated ->
+fun Constraint<out Sequence<Boolean>>.allTrue() = validation { validated ->
     validated.all { it }
 }
 
-fun Validator<out Sequence<Boolean>>.anyTrue() = validation { validated ->
+fun Constraint<out Sequence<Boolean>>.anyTrue() = validation { validated ->
     validated.any { it }
 }
 
-fun Validator<out Sequence<Boolean>>.anyFalse() = validation { validated ->
+fun Constraint<out Sequence<Boolean>>.anyFalse() = validation { validated ->
     validated.any { !it }
 }
 
-fun Validator<out Sequence<Boolean>>.allFalse() = validation { validated ->
+fun Constraint<out Sequence<Boolean>>.allFalse() = validation { validated ->
     validated.none { it }
 }
 
-fun <DT, DTS : Sequence<DT>> Validator<DTS>.contentEquals(
+fun <DT, DTS : Sequence<DT>> Constraint<DTS>.contentEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: (DTS) -> Sequence<DT>
@@ -228,13 +228,13 @@ fun <DT, DTS : Sequence<DT>> Validator<DTS>.contentEquals(
     )
 }
 
-fun <DT> Validator<out Sequence<DT>>.contentEquals(
+fun <DT> Constraint<out Sequence<DT>>.contentEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: Sequence<DT>
 ) = contentEquals(ignoreDuplicates, ignoreOrder) { other }
 
-fun <DT, DTS : Sequence<DT>> Validator<DTS>.contentNotEquals(
+fun <DT, DTS : Sequence<DT>> Constraint<DTS>.contentNotEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: (DTS) -> Sequence<DT>
@@ -246,7 +246,7 @@ fun <DT, DTS : Sequence<DT>> Validator<DTS>.contentNotEquals(
     )
 }
 
-fun <DT> Validator<out Sequence<DT>>.contentNotEquals(
+fun <DT> Constraint<out Sequence<DT>>.contentNotEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: Sequence<DT>

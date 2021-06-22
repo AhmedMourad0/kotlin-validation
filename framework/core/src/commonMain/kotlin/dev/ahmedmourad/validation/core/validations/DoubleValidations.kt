@@ -1,24 +1,24 @@
 package dev.ahmedmourad.validation.core.validations
 
-import dev.ahmedmourad.validation.core.Validator
+import dev.ahmedmourad.validation.core.Constraint
 
-inline fun Validator<Double>.isDivisibleBy(
+inline fun Constraint<Double>.isDivisibleBy(
     crossinline other: (Double) -> Double
 ) = validation {
     it % other(it) == 0.0
 }
 
-fun Validator<Double>.isDivisibleBy(other: Double) = isDivisibleBy { other }
+fun Constraint<Double>.isDivisibleBy(other: Double) = isDivisibleBy { other }
 
-inline fun Validator<Double>.isNotDivisibleBy(
+inline fun Constraint<Double>.isNotDivisibleBy(
     crossinline other: (Double) -> Double
 ) = validation {
     it % other(it) != 0.0
 }
 
-fun Validator<Double>.isNotDivisibleBy(other: Double) = isNotDivisibleBy { other }
+fun Constraint<Double>.isNotDivisibleBy(other: Double) = isNotDivisibleBy { other }
 
-fun Validator<Double>.isPositive(orZero: Boolean) = validation {
+fun Constraint<Double>.isPositive(orZero: Boolean) = validation {
     if (orZero) {
         it >= 0.0
     } else {
@@ -26,7 +26,7 @@ fun Validator<Double>.isPositive(orZero: Boolean) = validation {
     }
 }
 
-fun Validator<Double>.isNegative(orZero: Boolean) = validation {
+fun Constraint<Double>.isNegative(orZero: Boolean) = validation {
     if (orZero) {
         it <= 0.0
     } else {
@@ -34,26 +34,26 @@ fun Validator<Double>.isNegative(orZero: Boolean) = validation {
     }
 }
 
-fun Validator<Double>.isZero() = validation {
+fun Constraint<Double>.isZero() = validation {
     it == 0.0
 }
 
-fun Validator<Double>.isNotZero() = validation {
+fun Constraint<Double>.isNotZero() = validation {
     it != 0.0
 }
 
-fun Validator<Double>.isNaN() = validation {
+fun Constraint<Double>.isNaN() = validation {
     it.isNaN()
 }
 
-fun Validator<Double>.isNotNaN() = validation {
+fun Constraint<Double>.isNotNaN() = validation {
     !it.isNaN()
 }
 
-fun Validator<Double>.isInfinite() = validation {
+fun Constraint<Double>.isInfinite() = validation {
     it.isInfinite()
 }
 
-fun Validator<Double>.isFinite() = validation {
+fun Constraint<Double>.isFinite() = validation {
     it.isFinite()
 }

@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class CommonValidationsTests {
 
     @Test
     fun isEqualTo_meansThisObjectIsEqualToTheGivenObject() {
-        validator<Int> {
+        constraint<Int> {
             isEqualTo(5)
         }.allMatch(
             5
@@ -26,7 +26,7 @@ class CommonValidationsTests {
 
     @Test
     fun isEqualToL_meansThisObjectIsEqualToTheGivenObject() {
-        validator<Int> {
+        constraint<Int> {
             isEqualTo<Int> { 5 }
         }.allMatch(
             5
@@ -42,7 +42,7 @@ class CommonValidationsTests {
 
     @Test
     fun isNotEqualTo_meansThisObjectIsNotEqualToTheGivenObject() {
-        validator<Int> {
+        constraint<Int> {
             isNotEqualTo(5)
         }.allMatch(
             1,
@@ -58,7 +58,7 @@ class CommonValidationsTests {
 
     @Test
     fun isNotEqualToL_meansThisObjectIsNotEqualToTheGivenObject() {
-        validator<Int> {
+        constraint<Int> {
             isNotEqualTo<Int> { 5 }
         }.allMatch(
             1,
@@ -74,7 +74,7 @@ class CommonValidationsTests {
 
     @Test
     fun inValues_meansThisObjectEqualsAnyOfTheGivenObjects() {
-        validator<Int> {
+        constraint<Int> {
             inValues(3, 4, 5)
         }.allMatch(
             3,
@@ -90,7 +90,7 @@ class CommonValidationsTests {
 
     @Test
     fun inValuesL_meansThisObjectEqualsAnyOfTheGivenObjects() {
-        validator<Int> {
+        constraint<Int> {
             inValues(listOf(3, 4, 5))
         }.allMatch(
             3,
@@ -106,7 +106,7 @@ class CommonValidationsTests {
 
     @Test
     fun inValuesLL_meansThisObjectEqualsAnyOfTheGivenObjects() {
-        validator<Int> {
+        constraint<Int> {
             inValues { (listOf(3, 4, 5)) }
         }.allMatch(
             3,
@@ -122,7 +122,7 @@ class CommonValidationsTests {
 
     @Test
     fun notInValues_meansThisObjectDoesNotEqualAnyOfTheGivenObjects() {
-        validator<Int> {
+        constraint<Int> {
             notInValues(3, 4, 5)
         }.allMatch(
             1,
@@ -138,7 +138,7 @@ class CommonValidationsTests {
 
     @Test
     fun notInValuesL_meansThisObjectDoesNotEqualAnyOfTheGivenObjects() {
-        validator<Int> {
+        constraint<Int> {
             notInValues(listOf(3, 4, 5))
         }.allMatch(
             1,
@@ -154,7 +154,7 @@ class CommonValidationsTests {
 
     @Test
     fun notInValuesLL_meansThisObjectDoesNotEqualAnyOfTheGivenObjects() {
-        validator<Int> {
+        constraint<Int> {
             notInValues { (listOf(3, 4, 5)) }
         }.allMatch(
             1,
@@ -170,7 +170,7 @@ class CommonValidationsTests {
 
     @Test
     fun anyOf_meansTheGivenObjectMatchesAtLeastOneOfTheValidations() {
-        validator<Int> {
+        constraint<Int> {
             anyOf {
                 isEqualTo(1)
                 isEqualTo(2)
@@ -192,7 +192,7 @@ class CommonValidationsTests {
 
     @Test
     fun allOf_meansTheGivenObjectMatchesAllTheValidations() {
-        validator<Int> {
+        constraint<Int> {
             allOf {
                 min(3)
                 max(5)
@@ -212,7 +212,7 @@ class CommonValidationsTests {
 
     @Test
     fun noneOf_meansTheGivenObjectMatchesNoneOfTheValidations() {
-        validator<String> {
+        constraint<String> {
             noneOf {
                 startsWith("a")
                 endsWith("z")

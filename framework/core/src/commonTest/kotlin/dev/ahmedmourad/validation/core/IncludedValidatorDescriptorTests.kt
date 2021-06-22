@@ -12,9 +12,9 @@ private const val EXTREMELY_SHORT = "ExtremelyShort"
 private const val TOO_LONG = "TooLong"
 
 @InternalValidationApi
-class IncludedConstraintsTests {
+class IncludedValidatorDescriptorTests {
 
-    object IntConstrainer : Constrains<Int> {
+    object IntValidator : Validator<Int> {
         override val constraints by describe {
             constraint(violation = TOO_SHORT) {
                 min(3)
@@ -28,18 +28,18 @@ class IncludedConstraintsTests {
         }
     }
 
-    lateinit var includedConstraints: IncludedConstraints<String, Int, Constrains<Int>>
+    lateinit var includedValidator: IncludedValidatorDescriptor<String, Int, Validator<Int>>
 
     @BeforeTest
     fun setup() {
-        includedConstraints = IncludedConstraints("lengthViolations", String::length) { _, _ ->
-            IntConstrainer
+        includedValidator = IncludedValidatorDescriptor("lengthViolations", String::length) { _, _ ->
+            IntValidator
         }
     }
 
     @Test
-    fun isValid_checksIfTheGivenConstraintsMatchTheItemGivenTheIsValidExtensionFunctionForTheConstrainer() {
-        includedConstraints.with { item: String ->
+    fun isValid_checksIfTheGivenConstraintsMatchTheItemGivenTheIsValidExtensionFunctionForTheValidator() {
+        includedValidator.with { item: String ->
             isValid(item) { this.findViolatedConstraints(it).isEmpty() }
         }.allMatch(
             "123",
@@ -57,11 +57,11 @@ class IncludedConstraintsTests {
     }
 
     @Test
-    fun findViolations_checksIfTheGivenConstraintsMatchTheItemGivenTheIsValidExtensionFunctionForTheConstrainer() {
-        includedConstraints.with { item: Pair<String, List<String>> ->
+    fun findViolations_checksIfTheGivenConstraintsMatchTheItemGivenTheIsValidExtensionFunctionForTheValidator() {
+        includedValidator.with { item: Pair<String, List<String>> ->
             findViolations(item.first) {
                 this.findViolatedConstraints(it)
-                    .map(Constraint<Int>::violation)
+                    .map(ConstraintDescriptor<Int>::violation)
                     .toSet()
                     .illegal()
             }.contentEquals(
@@ -94,7 +94,7 @@ class IncludedConstraintsTests {
         )
     }
 
-    private fun <T : Any> Constrains<T>.findViolatedConstraints(item: T): List<Constraint<T>> {
+    private fun <T : Any> Validator<T>.findViolatedConstraints(item: T): List<ConstraintDescriptor<T>> {
         return this.constraints.filterNot { constraint ->
             constraint.validations.all { validation ->
                 validation.validate(item)

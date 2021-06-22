@@ -17,66 +17,66 @@ import org.jetbrains.kotlin.utils.addToStdlib.cast
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 import java.io.File
 
-internal class ConstraintsDescriptor(
+internal class ValidatorDescriptor(
     bindingContext: BindingContext,
     dslValidator: DslValidator,
-    val constrainedType: KotlinType,
-    val constrainerClassOrObject: KtClassOrObject,
+    val subjectType: KotlinType,
+    val validatorClassOrObject: KtClassOrObject,
     val violations: List<ViolationDescriptor>
 ) {
 
-    val packageName by lazy { constrainerClassOrObject.containingFile.cast<KtFile>().packageFqName.asString() }
+    val packageName by lazy { validatorClassOrObject.containingFile.cast<KtFile>().packageFqName.asString() }
     val packageAsPath by lazy { packageName.replace('.', File.separatorChar) }
 
-    val constrainedClass by lazy {
-        constrainedType.constructor
+    val subjectClass by lazy {
+        subjectType.constructor
             .declarationDescriptor
             ?.safeAs<LazyClassDescriptor>()
     }
 
-    private val constrainedTypeArgs by lazy {
-        constrainedType.arguments
+    private val subjectTypeArgs by lazy {
+        subjectType.arguments
             .map { it.toString() }
             .takeIf(List<String>::isNotEmpty)
             ?.joinToString(separator = ", ", prefix = "<", postfix = ">")
             .orEmpty()
     }
 
-    val constrainedParams: List<ValueParameterDescriptor>? by lazy {
-        constrainedClass?.constructors
+    val subjectParams: List<ValueParameterDescriptor>? by lazy {
+        subjectClass?.constructors
             ?.firstOrNull(ConstructorDescriptor::isPrimary)
             ?.valueParameters
     }
 
-    val constrainedFqName by lazy {
-        constrainedType
+    val subjectFqName by lazy {
+        subjectType
             .fqNameSafe
             ?.asString()
-            ?.plus(constrainedTypeArgs)
+            ?.plus(subjectTypeArgs)
     }
 
-    private val constrainedAlias by lazy {
+    private val subjectAlias by lazy {
 
-        val (annotation, entry) = constrainerClassOrObject.annotationEntries
+        val (annotation, entry) = validatorClassOrObject.annotationEntries
             .mapNotNull { annotationEntry ->
                 bindingContext.get(BindingContext.ANNOTATION, annotationEntry).takeIf {
-                    it?.fqName == fqNameConstrainerConfig
+                    it?.fqName == fqNameValidatorConfig
                 } to annotationEntry
             }.firstOrNull() ?: null to null
 
             annotation?.allValueArguments
-            ?.get(paramConstrainedAlias)
+            ?.get(paramSubjectAlias)
             ?.value
             ?.safeAs<String>()
-            ?.let { dslValidator.verifyConstrainedAlias(it, entry) }
+            ?.let { dslValidator.verifySubjectAlias(it, entry) }
     }
 
-    private val constrainedAliasOrSimpleName by lazy {
-        constrainedAlias ?: constrainedType.simpleName()
+    private val subjectAliasOrSimpleName by lazy {
+        subjectAlias ?: subjectType.simpleName()
     }
 
-    val constrainerTypeParamsAsTypeArgs by lazy {
-        constrainerClassOrObject
+    val validatorTypeParamsAsTypeArgs by lazy {
+        validatorClassOrObject
             .typeParameters
             .map { it.nameAsSafeName.asString() }
             .takeIf(List<String>::isNotEmpty)
@@ -84,8 +84,8 @@ internal class ConstraintsDescriptor(
             .orEmpty()
     }
 
-    val constrainerTypeParams by lazy {
-        constrainerClassOrObject
+    val validatorTypeParams by lazy {
+        validatorClassOrObject
             .typeParameters
             .map { it.deepFqName(bindingContext) }
             .takeIf(List<String>::isNotEmpty)
@@ -94,17 +94,17 @@ internal class ConstraintsDescriptor(
             .orEmpty()
     }
 
-    val constrainerFqName by lazy {
-        constrainerClassOrObject
+    val validatorFqName by lazy {
+        validatorClassOrObject
             .fqName
             ?.asString()
-            ?.plus(constrainerTypeParamsAsTypeArgs)
+            ?.plus(validatorTypeParamsAsTypeArgs)
     }
 
-    val violationsParentName by lazy { constrainedAliasOrSimpleName!! + SUFFIX_VIOLATIONS_SUPER_CLASS }
+    val violationsParentName by lazy { subjectAliasOrSimpleName!! + SUFFIX_VIOLATIONS_SUPER_CLASS }
 
-    val validationContextName by lazy { constrainedAliasOrSimpleName!! + SUFFIX_VALIDATION_CONTEXT }
+    val validationContextName by lazy { subjectAliasOrSimpleName!! + SUFFIX_VALIDATION_CONTEXT }
     val validationContextImplName by lazy { validationContextName + SUFFIX_VALIDATION_CONTEXT_IMPL }
 
-    val isValidationContextImplAnObject by lazy { constrainerTypeParams.isBlank() }
+    val isValidationContextImplAnObject by lazy { validatorTypeParams.isBlank() }
 }

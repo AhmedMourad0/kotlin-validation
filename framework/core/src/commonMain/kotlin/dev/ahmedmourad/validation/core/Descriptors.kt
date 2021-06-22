@@ -16,38 +16,38 @@ annotation class MustBeValid
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
-annotation class ConstrainerConfig(val constrainedAlias: String)
+annotation class ValidatorConfig(val subjectAlias: String)
 
-data class ConstraintsDescriptor<T : Any> internal constructor(
-    private val values: List<Constraint<T>>
-) : List<Constraint<T>> by values
+data class ValidatorDescriptor<T : Any> internal constructor(
+    private val values: List<ConstraintDescriptor<T>>
+) : List<ConstraintDescriptor<T>> by values
 
-data class Constraint<T : Any> internal constructor(
+data class ConstraintDescriptor<T : Any> internal constructor(
     val violation: String,
-    val includedConstraints: List<IncludedConstraints<T, *, *>>,
-    val validations: List<Validation<T>>,
-    val metadata: List<Metadata<T, *>>
+    val includedValidator: List<IncludedValidatorDescriptor<T, *, *>>,
+    val validations: List<ValidationDescriptor<T>>,
+    val metadata: List<MetadataDescriptor<T, *>>
 )
 
-data class IncludedConstraints<T : Any, T1 : Any, C : Constrains<T1>>(
+data class IncludedValidatorDescriptor<T : Any, T1 : Any, C : Validator<T1>>(
     val meta: String,
-    private val constrained: (T) -> T1?,
-    private val constrainer: (T, T1) -> C
+    private val subject: (T) -> T1?,
+    private val validator: (T, T1) -> C
 ) {
 
     @InternalValidationApi
-    fun getConstrained(item: T) = constrained.invoke(item)
+    fun getSubject(item: T) = subject.invoke(item)
 
     @InternalValidationApi
-    fun getConstrainer(item: T, included: T1) = constrainer.invoke(item, included)
+    fun getValidator(item: T, included: T1) = validator.invoke(item, included)
 
     @InternalValidationApi
     inline fun isValid(
         item: T,
         crossinline isValid: C.(T1) -> Boolean
     ): Boolean {
-        return getConstrained(item)?.let {
-            getConstrainer(item, it).isValid(it)
+        return getSubject(item)?.let {
+            getValidator(item, it).isValid(it)
         } ?: true
     }
 
@@ -56,20 +56,20 @@ data class IncludedConstraints<T : Any, T1 : Any, C : Constrains<T1>>(
         item: T,
         crossinline validate: C.(T1) -> Case<Set<V>, T1>
     ): Set<V> {
-        return getConstrained(item)?.let {
-            getConstrainer(item, it).validate(it).swap().orElse { emptySet() }
+        return getSubject(item)?.let {
+            getValidator(item, it).validate(it).swap().orElse { emptySet() }
         }.orEmpty()
     }
 }
 
-data class Metadata<T : Any, P> internal constructor(
+data class MetadataDescriptor<T : Any, P> internal constructor(
     val name: String,
     private val get: (T) -> P
 ) {
     fun get(item: T) = get.invoke(item)
 }
 
-data class Validation<DT> internal constructor(
+data class ValidationDescriptor<DT> internal constructor(
     private val validate: (DT) -> Boolean
 ) {
     fun validate(item: DT) = validate.invoke(item)

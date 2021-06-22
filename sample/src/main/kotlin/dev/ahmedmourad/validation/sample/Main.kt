@@ -13,35 +13,35 @@ fun main() {
 //    }
 }
 
-@ConstrainerConfig(constrainedAlias = "LongInt")
-object IntConstrainer : Constrains<Int> {
+@ValidatorConfig(subjectAlias = "LongInt")
+object IntValidator : Validator<Int> {
     override val constraints by describe {
         constraint(violation = "TooShort") { }
     }
 }
 
-@ConstrainerConfig(constrainedAlias = "SomeInt")
-object SomeConstrainer : Constrains<Int> {
+@ValidatorConfig(subjectAlias = "SomeInt")
+object SomeValidator : Validator<Int> {
     override val constraints by describe {
         constraint("Something") {
             meta("name") { "Ahmed" }
 //            meta("name1") { "Ahmed" }
             meta("country") { "Egypt" }
-            include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
-            include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
+            include("ageViolations", { 22 }) { _, _ -> IntValidator }
+            include("heightViolations", { 185 }) { _, _ -> IntValidator }
         }
         constraint("AnotherThing") {
             meta("name") { "Ahmed" }
             meta("country") { "Egypt" }
-            include("ageViolations", { 22 }) { _, _ -> IntConstrainer }
-            include("heightViolations", { 185 }) { _, _ -> IntConstrainer }
+            include("ageViolations", { 22 }) { _, _ -> IntValidator }
+            include("heightViolations", { 185 }) { _, _ -> IntValidator }
         }
     }
 }
 
 data class Rand<T : List<*>>(val v: List<T>?)
 data class Nested(val x: String, val y: String?) {
-    companion object : Constrains<Nested> {
+    companion object : Validator<Nested> {
         override val constraints by describe {
             constraint("LALALA") {
 
@@ -61,7 +61,7 @@ data class Model internal constructor(
     val x: X
 ) {
     internal constructor(n: Nested?, l1: Array<Nested>, l2: List<Nested?>, x: X) : this("v", n, l1, l2, x)
-    companion object : Constrains<Model> {
+    companion object : Validator<Model> {
         override val constraints by describe {
             constraint(violation = "TooShort") {
                 meta<Number>("min") { 7 }
@@ -148,12 +148,12 @@ data class Model internal constructor(
 }
 
 //Custom validations
-fun <T : List<*>> Validator<List<T>>.customValidation() = validation {
+fun <T : List<*>> Constraint<List<T>>.customValidation() = validation {
     it.size > 5
 }
 
 //Dealing with type parameters or extra parameters
-class RandConstrainer<T : List<*>, M>(val x: String, val m: T, val c: List<T>, d: M) : Constrains<Rand<T>> {
+class RandValidator<T : List<*>, M>(val x: String, val m: T, val c: List<T>, d: M) : Validator<Rand<T>> {
     override val constraints by describe {
         constraint("ad") {
 //            meta<M>("m") { throw RuntimeException() }
@@ -171,7 +171,7 @@ fun ConstraintBuilder<VSauce>.customScript() = validation {
 }
 
 data class VSauce(val v: String) {
-    companion object : Constrains<VSauce> {
+    companion object : Validator<VSauce> {
         override val constraints by describe {
             constraint(violation = "ShortV") {
                 customScript()

@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class CharValidationsTests {
 
     @Test
     fun isDefined_meansThisCharacterIsDefinedInUnicode() {
-        validator<Char> {
+        constraint<Char> {
             isDefined()
         }.allMatch(
             '1',
@@ -27,7 +27,7 @@ class CharValidationsTests {
 
     @Test
     fun isLetter_meansThisCharacterIsALetter() {
-        validator<Char> {
+        constraint<Char> {
             isLetter()
         }.allMatch(
             'a',
@@ -49,7 +49,7 @@ class CharValidationsTests {
 
     @Test
     fun isLetterOrDigit_meansThisCharacterIsALetterOrADigit() {
-        validator<Char> {
+        constraint<Char> {
             isLetterOrDigit()
         }.allMatch(
             'a',
@@ -71,7 +71,7 @@ class CharValidationsTests {
 
     @Test
     fun isDigit_meansThisCharacterIsADigit() {
-        validator<Char> {
+        constraint<Char> {
             isDigit()
         }.allMatch(
             '1',
@@ -93,7 +93,7 @@ class CharValidationsTests {
 
     @Test
     fun isISOControl_meansThisCharacterIsAnISOControlCharacter() {
-        validator<Char> {
+        constraint<Char> {
             isISOControl()
         }.allMatch(
             '\u0000',
@@ -107,7 +107,7 @@ class CharValidationsTests {
 
     @Test
     fun isWhitespace_meansThisCharacterIsWhitespace() {
-        validator<Char> {
+        constraint<Char> {
             isWhitespace()
         }.allMatch(
             ' ',
@@ -129,7 +129,7 @@ class CharValidationsTests {
 
     @Test
     fun isUpperCase_meansThisCharacterIsUpperCase() {
-        validator<Char> {
+        constraint<Char> {
             isUpperCase()
         }.allMatch(
             'A',
@@ -153,7 +153,7 @@ class CharValidationsTests {
 
     @Test
     fun isLowerCase_meansThisCharacterIsLowerCase() {
-        validator<Char> {
+        constraint<Char> {
             isLowerCase()
         }.allMatch(
             'a',
@@ -177,7 +177,7 @@ class CharValidationsTests {
 
     @Test
     fun isLowerCase_meansThisCharacterIsTitleCase() {
-        validator<Char> {
+        constraint<Char> {
             isTitleCase()
         }.allMatch(
             'ǅ',
@@ -206,7 +206,7 @@ class CharValidationsTests {
 
     @Test
     fun isHighSurrogate_meansThisCharacterIsUnicodeHighSurrogateCharacter() {
-        validator<Char> {
+        constraint<Char> {
             isHighSurrogate()
         }.allMatch(
             '\ud8b4',
@@ -235,7 +235,7 @@ class CharValidationsTests {
 
     @Test
     fun isLowSurrogate_meansThisCharacterIsUnicodeLowSurrogateCharacter() {
-        validator<Char> {
+        constraint<Char> {
             isLowSurrogate()
         }.allMatch(
             '\uDC00',
@@ -265,7 +265,7 @@ class CharValidationsTests {
     @Test
     fun isEqualTo_meansThisCharacterIsEqualToTheGivenCharacter() {
 
-        validator<Char> {
+        constraint<Char> {
             isEqualTo(false, 'a')
         }.allMatch(
             'a'
@@ -284,7 +284,7 @@ class CharValidationsTests {
             '2'
         )
 
-        validator<Char> {
+        constraint<Char> {
             isEqualTo(true, 'a')
         }.allMatch(
             'a',
@@ -307,7 +307,7 @@ class CharValidationsTests {
     @Test
     fun isEqualToL_meansThisCharacterIsEqualToTheGivenCharacter() {
 
-        validator<Char> {
+        constraint<Char> {
             isEqualTo(false) { 'a' }
         }.allMatch(
             'a'
@@ -326,7 +326,7 @@ class CharValidationsTests {
             '2'
         )
 
-        validator<Char> {
+        constraint<Char> {
             isEqualTo(true) { 'a' }
         }.allMatch(
             'a',
@@ -349,7 +349,7 @@ class CharValidationsTests {
     @Test
     fun isNotEqualTo_meansThisCharacterIsNotEqualToTheGivenCharacter() {
 
-        validator<Char> {
+        constraint<Char> {
             isNotEqualTo(false, 'a')
         }.allMatch(
             'A',
@@ -368,7 +368,7 @@ class CharValidationsTests {
             'a'
         )
 
-        validator<Char> {
+        constraint<Char> {
             isNotEqualTo(true, 'a')
         }.allMatch(
             'b',
@@ -391,7 +391,7 @@ class CharValidationsTests {
     @Test
     fun isNotEqualToL_meansThisCharacterIsNotEqualToTheGivenCharacter() {
 
-        validator<Char> {
+        constraint<Char> {
             isNotEqualTo(false) { 'a' }
         }.allMatch(
             'A',
@@ -410,7 +410,7 @@ class CharValidationsTests {
             'a'
         )
 
-        validator<Char> {
+        constraint<Char> {
             isNotEqualTo(true) { 'a' }
         }.allMatch(
             'b',

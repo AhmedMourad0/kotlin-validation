@@ -1,18 +1,18 @@
 package dev.ahmedmourad.validation.compiler.codegen.validations
 
 import dev.ahmedmourad.validation.compiler.codegen.CodeSectionGenerator
-import dev.ahmedmourad.validation.compiler.descriptors.ConstraintsDescriptor
+import dev.ahmedmourad.validation.compiler.descriptors.ValidatorDescriptor
 import dev.ahmedmourad.validation.compiler.descriptors.ViolationDescriptor
 
 internal class ViolationsGenerator : CodeSectionGenerator {
 
-    override fun imports(constraintsDescriptor: ConstraintsDescriptor) = emptySet<String>()
+    override fun imports(validatorDescriptor: ValidatorDescriptor) = emptySet<String>()
 
     override fun generate(
-        constraintsDescriptor: ConstraintsDescriptor
+        validatorDescriptor: ValidatorDescriptor
     ): Set<String> {
-        val parentName = constraintsDescriptor.violationsParentName
-        val violations = constraintsDescriptor.violations.joinToString("\n\t") {
+        val parentName = validatorDescriptor.violationsParentName
+        val violations = validatorDescriptor.violations.joinToString("\n\t") {
             generateViolation(parentName, it).replace("\n", "\n\t")
         }
         return setOf(generateViolationsParent(parentName, violations))

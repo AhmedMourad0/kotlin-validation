@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun minLength_meansTheCharSequenceMustHaveAtLeastTheGivenNumberOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             minLength(4)
         }.allMatch(
             "1234",
@@ -28,7 +28,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun minLengthL_meansTheCharSequenceMustHaveAtLeastTheGivenNumberOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             minLength { 4 }
         }.allMatch(
             "1234",
@@ -46,7 +46,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun maxLength_meansTheCharSequenceMustHaveAtMostTheGivenNumberOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             maxLength(4)
         }.allMatch(
             "",
@@ -64,7 +64,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun maxLengthL_meansTheCharSequenceMustHaveAtMostTheGivenNumberOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             maxLength { 4 }
         }.allMatch(
             "",
@@ -82,7 +82,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthLessThan_meansTheCharSequenceMustHaveLessThanTheGivenNumberOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthLessThan(4)
         }.allMatch(
             "",
@@ -100,7 +100,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthLessThanL_meansTheCharSequenceMustHaveLessThanTheGivenNumberOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthLessThan { 4 }
         }.allMatch(
             "",
@@ -118,7 +118,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthLargerThan_meansTheCharSequenceMustHaveMoreThanTheGivenNumberOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthLargerThan(4)
         }.allMatch(
             "12345",
@@ -136,7 +136,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthLargerThanL_meansTheCharSequenceMustHaveMoreThanTheGivenNumberOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthLargerThan { 4 }
         }.allMatch(
             "12345",
@@ -154,7 +154,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthIn_meansTheCharSequenceMustHaveTheGivenRangeOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthIn(3, 5)
         }.allMatch(
             "123",
@@ -172,7 +172,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthInR_meansTheCharSequenceMustHaveTheGivenRangeOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthIn(3..5)
         }.allMatch(
             "123",
@@ -190,7 +190,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthInRL_meansTheCharSequenceMustHaveTheGivenRangeOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthIn { 3..5 }
         }.allMatch(
             "123",
@@ -208,7 +208,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthNotIn_meansTheCharSequenceMustNotHaveTheGivenRangeOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthNotIn(3, 5)
         }.allMatch(
             "",
@@ -226,7 +226,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthNotInR_meansTheCharSequenceMustNotHaveTheGivenRangeOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthNotIn(3..5)
         }.allMatch(
             "",
@@ -244,7 +244,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthNotInRL_meansTheCharSequenceMustNotHaveTheGivenRangeOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthNotIn { 3..5 }
         }.allMatch(
             "",
@@ -262,7 +262,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthEqualTo_meansTheCharSequenceMustHaveTheGivenNumberOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthEqualTo(3)
         }.allMatch(
             "123"
@@ -278,7 +278,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthEqualToL_meansTheCharSequenceMustHaveTheGivenNumberOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthEqualTo { 3 }
         }.allMatch(
             "123"
@@ -294,7 +294,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthNotEqualTo_meansTheCharSequenceMustNotHaveTheGivenNumberOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthNotEqualTo(3)
         }.allMatch(
             "",
@@ -310,7 +310,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun lengthNotEqualToL_meansTheCharSequenceMustNotHaveTheGivenNumberOfCharacters() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             lengthNotEqualTo { 3 }
         }.allMatch(
             "",
@@ -327,7 +327,7 @@ class CharSequenceValidationsTests {
     @Test
     fun contains_meansTheCharSequenceContainsTheGivenCharacterSequence() {
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             contains("aB", true)
         }.allMatch(
             "aB",
@@ -356,7 +356,7 @@ class CharSequenceValidationsTests {
             "1A1b"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             contains("aB", false)
         }.allMatch(
             "aB",
@@ -384,7 +384,7 @@ class CharSequenceValidationsTests {
     @Test
     fun containsL_meansTheCharSequenceContainsTheGivenCharacterSequence() {
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             contains(true) { "aB" }
         }.allMatch(
             "aB",
@@ -413,7 +413,7 @@ class CharSequenceValidationsTests {
             "1A1b"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             contains(false) { "aB" }
         }.allMatch(
             "aB",
@@ -441,7 +441,7 @@ class CharSequenceValidationsTests {
     @Test
     fun containsChar_meansTheCharSequenceContainsTheGivenCharacter() {
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             containsChar('b', true)
         }.allMatch(
             "b",
@@ -460,7 +460,7 @@ class CharSequenceValidationsTests {
             "1111"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             containsChar('b', false)
         }.allMatch(
             "b",
@@ -483,7 +483,7 @@ class CharSequenceValidationsTests {
     @Test
     fun containsCharL_meansTheCharSequenceContainsTheGivenCharacter() {
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             containsChar(true) { 'b' }
         }.allMatch(
             "b",
@@ -502,7 +502,7 @@ class CharSequenceValidationsTests {
             "1111"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             containsChar(false) { 'b' }
         }.allMatch(
             "b",
@@ -524,7 +524,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun containsR_meansAPortionOrTheWholeCharacterSequenceMatchesTheGivenRegex() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             contains(Regex("\\s+"))
         }.allMatch(
             " ",
@@ -545,7 +545,7 @@ class CharSequenceValidationsTests {
     @Test
     fun startsWith_meansTheCharSequenceStartsWithTheGivenCharacterSequence() {
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             startsWith("aB", true)
         }.allMatch(
             "aB",
@@ -563,7 +563,7 @@ class CharSequenceValidationsTests {
             "1aB1"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             startsWith("aB", false)
         }.allMatch(
             "aB",
@@ -584,7 +584,7 @@ class CharSequenceValidationsTests {
     @Test
     fun startsWithL_meansTheCharSequenceStartsWithTheGivenCharacterSequence() {
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             startsWith(true) { "aB" }
         }.allMatch(
             "aB",
@@ -602,7 +602,7 @@ class CharSequenceValidationsTests {
             "1aB1"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             startsWith(false) { "aB" }
         }.allMatch(
             "aB",
@@ -623,7 +623,7 @@ class CharSequenceValidationsTests {
     @Test
     fun startsWithChar_meansTheCharSequenceStartsWithTheGivenCharacter() {
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             startsWithChar('b', true)
         }.allMatch(
             "b",
@@ -639,7 +639,7 @@ class CharSequenceValidationsTests {
             "1b1"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             startsWithChar('b', false)
         }.allMatch(
             "b",
@@ -658,7 +658,7 @@ class CharSequenceValidationsTests {
     @Test
     fun startsWithCharL_meansTheCharSequenceStartsWithTheGivenCharacter() {
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             startsWithChar(true) { 'b' }
         }.allMatch(
             "b",
@@ -674,7 +674,7 @@ class CharSequenceValidationsTests {
             "1b1"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             startsWithChar(false) { 'b' }
         }.allMatch(
             "b",
@@ -693,7 +693,7 @@ class CharSequenceValidationsTests {
     @Test
     fun endsWith_meansTheCharSequenceEndsWithTheGivenCharacterSequence() {
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             endsWith("aB", true)
         }.allMatch(
             "aB",
@@ -711,7 +711,7 @@ class CharSequenceValidationsTests {
             "1aB1"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             endsWith("aB", false)
         }.allMatch(
             "aB",
@@ -732,7 +732,7 @@ class CharSequenceValidationsTests {
     @Test
     fun endsWithL_meansTheCharSequenceEndsWithTheGivenCharacterSequence() {
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             endsWith(true) { "aB" }
         }.allMatch(
             "aB",
@@ -750,7 +750,7 @@ class CharSequenceValidationsTests {
             "1aB1"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             endsWith(false) { "aB" }
         }.allMatch(
             "aB",
@@ -771,7 +771,7 @@ class CharSequenceValidationsTests {
     @Test
     fun endsWithChar_meansTheCharSequenceEndsWithTheGivenCharacter() {
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             endsWithChar('b', true)
         }.allMatch(
             "b",
@@ -787,7 +787,7 @@ class CharSequenceValidationsTests {
             "1b1"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             endsWithChar('b', false)
         }.allMatch(
             "b",
@@ -806,7 +806,7 @@ class CharSequenceValidationsTests {
     @Test
     fun endsWithCharL_meansTheCharSequenceEndsWithTheGivenCharacter() {
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             endsWithChar(true) { 'b' }
         }.allMatch(
             "b",
@@ -822,7 +822,7 @@ class CharSequenceValidationsTests {
             "1b1"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             endsWithChar(false) { 'b' }
         }.allMatch(
             "b",
@@ -840,7 +840,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun matches_meansTheCharSequenceMatchesTheGivenRegex() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             matches(Regex("\\s+"))
         }.allMatch(
             " ",
@@ -857,7 +857,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun isEmpty_meansTheCharSequenceIsEmpty() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             isEmpty()
         }.allMatch(
             ""
@@ -871,7 +871,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun isNotEmpty_meansTheCharSequenceIsNotEmpty() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             isNotEmpty()
         }.allMatch(
             " ",
@@ -885,7 +885,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun isBlank_meansTheCharSequenceIsEmptyOrBlank() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             isBlank()
         }.allMatch(
             "",
@@ -902,7 +902,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun isNotBlank_meansTheCharSequenceIsNeitherEmptyNorBlank() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             isNotBlank()
         }.allMatch(
             "1",
@@ -919,7 +919,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun regionMatches_meansTheSpecifiedRangeInThisCharSequenceEqualsTheSpecifiedRangeInTheGivenCharSequence() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             regionMatches(
                 1,
                 "aaaBbbcccddd",
@@ -938,7 +938,7 @@ class CharSequenceValidationsTests {
             "aBbccc"
         )
 
-        validator<CharSequence> {
+        constraint<CharSequence> {
             regionMatches(
                 1,
                 "aaaBbbcccddd",
@@ -961,7 +961,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun hasSurrogatePairAt_meansTheSpecifiedRangeInThisCharSequenceEqualsTheSpecifiedRangeInTheGivenCharSequence() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             hasSurrogatePairAt(2)
         }.allMatch(
             "11\uD83C\uDF091111"
@@ -976,7 +976,7 @@ class CharSequenceValidationsTests {
 
     @Test
     fun hasSurrogatePairAtL_meansTheSpecifiedRangeInThisCharSequenceEqualsTheSpecifiedRangeInTheGivenCharSequence() {
-        validator<CharSequence> {
+        constraint<CharSequence> {
             hasSurrogatePairAt { 2 }
         }.allMatch(
             "11\uD83C\uDF091111"

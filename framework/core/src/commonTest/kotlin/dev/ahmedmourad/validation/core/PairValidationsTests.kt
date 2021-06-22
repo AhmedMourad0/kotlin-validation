@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class PairValidationsTests {
 
     @Test
     fun first_meansTheGivenValidationsMatchTheFirstElementOfThePair() {
-        validator<Pair<Int, Unit>> {
+        constraint<Pair<Int, Unit>> {
             first {
                 max(3)
             }
@@ -28,7 +28,7 @@ class PairValidationsTests {
 
     @Test
     fun second_meansTheGivenValidationsMatchTheSecondElementOfThePair() {
-        validator<Pair<Unit, Int>> {
+        constraint<Pair<Unit, Int>> {
             second {
                 max(3)
             }

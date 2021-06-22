@@ -2,7 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import dev.ahmedmourad.validation.core.utils.allFail
 import dev.ahmedmourad.validation.core.utils.allMatch
-import dev.ahmedmourad.validation.core.utils.validator
+import dev.ahmedmourad.validation.core.utils.constraint
 import dev.ahmedmourad.validation.core.validations.*
 import kotlin.test.Test
 
@@ -10,7 +10,7 @@ class LongValidationsTests {
 
     @Test
     fun isDivisibleBy_meansThisLongIsDivisibleByTheGivenLong() {
-        validator<Long> {
+        constraint<Long> {
             isDivisibleBy(3)
         }.allMatch(
             0,
@@ -29,7 +29,7 @@ class LongValidationsTests {
 
     @Test
     fun isDivisibleByL_meansThisLongIsDivisibleByTheGivenLong() {
-        validator<Long> {
+        constraint<Long> {
             isDivisibleBy { 3 }
         }.allMatch(
             0,
@@ -48,7 +48,7 @@ class LongValidationsTests {
 
     @Test
     fun isNotDivisibleBy_meansThisLongIsNotDivisibleByTheGivenLong() {
-        validator<Long> {
+        constraint<Long> {
             isNotDivisibleBy(3)
         }.allMatch(
             1,
@@ -67,7 +67,7 @@ class LongValidationsTests {
 
     @Test
     fun isNotDivisibleByL_meansThisLongIsNotDivisibleByTheGivenLong() {
-        validator<Long> {
+        constraint<Long> {
             isNotDivisibleBy { 3 }
         }.allMatch(
             1,
@@ -86,7 +86,7 @@ class LongValidationsTests {
 
     @Test
     fun isEven_meansThisLongIsEven() {
-        validator<Long> {
+        constraint<Long> {
             isEven()
         }.allMatch(
             0,
@@ -106,7 +106,7 @@ class LongValidationsTests {
 
     @Test
     fun isOdd_meansThisLongIsOdd() {
-        validator<Long> {
+        constraint<Long> {
             isOdd()
         }.allMatch(
             1,
@@ -127,7 +127,7 @@ class LongValidationsTests {
     @Test
     fun isPositive_meansThisLongIsPositive() {
 
-        validator<Long> {
+        constraint<Long> {
             isPositive(false)
         }.allMatch(
             1,
@@ -144,7 +144,7 @@ class LongValidationsTests {
             -125
         )
 
-        validator<Long> {
+        constraint<Long> {
             isPositive(true)
         }.allMatch(
             0,
@@ -165,7 +165,7 @@ class LongValidationsTests {
     @Test
     fun isNegative_meansThisLongIsNegative() {
 
-        validator<Long> {
+        constraint<Long> {
             isNegative(false)
         }.allMatch(
             -1,
@@ -182,7 +182,7 @@ class LongValidationsTests {
             125
         )
 
-        validator<Long> {
+        constraint<Long> {
             isNegative(true)
         }.allMatch(
             0,
@@ -202,7 +202,7 @@ class LongValidationsTests {
 
     @Test
     fun isZero_meansThisLongEqualsZero() {
-        validator<Long> {
+        constraint<Long> {
             isZero()
         }.allMatch(
             0
@@ -222,7 +222,7 @@ class LongValidationsTests {
 
     @Test
     fun isNotZero_meansThisLongDoesNotEqualZero() {
-        validator<Long> {
+        constraint<Long> {
             isNotZero()
         }.allMatch(
             -125,
@@ -242,7 +242,7 @@ class LongValidationsTests {
 
     @Test
     fun isPrime_meansThisLongIsPrime() {
-        validator<Long> {
+        constraint<Long> {
             isPrime()
         }.allMatch(
             2,
@@ -280,7 +280,7 @@ class LongValidationsTests {
 
     @Test
     fun isNotPrime_meansThisLongIsNotPrime() {
-        validator<Long> {
+        constraint<Long> {
             isNotPrime()
         }.allMatch(
             -5,
