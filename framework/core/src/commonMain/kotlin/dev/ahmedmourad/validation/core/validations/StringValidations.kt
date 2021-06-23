@@ -3,58 +3,58 @@ package dev.ahmedmourad.validation.core.validations
 import dev.ahmedmourad.validation.core.Constraint
 
 fun Constraint<String>.isInteger() = validation {
-    it.toLongOrNull() != null
+    subject.toLongOrNull() != null
 }
 
 fun Constraint<String>.isNumber() = validation {
-    it.toDoubleOrNull() != null
+    subject.toDoubleOrNull() != null
 }
 
-fun Constraint<String>.isPositiveInteger(orZero: Boolean) = validation { validated ->
+fun Constraint<String>.isPositiveInteger(orZero: Boolean) = validation {
     if (orZero) {
-        validated.toLongOrNull()?.let { it >= 0 } ?: false
+        subject.toLongOrNull()?.let { it >= 0 } ?: false
     } else {
-        validated.toLongOrNull()?.let { it > 0 } ?: false
+        subject.toLongOrNull()?.let { it > 0 } ?: false
     }
 }
 
-fun Constraint<String>.isNegativeInteger(orZero: Boolean) = validation { validated ->
+fun Constraint<String>.isNegativeInteger(orZero: Boolean) = validation {
     if (orZero) {
-        validated.toLongOrNull()?.let { it <= 0 } ?: false
+        subject.toLongOrNull()?.let { it <= 0 } ?: false
     } else {
-        validated.toLongOrNull()?.let { it < 0 } ?: false
+        subject.toLongOrNull()?.let { it < 0 } ?: false
     }
 }
 
-fun Constraint<String>.isPositiveNumber(orZero: Boolean) = validation { validated ->
+fun Constraint<String>.isPositiveNumber(orZero: Boolean) = validation {
     if (orZero) {
-        validated.toDoubleOrNull()?.let { it >= 0.0 } ?: false
+        subject.toDoubleOrNull()?.let { it >= 0.0 } ?: false
     } else {
-        validated.toDoubleOrNull()?.let { it > 0.0 } ?: false
+        subject.toDoubleOrNull()?.let { it > 0.0 } ?: false
     }
 }
 
-fun Constraint<String>.isNegativeNumber(orZero: Boolean) = validation { validated ->
+fun Constraint<String>.isNegativeNumber(orZero: Boolean) = validation {
     if (orZero) {
-        validated.toDoubleOrNull()?.let { it <= 0.0 } ?: false
+        subject.toDoubleOrNull()?.let { it <= 0.0 } ?: false
     } else {
-        validated.toDoubleOrNull()?.let { it < 0.0 } ?: false
+        subject.toDoubleOrNull()?.let { it < 0.0 } ?: false
     }
 }
 
 fun Constraint<String>.isZero() = validation {
-    (it.toDoubleOrNull() ?: 1.0) == 0.0
+    (subject.toDoubleOrNull() ?: 1.0) == 0.0
 }
 
 fun Constraint<String>.isNotZero() = validation {
-    (it.toDoubleOrNull() ?: 1.0) != 0.0
+    (subject.toDoubleOrNull() ?: 1.0) != 0.0
 }
 
 inline fun Constraint<String>.isEqualTo(
     ignoreCase: Boolean,
     crossinline other: (String) -> String
 ) = validation {
-    it.equals(other(it), ignoreCase)
+    subject.equals(other(subject), ignoreCase)
 }
 
 fun Constraint<String>.isEqualTo(
@@ -66,7 +66,7 @@ inline fun Constraint<String>.isNotEqualTo(
     ignoreCase: Boolean,
     crossinline other: (String) -> String
 ) = validation {
-    !it.equals(other(it), ignoreCase)
+    !subject.equals(other(subject), ignoreCase)
 }
 
 fun Constraint<String>.isNotEqualTo(

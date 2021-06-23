@@ -62,15 +62,17 @@ data class IncludedValidatorDescriptor<T : Any, T1 : Any, C : Validator<T1>>(
     }
 }
 
+//TODO: both should accept a SubjectHolder instead, and
+// it should be created once at call site
 data class MetadataDescriptor<T : Any, P> internal constructor(
     val name: String,
-    private val get: (T) -> P
+    private val get: SubjectHolder<T>.() -> P
 ) {
-    fun get(item: T) = get.invoke(item)
+    fun get(item: T) = get.invoke(SubjectHolder(item))
 }
 
 data class ValidationDescriptor<DT> internal constructor(
-    private val validate: (DT) -> Boolean
+    private val validate: SubjectHolder<DT>.() -> Boolean
 ) {
-    fun validate(item: DT) = validate.invoke(item)
+    fun validate(item: DT) = validate.invoke(SubjectHolder(item))
 }

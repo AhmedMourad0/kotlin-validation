@@ -15,12 +15,12 @@ class ConstraintBuilderTests {
         val expected = ConstraintDescriptor<Boolean>(
             "SomeConstraint",
             emptyList(),
-            listOf(ValidationDescriptor { it }),
+            listOf(ValidationDescriptor { subject }),
             emptyList()
         )
 
         val actual = ConstraintBuilder<Boolean>(expected.violation).apply {
-            validation(expected.validations.first()::validate)
+            validation { expected.validations.first().validate(subject) }
         }.build()
 
         assertTrue(actual.validations.all { it.validate(true) })
@@ -40,7 +40,7 @@ class ConstraintBuilderTests {
         )
 
         val actual = ConstraintBuilder<Int>(expected.violation).apply {
-            meta(expectedMeta.name, expectedMeta::get)
+            meta(expectedMeta.name) { expectedMeta.get(subject) }
         }.build()
 
         val actualMeta = actual.metadata.first()
@@ -178,7 +178,7 @@ class ConstraintBuilderTests {
     fun on1_changesTheConstraintScopeFromTheSubjectTypeToTheGivenItem() {
 
         val constraint = ConstraintBuilder<String>("SomeConstraint").apply {
-            on({ it.length }) {
+            on({ subject.length }) {
                 max(5)
             }
         }.build()

@@ -42,7 +42,7 @@ class ScopedConstraintBuilderTests {
     fun on1_changesTheConstraintScopeFromTheSubjectTypeToTheGivenItem() {
 
         val constraint = ScopedConstraintBuilder<String>().apply {
-            on({ it.length }) {
+            on({ subject.length }) {
                 max(5)
             }
         }

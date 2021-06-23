@@ -3,6 +3,7 @@ package dev.ahmedmourad.validation.core
 import kotlin.annotation.AnnotationRetention.*
 import kotlin.annotation.AnnotationTarget.*
 import kotlin.reflect.KProperty0
+import kotlin.reflect.KProperty1
 
 @DslMarker
 @Target(CLASS)
@@ -42,18 +43,24 @@ class ConstraintsBuilder<T : Any> internal constructor() {
         constraints.add(ConstraintBuilder<T>(violation).apply(description).build())
     }
 
+    fun <X> evaluate(evaluate: SubjectHolder<T>.() -> X): LazyValue<T, X> {
+        return LazyValue(evaluate)
+    }
+
     internal fun build(): ValidatorDescriptor<T> = ValidatorDescriptor(constraints)
 }
 
 @ValidationDslMarker
 interface Constraint<DT> {
 
-    fun validation(validate: (DT) -> Boolean)
+    fun validation(validate: SubjectHolder<DT>.() -> Boolean)
 
-    fun <DT1> on(property: (DT) -> DT1, constraint: Constraint<DT1>.() -> Unit)
+    fun <DT1> on(property: SubjectHolder<DT>.() -> DT1, constraint: Constraint<DT1>.() -> Unit)
     fun <DT1> on(property: KProperty0<DT1>, constraint: Constraint<DT1>.() -> Unit)
-    fun <DT1 : Any> on(property: (DT) -> DT1?): NullablePropertyScopedConstraint<DT, DT1>
+    fun <DT1> on(property: KProperty1<DT, DT1>, constraint: Constraint<DT1>.() -> Unit)
+    fun <DT1 : Any> on(property: SubjectHolder<DT>.() -> DT1?): NullablePropertyScopedConstraint<DT, DT1>
     fun <DT1 : Any> on(property: KProperty0<DT1?>): NullablePropertyScopedConstraint<DT, DT1>
+    fun <DT1 : Any> on(property: KProperty1<DT, DT1?>): NullablePropertyScopedConstraint<DT, DT1>
 
     infix fun <DT1 : Any> NullablePropertyScopedConstraint<DT, DT1>.ifExists(
         validations: Constraint<DT1>.() -> Unit
@@ -62,6 +69,10 @@ interface Constraint<DT> {
     infix fun <DT1 : Any> NullablePropertyScopedConstraint<DT, DT1>.mustExist(
         validations: Constraint<DT1>.() -> Unit
     )
+
+    fun <X> evaluate(evaluate: SubjectHolder<DT>.() -> X): LazyValue<DT, X> {
+        return LazyValue(evaluate)
+    }
 }
 
 @ValidationDslMarker
@@ -73,12 +84,12 @@ class ConstraintBuilder<T : Any> internal constructor(
     private val validations: MutableList<ValidationDescriptor<T>> = mutableListOf()
     private val metadata: MutableList<MetadataDescriptor<T, *>> = mutableListOf()
 
-    override fun validation(validate: (T) -> Boolean) {
+    override fun validation(validate: SubjectHolder<T>.() -> Boolean) {
         validations.add(ValidationDescriptor(validate))
     }
 
     @Meta
-    fun <@MetaType P> meta(@MetaName name: String, get: (T) -> P) {
+    fun <@MetaType P> meta(@MetaName name: String, get: SubjectHolder<T>.() -> P) {
         metadata.add(MetadataDescriptor(name, get))
     }
 
@@ -102,33 +113,58 @@ class ConstraintBuilder<T : Any> internal constructor(
     }
 
     override fun <DT> on(
-        property: (T) -> DT,
+        property: SubjectHolder<T>.() -> DT,
         constraint: Constraint<DT>.() -> Unit
     ) = validation {
-        ScopedConstraintBuilder<DT>().apply(constraint).validateAll(property.invoke(it))
+        ScopedConstraintBuilder<DT>()
+            .apply(constraint)
+            .validateAll(property.invoke(this))
     }
 
     override fun <DT> on(
         property: KProperty0<DT>,
         constraint: Constraint<DT>.() -> Unit
     ) = validation {
-        ScopedConstraintBuilder<DT>().apply(constraint).validateAll(property.get())
+        ScopedConstraintBuilder<DT>()
+            .apply(constraint)
+            .validateAll(property.get())
     }
 
-    override fun <DT : Any> on(property: (T) -> DT?): NullablePropertyScopedConstraint<T, DT> {
+    override fun <DT> on(
+        property: KProperty1<T, DT>,
+        constraint: Constraint<DT>.() -> Unit
+    ) = validation {
+        ScopedConstraintBuilder<DT>()
+            .apply(constraint)
+            .validateAll(property.get(subject))
+    }
+
+    override fun <DT : Any> on(
+        property: SubjectHolder<T>.() -> DT?
+    ): NullablePropertyScopedConstraint<T, DT> {
         return NullablePropertyScopedConstraint(property)
     }
 
-    override fun <DT : Any> on(property: KProperty0<DT?>): NullablePropertyScopedConstraint<T, DT> {
+    override fun <DT : Any> on(
+        property: KProperty0<DT?>
+    ): NullablePropertyScopedConstraint<T, DT> {
         return on { property.get() }
+    }
+
+    override fun <DT : Any> on(
+        property: KProperty1<T, DT?>
+    ): NullablePropertyScopedConstraint<T, DT> {
+        return on { property.get(subject) }
     }
 
     override infix fun <DT : Any> NullablePropertyScopedConstraint<T, DT>.ifExists(
         validations: Constraint<DT>.() -> Unit
     ) = this@ConstraintBuilder.validation {
-        val item = this@ifExists.get(it)
+        val item = this@ifExists.get(this)
         if (item != null) {
-            ScopedConstraintBuilder<DT>().apply(validations).validateAll(item)
+            ScopedConstraintBuilder<DT>()
+                .apply(validations)
+                .validateAll(item)
         } else {
             true
         }
@@ -137,9 +173,11 @@ class ConstraintBuilder<T : Any> internal constructor(
     override infix fun <DT : Any> NullablePropertyScopedConstraint<T, DT>.mustExist(
         validations: Constraint<DT>.() -> Unit
     ) = this@ConstraintBuilder.validation {
-        val item = this@mustExist.get(it)
+        val item = this@mustExist.get(this)
         if (item != null) {
-            ScopedConstraintBuilder<DT>().apply(validations).validateAll(item)
+            ScopedConstraintBuilder<DT>()
+                .apply(validations)
+                .validateAll(item)
         } else {
             false
         }
@@ -156,40 +194,66 @@ class ConstraintBuilder<T : Any> internal constructor(
 @ValidationDslMarker
 class ScopedConstraintBuilder<DT> : Constraint<DT> {
 
-    private val validations: MutableList<ValidationDescriptor<DT>> = mutableListOf()
+    private val validations: MutableList<ValidationDescriptor<DT>> =
+        mutableListOf()
 
-    override fun validation(validate: (DT) -> Boolean) {
+    override fun validation(validate: SubjectHolder<DT>.() -> Boolean) {
         validations.add(ValidationDescriptor(validate))
     }
 
     override fun <DT1> on(
-        property: (DT) -> DT1,
+        property: SubjectHolder<DT>.() -> DT1,
         constraint: Constraint<DT1>.() -> Unit
     ) = validation {
-        ScopedConstraintBuilder<DT1>().apply(constraint).validateAll(property.invoke(it))
+        ScopedConstraintBuilder<DT1>()
+            .apply(constraint)
+            .validateAll(property.invoke(this))
     }
 
     override fun <DT1> on(
         property: KProperty0<DT1>,
         constraint: Constraint<DT1>.() -> Unit
     ) = validation {
-        ScopedConstraintBuilder<DT1>().apply(constraint).validateAll(property.get())
+        ScopedConstraintBuilder<DT1>()
+            .apply(constraint)
+            .validateAll(property.get())
     }
 
-    override fun <DT1 : Any> on(property: (DT) -> DT1?): NullablePropertyScopedConstraint<DT, DT1> {
+    override fun <DT1> on(
+        property: KProperty1<DT, DT1>,
+        constraint: Constraint<DT1>.() -> Unit
+    ) = validation {
+        ScopedConstraintBuilder<DT1>()
+            .apply(constraint)
+            .validateAll(property.get(subject))
+    }
+
+    override fun <DT1 : Any> on(
+        property: SubjectHolder<DT>.() -> DT1?
+    ): NullablePropertyScopedConstraint<DT, DT1> {
         return NullablePropertyScopedConstraint(property)
     }
 
-    override fun <DT1 : Any> on(property: KProperty0<DT1?>): NullablePropertyScopedConstraint<DT, DT1> {
+    override fun <DT1 : Any> on(
+        property: KProperty0<DT1?>
+    ): NullablePropertyScopedConstraint<DT, DT1> {
         return on { property.get() }
+    }
+
+    override fun <DT1 : Any> on(
+        property: KProperty1<DT, DT1?>
+    ): NullablePropertyScopedConstraint<DT, DT1> {
+        return on { property.get(subject) }
     }
 
     override infix fun <DT1 : Any> NullablePropertyScopedConstraint<DT, DT1>.ifExists(
         validations: Constraint<DT1>.() -> Unit
     ) = this@ScopedConstraintBuilder.validation {
-        val item = this@ifExists.get(it)
+        val item = this@ifExists.get(this)
         if (item != null) {
-            ScopedConstraintBuilder<DT1>().apply(validations).validateAll(item)
+            ScopedConstraintBuilder<DT1>()
+                .apply(validations)
+                .validateAll(item)
         } else {
             true
         }
@@ -198,9 +262,11 @@ class ScopedConstraintBuilder<DT> : Constraint<DT> {
     override infix fun <DT1 : Any> NullablePropertyScopedConstraint<DT, DT1>.mustExist(
         validations: Constraint<DT1>.() -> Unit
     ) = this@ScopedConstraintBuilder.validation {
-        val item = this@mustExist.get(it)
+        val item = this@mustExist.get(this)
         if (item != null) {
-            ScopedConstraintBuilder<DT1>().apply(validations).validateAll(item)
+            ScopedConstraintBuilder<DT1>()
+                .apply(validations)
+                .validateAll(item)
         } else {
             false
         }
@@ -221,9 +287,36 @@ class ScopedConstraintBuilder<DT> : Constraint<DT> {
 
 @ValidationDslMarker
 class NullablePropertyScopedConstraint<T, DT : Any> internal constructor(
-    private val get: (T) -> DT?
+    private val get: SubjectHolder<T>.() -> DT?
 ) {
-    internal fun get(owner: T)  = get.invoke(owner)
+    internal fun get(holder: SubjectHolder<T>)  = get.invoke(holder)
+}
+
+@ValidationDslMarker
+class LazyValue<DT, X>(
+    private val evaluate: SubjectHolder<DT>.() -> X
+) {
+
+    private var isInitialized = false
+    private var item: X? = null
+
+    @Suppress("UNCHECKED_CAST")
+    internal fun get(holder: SubjectHolder<DT>): X {
+        return if (isInitialized) {
+            item as X
+        } else {
+            this@LazyValue.evaluate(holder).also {
+                item = it
+            }
+        }
+    }
+}
+
+@ValidationDslMarker
+class SubjectHolder<DT>(val subject: DT) {
+    fun <X> LazyValue<DT, X>.get(): X {
+        return this.get(this@SubjectHolder)
+    }
 }
 
 @Suppress("unused")

@@ -6,17 +6,17 @@ import dev.ahmedmourad.validation.core.ScopedConstraintBuilder
 inline fun <A, B, C> Constraint<Triple<A, B, C>>.first(
     crossinline firstConstraint: Constraint<A>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<A>().apply(firstConstraint).validateAll(it.first)
+    ScopedConstraintBuilder<A>().apply(firstConstraint).validateAll(subject.first)
 }
 
 inline fun <A, B, C> Constraint<Triple<A, B, C>>.second(
     crossinline secondConstraint: Constraint<B>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<B>().apply(secondConstraint).validateAll(it.second)
+    ScopedConstraintBuilder<B>().apply(secondConstraint).validateAll(subject.second)
 }
 
 inline fun <A, B, C> Constraint<Triple<A, B, C>>.third(
     crossinline thirdConstraint: Constraint<C>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<C>().apply(thirdConstraint).validateAll(it.third)
+    ScopedConstraintBuilder<C>().apply(thirdConstraint).validateAll(subject.third)
 }

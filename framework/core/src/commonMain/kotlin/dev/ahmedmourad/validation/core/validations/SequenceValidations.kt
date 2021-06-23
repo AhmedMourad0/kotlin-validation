@@ -5,44 +5,44 @@ import dev.ahmedmourad.validation.core.ScopedConstraintBuilder
 
 inline fun <DT> Constraint<out Sequence<DT>>.forAll(
     crossinline itemConstraint: Constraint<DT>.() -> Unit
-) = validation { validated ->
-    validated.all {
+) = validation {
+    subject.all {
         ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
     }
 }
 
 inline fun <DT> Constraint<out Sequence<DT>>.forAny(
     crossinline itemConstraint: Constraint<DT>.() -> Unit
-) = validation { validated ->
-    validated.any {
+) = validation {
+    subject.any {
         ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
     }
 }
 
 inline fun <DT> Constraint<out Sequence<DT>>.forNone(
     crossinline itemConstraint: Constraint<DT>.() -> Unit
-) = validation { validated ->
-    validated.none {
+) = validation {
+    subject.none {
         ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
     }
 }
 
 fun <DT> Constraint<out Sequence<DT>>.isEmpty() = validation {
-    it.count() == 0
+    subject.count() == 0
 }
 
 fun <DT> Constraint<out Sequence<DT>>.isNotEmpty() = validation {
-    it.count() > 0
+    subject.count() > 0
 }
 
 fun <DT> Constraint<out Sequence<DT>>.isDistinct() = validation {
-    it.distinct().count() == it.count()
+    subject.distinct().count() == subject.count()
 }
 
 inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.minSize(
     crossinline min: (DTS) -> Int
 ) = validation {
-    it.count() >= min(it)
+    subject.count() >= min(subject)
 }
 
 fun <DT> Constraint<out Sequence<DT>>.minSize(min: Int) = minSize { min }
@@ -50,7 +50,7 @@ fun <DT> Constraint<out Sequence<DT>>.minSize(min: Int) = minSize { min }
 inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.maxSize(
     crossinline max: (DTS) -> Int
 ) = validation {
-    it.count() <= max(it)
+    subject.count() <= max(subject)
 }
 
 fun <DT> Constraint<out Sequence<DT>>.maxSize(max: Int) = maxSize { max }
@@ -58,7 +58,7 @@ fun <DT> Constraint<out Sequence<DT>>.maxSize(max: Int) = maxSize { max }
 inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.sizeLessThan(
     crossinline maxExclusive: (DTS) -> Int
 ) = validation {
-    it.count() < maxExclusive(it)
+    subject.count() < maxExclusive(subject)
 }
 
 fun <DT> Constraint<out Sequence<DT>>.sizeLessThan(maxExclusive: Int) = sizeLessThan { maxExclusive }
@@ -66,7 +66,7 @@ fun <DT> Constraint<out Sequence<DT>>.sizeLessThan(maxExclusive: Int) = sizeLess
 inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.sizeLargerThan(
     crossinline minExclusive: (DTS) -> Int
 ) = validation {
-    it.count() > minExclusive(it)
+    subject.count() > minExclusive(subject)
 }
 
 fun <DT> Constraint<out Sequence<DT>>.sizeLargerThan(minExclusive: Int) = sizeLargerThan { minExclusive }
@@ -74,7 +74,7 @@ fun <DT> Constraint<out Sequence<DT>>.sizeLargerThan(minExclusive: Int) = sizeLa
 inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.sizeIn(
     crossinline range: (DTS) -> IntRange
 ) = validation {
-    it.count() in range(it)
+    subject.count() in range(subject)
 }
 
 fun <DT> Constraint<out Sequence<DT>>.sizeIn(range: IntRange) = sizeIn { range }
@@ -84,7 +84,7 @@ fun <DT> Constraint<out Sequence<DT>>.sizeIn(min: Int, max: Int) = sizeIn(min..m
 inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.sizeNotIn(
     crossinline range: (DTS) -> IntRange
 ) = validation {
-    it.count() !in range(it)
+    subject.count() !in range(subject)
 }
 
 fun <DT> Constraint<out Sequence<DT>>.sizeNotIn(range: IntRange) = sizeNotIn { range }
@@ -94,7 +94,7 @@ fun <DT> Constraint<out Sequence<DT>>.sizeNotIn(min: Int, max: Int) = sizeNotIn(
 inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.sizeEqualTo(
     crossinline value: (DTS) -> Int
 ) = validation {
-    it.count() == value(it)
+    subject.count() == value(subject)
 }
 
 fun <DT> Constraint<out Sequence<DT>>.sizeEqualTo(value: Int) = sizeEqualTo { value }
@@ -102,7 +102,7 @@ fun <DT> Constraint<out Sequence<DT>>.sizeEqualTo(value: Int) = sizeEqualTo { va
 inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.sizeNotEqualTo(
     crossinline value: (DTS) -> Int
 ) = validation {
-    it.count() != value(it)
+    subject.count() != value(subject)
 }
 
 fun <DT> Constraint<out Sequence<DT>>.sizeNotEqualTo(value: Int) = sizeNotEqualTo { value }
@@ -110,7 +110,7 @@ fun <DT> Constraint<out Sequence<DT>>.sizeNotEqualTo(value: Int) = sizeNotEqualT
 inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.contains(
     crossinline element: (DTS) -> DT
 ) = validation {
-    it.contains(element(it))
+    subject.contains(element(subject))
 }
 
 fun <DT> Constraint<out Sequence<DT>>.contains(
@@ -120,7 +120,7 @@ fun <DT> Constraint<out Sequence<DT>>.contains(
 inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.doesNotContain(
     crossinline element: (DTS) -> DT
 ) = validation {
-    !it.contains(element(it))
+    !subject.contains(element(subject))
 }
 
 fun <DT> Constraint<out Sequence<DT>>.doesNotContain(
@@ -132,7 +132,7 @@ inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.containsAt(
     crossinline element: (DTS) -> DT
 ) = validation {
     try {
-        it.elementAt(index) == element(it)
+        subject.elementAt(index) == element(subject)
     } catch (e: IndexOutOfBoundsException) {
         false
     }
@@ -147,7 +147,7 @@ inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.startsWith(
     crossinline element: (DTS) -> DT
 ) = validation {
     try {
-        it.first() == element(it)
+        subject.first() == element(subject)
     } catch (e: NoSuchElementException) {
         false
     }
@@ -161,7 +161,7 @@ inline fun <DT, DTS : Sequence<DT>> Constraint<DTS>.endsWith(
     crossinline element: (DTS) -> DT
 ) = validation {
     try {
-        it.last() == element(it)
+        subject.last() == element(subject)
     } catch (e: NoSuchElementException) {
         false
     }
@@ -173,8 +173,8 @@ fun <DT> Constraint<out Sequence<DT>>.endsWith(
 
 fun <DT, DTS : Sequence<DT>> Constraint<DTS>.containsAll(
     elements: (DTS) -> Sequence<DT>
-) = validation { validated ->
-    elements(validated).all { validated.contains(it) }
+) = validation {
+    elements(subject).all { subject.contains(it) }
 }
 
 fun <DT, DTS : Sequence<DT>> Constraint<DTS>.containsAll(
@@ -187,9 +187,9 @@ fun <DT, DTS : Sequence<DT>> Constraint<DTS>.containsAll(
 
 fun <DT, DTS : Sequence<DT>> Constraint<DTS>.isPartOf(
     elements: (DTS) -> Sequence<DT>
-) = validation { validated ->
-    val elementsList = elements(validated)
-    validated.all { elementsList.contains(it) }
+) = validation {
+    val elementsList = elements(subject)
+    subject.all { elementsList.contains(it) }
 }
 
 fun <DT, DTS : Sequence<DT>> Constraint<DTS>.isPartOf(
@@ -200,31 +200,31 @@ fun <DT, DTS : Sequence<DT>> Constraint<DTS>.isPartOf(
     elements: Sequence<DT>
 ) = isPartOf { elements }
 
-fun Constraint<out Sequence<Boolean>>.allTrue() = validation { validated ->
-    validated.all { it }
+fun Constraint<out Sequence<Boolean>>.allTrue() = validation {
+    subject.all { it }
 }
 
-fun Constraint<out Sequence<Boolean>>.anyTrue() = validation { validated ->
-    validated.any { it }
+fun Constraint<out Sequence<Boolean>>.anyTrue() = validation {
+    subject.any { it }
 }
 
-fun Constraint<out Sequence<Boolean>>.anyFalse() = validation { validated ->
-    validated.any { !it }
+fun Constraint<out Sequence<Boolean>>.anyFalse() = validation {
+    subject.any { !it }
 }
 
-fun Constraint<out Sequence<Boolean>>.allFalse() = validation { validated ->
-    validated.none { it }
+fun Constraint<out Sequence<Boolean>>.allFalse() = validation {
+    subject.none { it }
 }
 
 fun <DT, DTS : Sequence<DT>> Constraint<DTS>.contentEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: (DTS) -> Sequence<DT>
-) = validation { validated ->
-    validated.toList().contentEquals(
+) = validation {
+    subject.toList().contentEquals(
         ignoreDuplicates,
         ignoreOrder,
-        other(validated).toList()
+        other(subject).toList()
     )
 }
 
@@ -238,11 +238,11 @@ fun <DT, DTS : Sequence<DT>> Constraint<DTS>.contentNotEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: (DTS) -> Sequence<DT>
-) = validation { validated ->
-    validated.toList().contentNotEquals(
+) = validation {
+    subject.toList().contentNotEquals(
         ignoreDuplicates,
         ignoreOrder,
-        other(validated).toList()
+        other(subject).toList()
     )
 }
 

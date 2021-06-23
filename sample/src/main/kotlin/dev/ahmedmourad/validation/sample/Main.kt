@@ -84,7 +84,7 @@ data class Model internal constructor(
                         startsWith { "" }
                     }
                     validation {
-                        it.x.length == it.y?.length
+                        subject.x.length == subject.y?.length
                     }
                 }
                 on(Model::x) {
@@ -133,11 +133,11 @@ data class Model internal constructor(
                     }
                     maxLength { it.toInt() }
                     minLength(7)
-                    validation { it.length in 7..15 }
+                    validation { subject.length in 7..15 }
                 }
                 /* or */
                 validation { //validations can also operates on all properties of the data class
-                    it.v.length in 7..15
+                    subject.v.length in 7..15
                 }
             }
             constraint(violation = "ContainsNoDigits") {
@@ -149,13 +149,14 @@ data class Model internal constructor(
 
 //Custom validations
 fun <T : List<*>> Constraint<List<T>>.customValidation() = validation {
-    it.size > 5
+    subject.size > 5
 }
 
 //Dealing with type parameters or extra parameters
 class RandValidator<T : List<*>, M>(val x: String, val m: T, val c: List<T>, d: M) : Validator<Rand<T>> {
     override val constraints by describe {
         constraint("ad") {
+            val name = evaluate { subject.v }
 //            meta<M>("m") { throw RuntimeException() }
 //            meta<T>("t") { throw RuntimeException() }
             on(Rand<T>::v) ifExists {
@@ -167,7 +168,7 @@ class RandValidator<T : List<*>, M>(val x: String, val m: T, val c: List<T>, d: 
 
 //Custom scripts
 fun ConstraintBuilder<VSauce>.customScript() = validation {
-    it.v.length > 44
+    subject.v.length > 44
 }
 
 data class VSauce(val v: String) {

@@ -7,44 +7,44 @@ import kotlin.NoSuchElementException
 //TODO: CharArray, IntArray, CharIterator, IntIterator, ...
 inline fun <DT> Constraint<Array<DT>>.forAll(
     crossinline itemConstraint: Constraint<DT>.() -> Unit
-) = validation { validated ->
-    validated.all {
+) = validation {
+    subject.all {
         ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
     }
 }
 
 inline fun <DT> Constraint<Array<DT>>.forAny(
     crossinline itemConstraint: Constraint<DT>.() -> Unit
-) = validation { validated ->
-    validated.any {
+) = validation {
+    subject.any {
         ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
     }
 }
 
 inline fun <DT> Constraint<Array<DT>>.forNone(
     crossinline itemConstraint: Constraint<DT>.() -> Unit
-) = validation { validated ->
-    validated.none {
+) = validation {
+    subject.none {
         ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
     }
 }
 
 fun <DT> Constraint<Array<DT>>.isEmpty() = validation {
-    it.count() == 0
+    subject.count() == 0
 }
 
 fun <DT> Constraint<Array<DT>>.isNotEmpty() = validation {
-    it.count() > 0
+    subject.count() > 0
 }
 
 fun <DT> Constraint<Array<DT>>.isDistinct() = validation {
-    it.distinct().count() == it.count()
+    subject.distinct().count() == subject.count()
 }
 
 inline fun <DT> Constraint<Array<DT>>.minSize(
     crossinline min: (Array<DT>) -> Int
 ) = validation {
-    it.count() >= min(it)
+    subject.count() >= min(subject)
 }
 
 fun <DT> Constraint<Array<DT>>.minSize(min: Int) = minSize { min }
@@ -52,7 +52,7 @@ fun <DT> Constraint<Array<DT>>.minSize(min: Int) = minSize { min }
 inline fun <DT> Constraint<Array<DT>>.maxSize(
     crossinline max: (Array<DT>) -> Int
 ) = validation {
-    it.count() <= max(it)
+    subject.count() <= max(subject)
 }
 
 fun <DT> Constraint<Array<DT>>.maxSize(max: Int) = maxSize { max }
@@ -60,7 +60,7 @@ fun <DT> Constraint<Array<DT>>.maxSize(max: Int) = maxSize { max }
 inline fun <DT> Constraint<Array<DT>>.sizeLessThan(
     crossinline maxExclusive: (Array<DT>) -> Int
 ) = validation {
-    it.count() < maxExclusive(it)
+    subject.count() < maxExclusive(subject)
 }
 
 fun <DT> Constraint<Array<DT>>.sizeLessThan(maxExclusive: Int) = sizeLessThan { maxExclusive }
@@ -68,7 +68,7 @@ fun <DT> Constraint<Array<DT>>.sizeLessThan(maxExclusive: Int) = sizeLessThan { 
 inline fun <DT> Constraint<Array<DT>>.sizeLargerThan(
     crossinline minExclusive: (Array<DT>) -> Int
 ) = validation {
-    it.count() > minExclusive(it)
+    subject.count() > minExclusive(subject)
 }
 
 fun <DT> Constraint<Array<DT>>.sizeLargerThan(minExclusive: Int) = sizeLargerThan { minExclusive }
@@ -76,7 +76,7 @@ fun <DT> Constraint<Array<DT>>.sizeLargerThan(minExclusive: Int) = sizeLargerTha
 inline fun <DT> Constraint<Array<DT>>.sizeIn(
     crossinline range: (Array<DT>) -> IntRange
 ) = validation {
-    it.count() in range(it)
+    subject.count() in range(subject)
 }
 
 fun <DT> Constraint<Array<DT>>.sizeIn(range: IntRange) = sizeIn { range }
@@ -86,7 +86,7 @@ fun <DT> Constraint<Array<DT>>.sizeIn(min: Int, max: Int) = sizeIn(min..max)
 inline fun <DT> Constraint<Array<DT>>.sizeNotIn(
     crossinline range: (Array<DT>) -> IntRange
 ) = validation {
-    it.count() !in range(it)
+    subject.count() !in range(subject)
 }
 
 fun <DT> Constraint<Array<DT>>.sizeNotIn(range: IntRange) = sizeNotIn { range }
@@ -96,7 +96,7 @@ fun <DT> Constraint<Array<DT>>.sizeNotIn(min: Int, max: Int) = sizeNotIn(min..ma
 inline fun <DT> Constraint<Array<DT>>.sizeEqualTo(
     crossinline value: (Array<DT>) -> Int
 ) = validation {
-    it.count() == value(it)
+    subject.count() == value(subject)
 }
 
 fun <DT> Constraint<Array<DT>>.sizeEqualTo(value: Int) = sizeEqualTo { value }
@@ -104,7 +104,7 @@ fun <DT> Constraint<Array<DT>>.sizeEqualTo(value: Int) = sizeEqualTo { value }
 inline fun <DT> Constraint<Array<DT>>.sizeNotEqualTo(
     crossinline value: (Array<DT>) -> Int
 ) = validation {
-    it.count() != value(it)
+    subject.count() != value(subject)
 }
 
 fun <DT> Constraint<Array<DT>>.sizeNotEqualTo(value: Int) = sizeNotEqualTo { value }
@@ -112,25 +112,25 @@ fun <DT> Constraint<Array<DT>>.sizeNotEqualTo(value: Int) = sizeNotEqualTo { val
 inline fun <DT> Constraint<Array<DT>>.contains(
     crossinline element: (Array<DT>) -> DT
 ) = validation {
-    it.contains(element(it))
+    subject.contains(element(subject))
 }
 
 fun <DT> Constraint<Array<DT>>.contains(
     element: DT
 ) = validation {
-    it.contains(element)
+    subject.contains(element)
 }
 
 inline fun <DT> Constraint<Array<DT>>.doesNotContain(
     crossinline element: (Array<DT>) -> DT
 ) = validation {
-    !it.contains(element(it))
+    !subject.contains(element(subject))
 }
 
 fun <DT> Constraint<Array<DT>>.doesNotContain(
     element: DT
 ) = validation {
-    !it.contains(element)
+    !subject.contains(element)
 }
 
 inline fun <DT> Constraint<Array<DT>>.containsAt(
@@ -138,7 +138,7 @@ inline fun <DT> Constraint<Array<DT>>.containsAt(
     crossinline element: (Array<DT>) -> DT
 ) = validation {
     try {
-        it.elementAt(index) == element(it)
+        subject.elementAt(index) == element(subject)
     } catch (e: IndexOutOfBoundsException) {
         false
     }
@@ -149,7 +149,7 @@ fun <DT> Constraint<Array<DT>>.containsAt(
     element: DT
 ) = validation {
     try {
-        it.elementAt(index) == element
+        subject.elementAt(index) == element
     } catch (e: IndexOutOfBoundsException) {
         false
     }
@@ -159,7 +159,7 @@ inline fun <DT> Constraint<Array<DT>>.startsWith(
     crossinline element: (Array<DT>) -> DT
 ) = validation {
     try {
-        it.first() == element(it)
+        subject.first() == element(subject)
     } catch (e: NoSuchElementException) {
         false
     }
@@ -169,7 +169,7 @@ fun <DT> Constraint<Array<DT>>.startsWith(
     element: DT
 ) = validation {
     try {
-        it.first() == element
+        subject.first() == element
     } catch (e: NoSuchElementException) {
         false
     }
@@ -179,7 +179,7 @@ inline fun <DT> Constraint<Array<DT>>.endsWith(
     crossinline element: (Array<DT>) -> DT
 ) = validation {
     try {
-        it.last() == element(it)
+        subject.last() == element(subject)
     } catch (e: NoSuchElementException) {
         false
     }
@@ -189,7 +189,7 @@ fun <DT> Constraint<Array<DT>>.endsWith(
     element: DT
 ) = validation {
     try {
-        it.last() == element
+        subject.last() == element
     } catch (e: NoSuchElementException) {
         false
     }
@@ -197,54 +197,54 @@ fun <DT> Constraint<Array<DT>>.endsWith(
 
 fun <DT> Constraint<Array<DT>>.containsAll(
     elements: (Array<DT>) -> Array<DT>
-) = validation { validated ->
-    elements(validated).all { validated.contains(it) }
+) = validation {
+    elements(subject).all { subject.contains(it) }
 }
 
 fun <DT> Constraint<Array<DT>>.containsAll(
     vararg elements: DT
-) = validation { validated ->
-    elements.all { validated.contains(it) }
+) = validation {
+    elements.all { subject.contains(it) }
 }
 
 fun <DT> Constraint<Array<DT>>.isPartOf(
     elements: (Array<DT>) -> Array<DT>
-) = validation { validated ->
-    val elementsList = elements(validated)
-    validated.all { elementsList.contains(it) }
+) = validation {
+    val elementsList = elements(subject)
+    subject.all { elementsList.contains(it) }
 }
 
 fun <DT> Constraint<Array<DT>>.isPartOf(
     vararg elements: DT
-) = validation { validated ->
-    validated.all { elements.contains(it) }
+) = validation {
+    subject.all { elements.contains(it) }
 }
 
-fun Constraint<Array<Boolean>>.allTrue() = validation { validated ->
-    validated.all { it }
+fun Constraint<Array<Boolean>>.allTrue() = validation {
+    subject.all { it }
 }
 
-fun Constraint<Array<Boolean>>.anyTrue() = validation { validated ->
-    validated.any { it }
+fun Constraint<Array<Boolean>>.anyTrue() = validation {
+    subject.any { it }
 }
 
-fun Constraint<Array<Boolean>>.anyFalse() = validation { validated ->
-    validated.any { !it }
+fun Constraint<Array<Boolean>>.anyFalse() = validation {
+    subject.any { !it }
 }
 
-fun Constraint<Array<Boolean>>.allFalse() = validation { validated ->
-    validated.none { it }
+fun Constraint<Array<Boolean>>.allFalse() = validation {
+    subject.none { it }
 }
 
 fun <DT> Constraint<Array<DT>>.contentEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: (Array<DT>) -> Array<DT>
-) = validation { validated ->
-    validated.asList().contentEquals(
+) = validation {
+    subject.asList().contentEquals(
         ignoreDuplicates,
         ignoreOrder,
-        other(validated).asList()
+        other(subject).asList()
     )
 }
 
@@ -259,11 +259,11 @@ fun <DT> Constraint<Array<DT>>.contentNotEquals(
     ignoreDuplicates: Boolean,
     ignoreOrder: Boolean,
     other: (Array<DT>) -> Array<DT>
-) = validation { validated ->
-    validated.asList().contentNotEquals(
+) = validation {
+    subject.asList().contentNotEquals(
         ignoreDuplicates,
         ignoreOrder,
-        other(validated).asList()
+        other(subject).asList()
     )
 }
 

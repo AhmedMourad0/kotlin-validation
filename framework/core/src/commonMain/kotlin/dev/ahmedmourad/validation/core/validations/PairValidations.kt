@@ -6,11 +6,11 @@ import dev.ahmedmourad.validation.core.ScopedConstraintBuilder
 inline fun <A, B> Constraint<Pair<A, B>>.first(
     crossinline firstConstraint: Constraint<A>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<A>().apply(firstConstraint).validateAll(it.first)
+    ScopedConstraintBuilder<A>().apply(firstConstraint).validateAll(subject.first)
 }
 
 inline fun <A, B> Constraint<Pair<A, B>>.second(
     crossinline secondConstraint: Constraint<B>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<B>().apply(secondConstraint).validateAll(it.second)
+    ScopedConstraintBuilder<B>().apply(secondConstraint).validateAll(subject.second)
 }

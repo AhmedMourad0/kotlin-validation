@@ -6,8 +6,8 @@ import dev.ahmedmourad.validation.core.ScopedConstraintBuilder
 fun <DT : Any> Constraint<DT?>.ifExists(
     validations: Constraint<DT>.() -> Unit
 ) = this@ifExists.validation {
-    if (it != null) {
-        ScopedConstraintBuilder<DT>().apply(validations).validateAll(it)
+    if (subject != null) {
+        ScopedConstraintBuilder<DT>().apply(validations).validateAll(subject)
     } else {
         true
     }
@@ -16,17 +16,17 @@ fun <DT : Any> Constraint<DT?>.ifExists(
 fun <DT : Any> Constraint<DT?>.mustExist(
     validations: Constraint<DT>.() -> Unit
 ) = this@mustExist.validation {
-    if (it != null) {
-        ScopedConstraintBuilder<DT>().apply(validations).validateAll(it)
+    if (subject != null) {
+        ScopedConstraintBuilder<DT>().apply(validations).validateAll(subject)
     } else {
         false
     }
 }
 
 fun <DT : Any> Constraint<DT?>.exists() = validation {
-    it != null
+    subject != null
 }
 
 fun <DT : Any> Constraint<DT?>.doesNotExist() = validation {
-    it == null
+    subject == null
 }

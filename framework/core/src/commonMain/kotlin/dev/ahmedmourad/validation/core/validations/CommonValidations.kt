@@ -6,61 +6,61 @@ import dev.ahmedmourad.validation.core.ScopedConstraintBuilder
 inline fun <DT> Constraint<DT>.isEqualTo(
     crossinline other: (DT) -> DT
 ) = validation {
-    it == other(it)
+    subject == other(subject)
 }
 
 fun <DT> Constraint<DT>.isEqualTo(other: DT) = validation {
-    it == other
+    subject == other
 }
 
 inline fun <DT> Constraint<DT>.isNotEqualTo(
     crossinline other: (DT) -> DT
 ) = validation {
-    it != other(it)
+    subject != other(subject)
 }
 
 fun <DT> Constraint<DT>.isNotEqualTo(other: DT) = validation {
-    it != other
+    subject != other
 }
 
 inline fun <DT> Constraint<DT>.inValues(
     crossinline candidates: (DT) -> Iterable<DT>
 ) = validation {
-    it in candidates(it)
+    subject in candidates(subject)
 }
 
 fun <DT> Constraint<DT>.inValues(candidates: Iterable<DT>) = inValues { candidates }
 
 fun <DT> Constraint<DT>.inValues(vararg candidates: DT) = validation {
-    it in candidates
+    subject in candidates
 }
 
 inline fun <DT> Constraint<DT>.notInValues(
     crossinline candidates: (DT) -> Iterable<DT>
 ) = validation {
-    it !in candidates(it)
+    subject !in candidates(subject)
 }
 
 fun <DT> Constraint<DT>.notInValues(candidates: Iterable<DT>) = notInValues { candidates }
 
 fun <DT> Constraint<DT>.notInValues(vararg candidates: DT) = validation {
-    it !in candidates
+    subject !in candidates
 }
 
 inline fun <DT> Constraint<DT>.anyOf(
     crossinline constraint: Constraint<DT>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<DT>().apply { constraint() }.validateAny(it)
+    ScopedConstraintBuilder<DT>().apply { constraint() }.validateAny(subject)
 }
 
 inline fun <DT> Constraint<DT>.allOf(
     crossinline constraint: Constraint<DT>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<DT>().apply { constraint() }.validateAll(it)
+    ScopedConstraintBuilder<DT>().apply { constraint() }.validateAll(subject)
 }
 
 inline fun <DT> Constraint<DT>.noneOf(
     crossinline constraint: Constraint<DT>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<DT>().apply { constraint() }.validateNone(it)
+    ScopedConstraintBuilder<DT>().apply { constraint() }.validateNone(subject)
 }

@@ -398,7 +398,7 @@ class MapValidationsTests {
         constraint<Map<Int, Int?>> {
             entries {
                 forAll {
-                    validation { it.key == it.value }
+                    validation { subject.key == subject.value }
                 }
             }
         }.allMatch(

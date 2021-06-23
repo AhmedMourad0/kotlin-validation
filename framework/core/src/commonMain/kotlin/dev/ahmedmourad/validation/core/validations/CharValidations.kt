@@ -3,54 +3,54 @@ package dev.ahmedmourad.validation.core.validations
 import dev.ahmedmourad.validation.core.Constraint
 
 fun Constraint<Char>.isDefined() = validation {
-    it.isDefined()
+    subject.isDefined()
 }
 
 fun Constraint<Char>.isLetter() = validation {
-    it.isLetter()
+    subject.isLetter()
 }
 
 fun Constraint<Char>.isLetterOrDigit() = validation {
-    it.isLetterOrDigit()
+    subject.isLetterOrDigit()
 }
 
 fun Constraint<Char>.isDigit() = validation {
-    it.isDigit()
+    subject.isDigit()
 }
 
 fun Constraint<Char>.isISOControl() = validation {
-    it.isISOControl()
+    subject.isISOControl()
 }
 
 fun Constraint<Char>.isWhitespace() = validation {
-    it.isWhitespace()
+    subject.isWhitespace()
 }
 
 fun Constraint<Char>.isUpperCase() = validation {
-    it.isUpperCase()
+    subject.isUpperCase()
 }
 
 fun Constraint<Char>.isLowerCase() = validation {
-    it.isLowerCase()
+    subject.isLowerCase()
 }
 
 fun Constraint<Char>.isTitleCase() = validation {
-    it.isTitleCase()
+    subject.isTitleCase()
 }
 
 fun Constraint<Char>.isHighSurrogate() = validation {
-    it.isHighSurrogate()
+    subject.isHighSurrogate()
 }
 
 fun Constraint<Char>.isLowSurrogate() = validation {
-    it.isLowSurrogate()
+    subject.isLowSurrogate()
 }
 
 inline fun Constraint<Char>.isEqualTo(
     ignoreCase: Boolean,
     crossinline other: (Char) -> Char
 ) = validation {
-    it.equals(other(it), ignoreCase)
+    subject.equals(other(subject), ignoreCase)
 }
 
 fun Constraint<Char>.isEqualTo(
@@ -62,7 +62,7 @@ inline fun Constraint<Char>.isNotEqualTo(
     ignoreCase: Boolean,
     crossinline other: (Char) -> Char
 ) = validation {
-    !it.equals(other(it), ignoreCase)
+    !subject.equals(other(subject), ignoreCase)
 }
 
 fun Constraint<Char>.isNotEqualTo(
