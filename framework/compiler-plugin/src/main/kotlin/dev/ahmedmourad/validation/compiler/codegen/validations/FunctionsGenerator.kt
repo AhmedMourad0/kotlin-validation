@@ -190,7 +190,7 @@ internal class FunctionsGenerator : CodeSectionGenerator {
                     val valName = "${param.name}Descriptor"
 
                     """
-                    |val $valName = this.includedValidator[$index] as ${fqNameIncludedValidator.asString()}$includedValidatorTypeArgs
+                    |val $valName = this.includedValidators[$index] as ${fqNameIncludedValidator.asString()}$includedValidatorTypeArgs
                     |val ${param.name} = $valName.isValid(item.value) {
                     |    this.isValid { it }
                     |}
@@ -266,7 +266,7 @@ internal class FunctionsGenerator : CodeSectionGenerator {
                     val valName = "${arg.name}Descriptor"
 
                     """
-                    |val $valName = this.includedValidator[$index] as ${fqNameIncludedValidator.asString()}$includedValidatorTypeArgs
+                    |val $valName = this.includedValidators[$index] as ${fqNameIncludedValidator.asString()}$includedValidatorTypeArgs
                     |val ${arg.name} = $valName.findViolations(item.value) {
                     |    this.validate { it }
                     |}

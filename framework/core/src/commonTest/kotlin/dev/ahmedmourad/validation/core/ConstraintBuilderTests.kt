@@ -62,9 +62,8 @@ class ConstraintBuilderTests {
         }
 
         val expectedIncludedValidator = IncludedValidatorDescriptor<Model, Int, Validator<Int>>(
-            "someMeta",
-            Model::n
-        ) { _, _ -> intValidator }
+            "someMeta"
+        ) { subject.n to intValidator }
 
         val expected = ConstraintDescriptor(
             "SomeConstraint",
@@ -74,23 +73,17 @@ class ConstraintBuilderTests {
         )
 
         val actual = ConstraintBuilder<Model>(expected.violation).apply {
-            include(
-                expectedIncludedValidator.meta,
-                expectedIncludedValidator::getSubject,
-                expectedIncludedValidator::getValidator
-            )
+            include(expectedIncludedValidator.meta) {
+                expectedIncludedValidator.getBinding(subject)
+            }
         }.build()
 
-        val actualIncludedValidator = actual.includedValidator.first() as IncludedValidatorDescriptor<Model, Int, Validator<Int>>
+        val actualIncludedValidator = actual.includedValidators.first() as IncludedValidatorDescriptor<Model, Int, Validator<Int>>
 
         assertEquals(expectedIncludedValidator.meta, actualIncludedValidator.meta)
         assertEquals(
-            expectedIncludedValidator.getSubject(Model(5)),
-            actualIncludedValidator.getSubject(Model(5))
-        )
-        assertEquals(
-            expectedIncludedValidator.getValidator(Model(5), 5),
-            actualIncludedValidator.getValidator(Model(5), 5)
+            expectedIncludedValidator.getBinding(Model(5)),
+            actualIncludedValidator.getBinding(Model(5))
         )
     }
 
@@ -107,10 +100,8 @@ class ConstraintBuilderTests {
         }
 
         val expectedIncludedValidator = IncludedValidatorDescriptor<Int, Int, Validator<Int>>(
-            "someMeta",
-            { 5 },
-            { _, _ -> intValidator }
-        )
+            "someMeta"
+        ) { 5 to intValidator }
 
         val expected = ConstraintDescriptor(
             "SomeConstraint",
@@ -120,23 +111,17 @@ class ConstraintBuilderTests {
         )
 
         val actual = ConstraintBuilder<Int>(expected.violation).apply {
-            include(
-                expectedIncludedValidator.meta,
-                expectedIncludedValidator::getSubject,
-                expectedIncludedValidator::getValidator
-            )
+            include(expectedIncludedValidator.meta) {
+                expectedIncludedValidator.getBinding(subject)
+            }
         }.build()
 
-        val actualIncludedValidator = actual.includedValidator.first() as IncludedValidatorDescriptor<Int, Int, Validator<Int>>
+        val actualIncludedValidator = actual.includedValidators.first() as IncludedValidatorDescriptor<Int, Int, Validator<Int>>
 
         assertEquals(expectedIncludedValidator.meta, actualIncludedValidator.meta)
         assertEquals(
-            expectedIncludedValidator.getSubject(5),
-            actualIncludedValidator.getSubject(5)
-        )
-        assertEquals(
-            expectedIncludedValidator.getValidator(5, 5),
-            actualIncludedValidator.getValidator(5, 5)
+            expectedIncludedValidator.getBinding(5),
+            actualIncludedValidator.getBinding(5)
         )
     }
 
@@ -150,15 +135,14 @@ class ConstraintBuilderTests {
         val model = Model(5)
 
         val constraint = ConstraintBuilder<Int>("SomeConstraint").apply {
-            include(
-                "someMeta",
-                model::n,
-                { _, _ -> intValidator }
-            )
+            include("someMeta") {
+                model::n to intValidator
+            }
+
         }.build()
 
-        assertTrue(constraint.includedValidator.all { ic -> ic.isValid(7) { (it as Int) < 6 } })
-        assertFalse(constraint.includedValidator.all { ic -> ic.isValid(7) { (it as Int) > 6 } })
+        assertTrue(constraint.includedValidators.all { ic -> ic.isValid(7) { (it as Int) < 6 } })
+        assertFalse(constraint.includedValidators.all { ic -> ic.isValid(7) { (it as Int) > 6 } })
     }
 
     @Test

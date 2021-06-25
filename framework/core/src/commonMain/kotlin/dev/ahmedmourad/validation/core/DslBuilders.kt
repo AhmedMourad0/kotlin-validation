@@ -2,6 +2,7 @@ package dev.ahmedmourad.validation.core
 
 import kotlin.annotation.AnnotationRetention.*
 import kotlin.annotation.AnnotationTarget.*
+import kotlin.experimental.ExperimentalTypeInference
 import kotlin.reflect.KProperty0
 import kotlin.reflect.KProperty1
 
@@ -43,8 +44,8 @@ class ConstraintsBuilder<T : Any> internal constructor() {
         constraints.add(ConstraintBuilder<T>(violation).apply(description).build())
     }
 
-    fun <X> evaluate(evaluate: SubjectHolder<T>.() -> X): LazyValue<T, X> {
-        return LazyValue(evaluate)
+    fun <X> evaluate(evaluate: SubjectHolder<T>.() -> X): Lazy<T, X> {
+        return Lazy(evaluate)
     }
 
     internal fun build(): ValidatorDescriptor<T> = ValidatorDescriptor(constraints)
@@ -70,17 +71,18 @@ interface Constraint<DT> {
         validations: Constraint<DT1>.() -> Unit
     )
 
-    fun <X> evaluate(evaluate: SubjectHolder<DT>.() -> X): LazyValue<DT, X> {
-        return LazyValue(evaluate)
+    fun <X> evaluate(evaluate: SubjectHolder<DT>.() -> X): Lazy<DT, X> {
+        return Lazy(evaluate)
     }
 }
 
+@OptIn(ExperimentalTypeInference::class)
 @ValidationDslMarker
 class ConstraintBuilder<T : Any> internal constructor(
     private val violation: String
 ) : Constraint<T> {
 
-    private val includedValidator: MutableList<IncludedValidatorDescriptor<T, *, *>> = mutableListOf()
+    private val includedValidators: MutableList<IncludedValidatorDescriptor<T, *, *>> = mutableListOf()
     private val validations: MutableList<ValidationDescriptor<T>> = mutableListOf()
     private val metadata: MutableList<MetadataDescriptor<T, *>> = mutableListOf()
 
@@ -93,23 +95,40 @@ class ConstraintBuilder<T : Any> internal constructor(
         metadata.add(MetadataDescriptor(name, get))
     }
 
-    //TODO: combine both parameters of validator into a single object
     @Meta
+    @OverloadResolutionByLambdaReturnType
     fun <T1 : Any, @InclusionType @MetaType C : Validator<T1>> include(
         @MetaName meta: String,
-        property: (T) -> T1?,
-        validator: (T, T1) -> C
+        binding: SubjectHolder<T>.() -> Pair<T1?, C>
     ) {
-        includedValidator.add(IncludedValidatorDescriptor(meta, property, validator))
+        includedValidators.add(IncludedValidatorDescriptor(
+            meta,
+            binding
+        ))
     }
 
     @Meta
+    @OverloadResolutionByLambdaReturnType
     fun <T1 : Any, @InclusionType @MetaType C : Validator<T1>> include(
         @MetaName meta: String,
-        property: KProperty0<T1?>,
-        validator: (T, T1) -> C
+        binding: SubjectHolder<T>.() -> Pair<KProperty0<T1?>, C>
     ) {
-        include(meta, { property.get() }, validator)
+        include(meta) {
+            val (property, target) = binding.invoke(this)
+            property.invoke() to target
+        }
+    }
+
+    @Meta
+    @OverloadResolutionByLambdaReturnType
+    fun <T1 : Any, @InclusionType @MetaType C : Validator<T1>> include(
+        @MetaName meta: String,
+        binding: SubjectHolder<T>.() -> Pair<KProperty1<T, T1?>, C>
+    ) {
+        include(meta) {
+            val (property, target) = binding.invoke(this)
+            property.invoke(subject) to target
+        }
     }
 
     override fun <DT> on(
@@ -185,7 +204,7 @@ class ConstraintBuilder<T : Any> internal constructor(
 
     internal fun build(): ConstraintDescriptor<T> = ConstraintDescriptor(
         violation,
-        includedValidator,
+        includedValidators,
         validations,
         metadata
     )
@@ -293,7 +312,7 @@ class NullablePropertyScopedConstraint<T, DT : Any> internal constructor(
 }
 
 @ValidationDslMarker
-class LazyValue<DT, X>(
+class Lazy<DT, X>(
     private val evaluate: SubjectHolder<DT>.() -> X
 ) {
 
@@ -305,7 +324,7 @@ class LazyValue<DT, X>(
         return if (isInitialized) {
             item as X
         } else {
-            this@LazyValue.evaluate(holder).also {
+            this@Lazy.evaluate(holder).also {
                 item = it
             }
         }
@@ -314,16 +333,22 @@ class LazyValue<DT, X>(
 
 @ValidationDslMarker
 class SubjectHolder<DT>(val subject: DT) {
-    fun <X> LazyValue<DT, X>.get(): X {
+    fun <X> Lazy<DT, X>.get(): X {
         return this.get(this@SubjectHolder)
     }
 }
+
+@ValidationDslMarker
+class InclusionMetadata<T : Any, T1 : Any>(
+    val subject: T,
+    val target: T1
+)
 
 @Suppress("unused")
 // The receiver is needed to ensure dsl integrity
 // This lives outside of the interface to prevent overriding it
 fun <T : Any> Validator<T>.describe(
     description: ConstraintsBuilder<T>.() -> Unit
-): Lazy<ValidatorDescriptor<T>> {
+): kotlin.Lazy<ValidatorDescriptor<T>> {
     return lazy { ConstraintsBuilder<T>().apply(description).build() }
 }

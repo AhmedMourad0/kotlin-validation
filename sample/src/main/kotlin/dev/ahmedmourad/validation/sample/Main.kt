@@ -27,14 +27,14 @@ object SomeValidator : Validator<Int> {
             meta("name") { "Ahmed" }
 //            meta("name1") { "Ahmed" }
             meta("country") { "Egypt" }
-            include("ageViolations", { 22 }) { _, _ -> IntValidator }
-            include("heightViolations", { 185 }) { _, _ -> IntValidator }
+            include("ageViolations") { 22 to IntValidator }
+            include("heightViolations") { 185 to IntValidator }
         }
         constraint("AnotherThing") {
             meta("name") { "Ahmed" }
             meta("country") { "Egypt" }
-            include("ageViolations", { 22 }) { _, _ -> IntValidator }
-            include("heightViolations", { 185 }) { _, _ -> IntValidator }
+            include("ageViolations") { 22 to IntValidator }
+            include("heightViolations") { 185 to IntValidator }
         }
     }
 }
@@ -67,8 +67,8 @@ data class Model internal constructor(
                 meta<Number>("min") { 7 }
                 meta("max") { Rand(emptyList()) }
                 meta("len") { 56.567 }
-                include("nestedViolations", Model::n) { _, _ ->
-                    Nested.Companion
+                include("nestedViolations") {
+                    Model::n to Nested.Companion
                 }
 
                 on(Model::n) ifExists {

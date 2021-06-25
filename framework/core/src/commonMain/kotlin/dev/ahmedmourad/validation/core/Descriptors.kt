@@ -24,30 +24,27 @@ data class ValidatorDescriptor<T : Any> internal constructor(
 
 data class ConstraintDescriptor<T : Any> internal constructor(
     val violation: String,
-    val includedValidator: List<IncludedValidatorDescriptor<T, *, *>>,
+    val includedValidators: List<IncludedValidatorDescriptor<T, *, *>>,
     val validations: List<ValidationDescriptor<T>>,
     val metadata: List<MetadataDescriptor<T, *>>
 )
 
 data class IncludedValidatorDescriptor<T : Any, T1 : Any, C : Validator<T1>>(
     val meta: String,
-    private val subject: (T) -> T1?,
-    private val validator: (T, T1) -> C
+    private val binding: SubjectHolder<T>.() -> Pair<T1?, C>
 ) {
 
     @InternalValidationApi
-    fun getSubject(item: T) = subject.invoke(item)
-
-    @InternalValidationApi
-    fun getValidator(item: T, included: T1) = validator.invoke(item, included)
+    fun getBinding(item: T) = binding.invoke(SubjectHolder(item))
 
     @InternalValidationApi
     inline fun isValid(
         item: T,
         crossinline isValid: C.(T1) -> Boolean
     ): Boolean {
-        return getSubject(item)?.let {
-            getValidator(item, it).isValid(it)
+        val (target, validator) = getBinding(item)
+        return target?.let {
+            validator.isValid(it)
         } ?: true
     }
 
@@ -56,13 +53,14 @@ data class IncludedValidatorDescriptor<T : Any, T1 : Any, C : Validator<T1>>(
         item: T,
         crossinline validate: C.(T1) -> Case<Set<V>, T1>
     ): Set<V> {
-        return getSubject(item)?.let {
-            getValidator(item, it).validate(it).swap().orElse { emptySet() }
+        val (target, validator) = getBinding(item)
+        return target?.let {
+            validator.validate(it).swap().orElse { emptySet() }
         }.orEmpty()
     }
 }
 
-//TODO: both should accept a SubjectHolder instead, and
+//TODO: both, and IncludedValidator should accept a SubjectHolder instead, and
 // it should be created once at call site
 data class MetadataDescriptor<T : Any, P> internal constructor(
     val name: String,
