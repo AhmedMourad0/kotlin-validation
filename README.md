@@ -10,8 +10,8 @@ Check the samples for current syntax.
 - Support for adding properties to different violations
 - Support for Generics
 - Support providing extra parameters / type parameters to use during validation
-- Support validating the extra metadata to violations
-- Third-party classes validators
+- Support validating the extra parameters to validators
+- Support creating validators for Third-party classes.
 - Multiple validators per class
 - Validators composition
 - Ability to enforce classes to be validated before usage
@@ -23,6 +23,7 @@ Check the samples for current syntax.
 - Support doing logical operations on validations
 - Validations for elements of different containers
 - Easy-to-create custom validations
+- Arguments and returned values validation (on-the-fly validators)
 
 ## Roadmap
 - Providing ready-to-use validators (email, phone-number, ...)
@@ -31,7 +32,6 @@ Check the samples for current syntax.
 - K/Jvm ready-to-use validations
 - K/N ready-to-use validations
 - K/Js ready-to-use validations
-- Arguments and returned values validation (call-site validation)
 - (Arrow, Kotest, ...) extensions
 - Jetpack Compose support?
 - To suspend or not to suspend.
