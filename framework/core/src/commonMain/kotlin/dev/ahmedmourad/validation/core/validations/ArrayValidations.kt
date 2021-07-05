@@ -9,7 +9,7 @@ inline fun <DT> Constraint<Array<DT>>.forAll(
     crossinline itemConstraint: Constraint<DT>.() -> Unit
 ) = validation {
     subject.all {
-        ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
+        ScopedConstraintBuilder<DT>().apply(itemConstraint).matchesAll(it)
     }
 }
 
@@ -17,7 +17,7 @@ inline fun <DT> Constraint<Array<DT>>.forAny(
     crossinline itemConstraint: Constraint<DT>.() -> Unit
 ) = validation {
     subject.any {
-        ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
+        ScopedConstraintBuilder<DT>().apply(itemConstraint).matchesAll(it)
     }
 }
 
@@ -25,7 +25,7 @@ inline fun <DT> Constraint<Array<DT>>.forNone(
     crossinline itemConstraint: Constraint<DT>.() -> Unit
 ) = validation {
     subject.none {
-        ScopedConstraintBuilder<DT>().apply(itemConstraint).validateAll(it)
+        ScopedConstraintBuilder<DT>().apply(itemConstraint).matchesAll(it)
     }
 }
 

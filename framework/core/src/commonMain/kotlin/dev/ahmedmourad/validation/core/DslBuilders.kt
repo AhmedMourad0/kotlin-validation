@@ -137,7 +137,7 @@ class ConstraintBuilder<T : Any> internal constructor(
     ) = validation {
         ScopedConstraintBuilder<DT>()
             .apply(constraint)
-            .validateAll(property.invoke(this))
+            .matchesAll(property.invoke(this))
     }
 
     override fun <DT> on(
@@ -146,7 +146,7 @@ class ConstraintBuilder<T : Any> internal constructor(
     ) = validation {
         ScopedConstraintBuilder<DT>()
             .apply(constraint)
-            .validateAll(property.get())
+            .matchesAll(property.get())
     }
 
     override fun <DT> on(
@@ -155,7 +155,7 @@ class ConstraintBuilder<T : Any> internal constructor(
     ) = validation {
         ScopedConstraintBuilder<DT>()
             .apply(constraint)
-            .validateAll(property.get(subject))
+            .matchesAll(property.get(subject))
     }
 
     override fun <DT : Any> on(
@@ -183,7 +183,7 @@ class ConstraintBuilder<T : Any> internal constructor(
         if (item != null) {
             ScopedConstraintBuilder<DT>()
                 .apply(validations)
-                .validateAll(item)
+                .matchesAll(item)
         } else {
             true
         }
@@ -196,7 +196,7 @@ class ConstraintBuilder<T : Any> internal constructor(
         if (item != null) {
             ScopedConstraintBuilder<DT>()
                 .apply(validations)
-                .validateAll(item)
+                .matchesAll(item)
         } else {
             false
         }
@@ -226,7 +226,7 @@ class ScopedConstraintBuilder<DT> : Constraint<DT> {
     ) = validation {
         ScopedConstraintBuilder<DT1>()
             .apply(constraint)
-            .validateAll(property.invoke(this))
+            .matchesAll(property.invoke(this))
     }
 
     override fun <DT1> on(
@@ -235,7 +235,7 @@ class ScopedConstraintBuilder<DT> : Constraint<DT> {
     ) = validation {
         ScopedConstraintBuilder<DT1>()
             .apply(constraint)
-            .validateAll(property.get())
+            .matchesAll(property.get())
     }
 
     override fun <DT1> on(
@@ -244,7 +244,7 @@ class ScopedConstraintBuilder<DT> : Constraint<DT> {
     ) = validation {
         ScopedConstraintBuilder<DT1>()
             .apply(constraint)
-            .validateAll(property.get(subject))
+            .matchesAll(property.get(subject))
     }
 
     override fun <DT1 : Any> on(
@@ -272,7 +272,7 @@ class ScopedConstraintBuilder<DT> : Constraint<DT> {
         if (item != null) {
             ScopedConstraintBuilder<DT1>()
                 .apply(validations)
-                .validateAll(item)
+                .matchesAll(item)
         } else {
             true
         }
@@ -285,21 +285,21 @@ class ScopedConstraintBuilder<DT> : Constraint<DT> {
         if (item != null) {
             ScopedConstraintBuilder<DT1>()
                 .apply(validations)
-                .validateAll(item)
+                .matchesAll(item)
         } else {
             false
         }
     }
 
-    fun validateAll(item: DT): Boolean {
+    fun matchesAll(item: DT): Boolean {
         return validations.all { it.validate(item) }
     }
 
-    fun validateAny(item: DT): Boolean {
+    fun matchesAtLeastOne(item: DT): Boolean {
         return validations.any { it.validate(item) }
     }
 
-    fun validateNone(item: DT): Boolean {
+    fun matchesNone(item: DT): Boolean {
         return validations.none { it.validate(item) }
     }
 }
@@ -351,4 +351,10 @@ fun <T : Any> Validator<T>.describe(
     description: ConstraintsBuilder<T>.() -> Unit
 ): kotlin.Lazy<ValidatorDescriptor<T>> {
     return lazy { ConstraintsBuilder<T>().apply(description).build() }
+}
+
+fun <T> validator(
+    validations: ScopedConstraintBuilder<T>.() -> Unit
+): ScopedConstraintBuilder<T> {
+    return ScopedConstraintBuilder<T>().apply(validations)
 }

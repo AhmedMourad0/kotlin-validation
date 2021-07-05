@@ -9,7 +9,7 @@ fun <DT> constraint(constraint: Constraint<DT>.() -> Unit): ScopedConstraintBuil
 
 fun <DT> ScopedConstraintBuilder<DT>.allMatch(vararg items: DT): ScopedConstraintBuilder<DT> {
     val failed = items.filterNot {
-        this.validateAll(it)
+        this.matchesAll(it)
     }
     if (failed.isNotEmpty()) {
         throw AssertionError(
@@ -21,7 +21,7 @@ fun <DT> ScopedConstraintBuilder<DT>.allMatch(vararg items: DT): ScopedConstrain
 
 fun <DT> ScopedConstraintBuilder<DT>.allFail(vararg items: DT): ScopedConstraintBuilder<DT> {
     val matching = items.filter {
-        this.validateAll(it)
+        this.matchesAll(it)
     }
     if (matching.isNotEmpty()) {
         throw AssertionError(

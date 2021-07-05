@@ -94,11 +94,11 @@ fun <K, V> Constraint<Map<K, V>>.entries(
 fun <K, V> Constraint<Map.Entry<K, V>>.key(
     keyConstraint: Constraint<K>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<K>().apply(keyConstraint).validateAll(subject.key)
+    ScopedConstraintBuilder<K>().apply(keyConstraint).matchesAll(subject.key)
 }
 
 inline fun <K, V> Constraint<Map.Entry<K, V>>.value(
     crossinline valueConstraint: Constraint<V>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<V>().apply(valueConstraint).validateAll(subject.value)
+    ScopedConstraintBuilder<V>().apply(valueConstraint).matchesAll(subject.value)
 }

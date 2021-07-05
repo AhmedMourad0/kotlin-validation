@@ -50,17 +50,17 @@ fun <DT> Constraint<DT>.notInValues(vararg candidates: DT) = validation {
 inline fun <DT> Constraint<DT>.anyOf(
     crossinline constraint: Constraint<DT>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<DT>().apply { constraint() }.validateAny(subject)
+    ScopedConstraintBuilder<DT>().apply { constraint() }.matchesAtLeastOne(subject)
 }
 
 inline fun <DT> Constraint<DT>.allOf(
     crossinline constraint: Constraint<DT>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<DT>().apply { constraint() }.validateAll(subject)
+    ScopedConstraintBuilder<DT>().apply { constraint() }.matchesAll(subject)
 }
 
 inline fun <DT> Constraint<DT>.noneOf(
     crossinline constraint: Constraint<DT>.() -> Unit
 ) = validation {
-    ScopedConstraintBuilder<DT>().apply { constraint() }.validateNone(subject)
+    ScopedConstraintBuilder<DT>().apply { constraint() }.matchesNone(subject)
 }

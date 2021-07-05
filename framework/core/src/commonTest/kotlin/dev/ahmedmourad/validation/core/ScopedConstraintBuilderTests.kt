@@ -16,13 +16,13 @@ class ScopedConstraintBuilderTests {
             validation { true }
         }
 
-        assertTrue(constraint.validateAll(Unit))
+        assertTrue(constraint.matchesAll(Unit))
 
         val constraint1 = ScopedConstraintBuilder<Unit>().apply {
             validation { false }
         }
 
-        assertFalse(constraint1.validateAll(Unit))
+        assertFalse(constraint1.matchesAll(Unit))
     }
 
     @Test
@@ -34,8 +34,8 @@ class ScopedConstraintBuilderTests {
             }
         }
 
-        assertTrue(constraint.validateAll("12345"))
-        assertFalse(constraint.validateAll("123456"))
+        assertTrue(constraint.matchesAll("12345"))
+        assertFalse(constraint.matchesAll("123456"))
     }
 
     @Test
@@ -47,8 +47,8 @@ class ScopedConstraintBuilderTests {
             }
         }
 
-        assertTrue(constraint.validateAll("12345"))
-        assertFalse(constraint.validateAll("123456"))
+        assertTrue(constraint.matchesAll("12345"))
+        assertFalse(constraint.matchesAll("123456"))
     }
 
     @Test
@@ -60,8 +60,8 @@ class ScopedConstraintBuilderTests {
             }
         }
 
-        assertTrue(constraint.validateAll("12345"))
-        assertTrue(constraint.validateAll("123456"))
+        assertTrue(constraint.matchesAll("12345"))
+        assertTrue(constraint.matchesAll("123456"))
     }
 
     @Test
@@ -73,9 +73,9 @@ class ScopedConstraintBuilderTests {
             }
         }
 
-        assertTrue(constraint.validateAll(Model(null)))
-        assertTrue(constraint.validateAll(Model(3)))
-        assertFalse(constraint.validateAll(Model(6)))
+        assertTrue(constraint.matchesAll(Model(null)))
+        assertTrue(constraint.matchesAll(Model(3)))
+        assertFalse(constraint.matchesAll(Model(6)))
     }
 
     @Test
@@ -87,9 +87,9 @@ class ScopedConstraintBuilderTests {
             }
         }
 
-        assertFalse(constraint.validateAll(Model(null)))
-        assertTrue(constraint.validateAll(Model(3)))
-        assertFalse(constraint.validateAll(Model(6)))
+        assertFalse(constraint.matchesAll(Model(null)))
+        assertTrue(constraint.matchesAll(Model(3)))
+        assertFalse(constraint.matchesAll(Model(6)))
     }
 
     @Test
@@ -100,14 +100,14 @@ class ScopedConstraintBuilderTests {
             isEven()
         }
 
-        assertTrue(constraint.validateAll(-2))
-        assertTrue(constraint.validateAll(0))
-        assertTrue(constraint.validateAll(2))
-        assertFalse(constraint.validateAll(1))
-        assertFalse(constraint.validateAll(3))
-        assertFalse(constraint.validateAll(4))
-        assertFalse(constraint.validateAll(5))
-        assertFalse(constraint.validateAll(6))
+        assertTrue(constraint.matchesAll(-2))
+        assertTrue(constraint.matchesAll(0))
+        assertTrue(constraint.matchesAll(2))
+        assertFalse(constraint.matchesAll(1))
+        assertFalse(constraint.matchesAll(3))
+        assertFalse(constraint.matchesAll(4))
+        assertFalse(constraint.matchesAll(5))
+        assertFalse(constraint.matchesAll(6))
     }
 
     @Test
@@ -118,17 +118,17 @@ class ScopedConstraintBuilderTests {
             isEven()
         }
 
-        assertTrue(constraint.validateAny(-2))
-        assertTrue(constraint.validateAny(-1))
-        assertTrue(constraint.validateAny(0))
-        assertTrue(constraint.validateAny(1))
-        assertTrue(constraint.validateAny(2))
-        assertTrue(constraint.validateAny(3))
-        assertTrue(constraint.validateAny(4))
-        assertTrue(constraint.validateAny(6))
-        assertFalse(constraint.validateAny(5))
-        assertFalse(constraint.validateAny(7))
-        assertFalse(constraint.validateAny(9))
+        assertTrue(constraint.matchesAtLeastOne(-2))
+        assertTrue(constraint.matchesAtLeastOne(-1))
+        assertTrue(constraint.matchesAtLeastOne(0))
+        assertTrue(constraint.matchesAtLeastOne(1))
+        assertTrue(constraint.matchesAtLeastOne(2))
+        assertTrue(constraint.matchesAtLeastOne(3))
+        assertTrue(constraint.matchesAtLeastOne(4))
+        assertTrue(constraint.matchesAtLeastOne(6))
+        assertFalse(constraint.matchesAtLeastOne(5))
+        assertFalse(constraint.matchesAtLeastOne(7))
+        assertFalse(constraint.matchesAtLeastOne(9))
     }
 
     @Test
@@ -139,16 +139,16 @@ class ScopedConstraintBuilderTests {
             isEven()
         }
 
-        assertTrue(constraint.validateNone(5))
-        assertTrue(constraint.validateNone(7))
-        assertTrue(constraint.validateNone(9))
-        assertFalse(constraint.validateNone(-2))
-        assertFalse(constraint.validateNone(-1))
-        assertFalse(constraint.validateNone(0))
-        assertFalse(constraint.validateNone(1))
-        assertFalse(constraint.validateNone(2))
-        assertFalse(constraint.validateNone(3))
-        assertFalse(constraint.validateNone(4))
-        assertFalse(constraint.validateNone(6))
+        assertTrue(constraint.matchesNone(5))
+        assertTrue(constraint.matchesNone(7))
+        assertTrue(constraint.matchesNone(9))
+        assertFalse(constraint.matchesNone(-2))
+        assertFalse(constraint.matchesNone(-1))
+        assertFalse(constraint.matchesNone(0))
+        assertFalse(constraint.matchesNone(1))
+        assertFalse(constraint.matchesNone(2))
+        assertFalse(constraint.matchesNone(3))
+        assertFalse(constraint.matchesNone(4))
+        assertFalse(constraint.matchesNone(6))
     }
 }

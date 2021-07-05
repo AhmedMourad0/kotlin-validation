@@ -7,7 +7,7 @@ fun <DT : Any> Constraint<DT?>.ifExists(
     validations: Constraint<DT>.() -> Unit
 ) = this@ifExists.validation {
     if (subject != null) {
-        ScopedConstraintBuilder<DT>().apply(validations).validateAll(subject)
+        ScopedConstraintBuilder<DT>().apply(validations).matchesAll(subject)
     } else {
         true
     }
@@ -17,7 +17,7 @@ fun <DT : Any> Constraint<DT?>.mustExist(
     validations: Constraint<DT>.() -> Unit
 ) = this@mustExist.validation {
     if (subject != null) {
-        ScopedConstraintBuilder<DT>().apply(validations).validateAll(subject)
+        ScopedConstraintBuilder<DT>().apply(validations).matchesAll(subject)
     } else {
         false
     }
