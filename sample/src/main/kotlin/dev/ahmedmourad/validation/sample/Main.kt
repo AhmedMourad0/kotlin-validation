@@ -11,6 +11,15 @@ fun main() {
 //            "", null, emptyArray(), emptyList(), object : X {}
 //        ).copy()
 //    }
+
+    val x = validator<String> {
+        isNotBlank()
+        maxLength(17)
+    }
+
+    validator<String> {
+        x.asValidation()
+    }
 }
 
 @ValidatorConfig(subjectAlias = "LongInt")
@@ -70,7 +79,6 @@ data class Model internal constructor(
                 include("nestedViolations") {
                     Model::n to Nested.Companion
                 }
-
                 on(Model::n) ifExists {
                     on(Nested::x) {
                         maxLength { 14 }
