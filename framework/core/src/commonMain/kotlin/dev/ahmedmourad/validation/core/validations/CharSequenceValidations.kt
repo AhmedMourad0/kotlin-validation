@@ -179,3 +179,11 @@ fun <DT : CharSequence> Constraint<DT>.regionMatches(
 ) = validation {
     subject.regionMatches(thisOffset, other, otherOffset, length, ignoreCase)
 }
+
+fun <DT : CharSequence> Constraint<DT>.containsWhiteSpaces() = validation {
+    subject.contains(' ')
+}
+
+fun <DT : CharSequence> Constraint<DT>.doesNotContainWhiteSpaces() = validation {
+    !subject.contains(' ')
+}
