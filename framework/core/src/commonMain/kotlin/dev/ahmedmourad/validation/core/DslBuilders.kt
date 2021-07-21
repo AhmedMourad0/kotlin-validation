@@ -39,9 +39,9 @@ class ConstraintsBuilder<T : Any> internal constructor() {
 
     fun constraint(
         violation: String,
-        description: ConstraintBuilder<T>.() -> Unit
+        validations: ConstraintBuilder<T>.() -> Unit
     ) {
-        constraints.add(ConstraintBuilder<T>(violation).apply(description).build())
+        constraints.add(ConstraintBuilder<T>(violation).apply(validations).build())
     }
 
     fun <X> evaluate(evaluate: SubjectHolder<T>.() -> X): Lazy<T, X> {
@@ -56,12 +56,14 @@ interface Constraint<DT> {
 
     fun validation(validate: SubjectHolder<DT>.() -> Boolean)
 
-    fun <DT1> on(property: SubjectHolder<DT>.() -> DT1, constraint: Constraint<DT1>.() -> Unit)
-    fun <DT1> on(property: KProperty0<DT1>, constraint: Constraint<DT1>.() -> Unit)
-    fun <DT1> on(property: KProperty1<DT, DT1>, constraint: Constraint<DT1>.() -> Unit)
-    fun <DT1 : Any> on(property: SubjectHolder<DT>.() -> DT1?): NullablePropertyScopedConstraint<DT, DT1>
-    fun <DT1 : Any> on(property: KProperty0<DT1?>): NullablePropertyScopedConstraint<DT, DT1>
-    fun <DT1 : Any> on(property: KProperty1<DT, DT1?>): NullablePropertyScopedConstraint<DT, DT1>
+    fun <DT1> on(target: SubjectHolder<DT>.() -> DT1, validations: Constraint<DT1>.() -> Unit)
+    fun <DT1> on(target: Lazy<DT, DT1>, validations: Constraint<DT1>.() -> Unit)
+    fun <DT1> on(target: KProperty0<DT1>, validations: Constraint<DT1>.() -> Unit)
+    fun <DT1> on(target: KProperty1<DT, DT1>, validations: Constraint<DT1>.() -> Unit)
+    fun <DT1 : Any> on(target: SubjectHolder<DT>.() -> DT1?): NullablePropertyScopedConstraint<DT, DT1>
+    fun <DT1 : Any> on(target: Lazy<DT, DT1?>): NullablePropertyScopedConstraint<DT, DT1>
+    fun <DT1 : Any> on(target: KProperty0<DT1?>): NullablePropertyScopedConstraint<DT, DT1>
+    fun <DT1 : Any> on(target: KProperty1<DT, DT1?>): NullablePropertyScopedConstraint<DT, DT1>
 
     infix fun <DT1 : Any> NullablePropertyScopedConstraint<DT, DT1>.ifExists(
         validations: Constraint<DT1>.() -> Unit
@@ -91,8 +93,13 @@ class ConstraintBuilder<T : Any> internal constructor(
     }
 
     @Meta
-    fun <@MetaType P> meta(@MetaName name: String, get: SubjectHolder<T>.() -> P) {
-        metadata.add(MetadataDescriptor(name, get))
+    fun <@MetaType P> meta(@MetaName name: String, value: SubjectHolder<T>.() -> P) {
+        metadata.add(MetadataDescriptor(name, value))
+    }
+
+    @Meta
+    fun <@MetaType P> meta(@MetaName name: String, value: Lazy<T, P>) {
+        meta(name) { value.get() }
     }
 
     @Meta
@@ -132,48 +139,61 @@ class ConstraintBuilder<T : Any> internal constructor(
     }
 
     override fun <DT> on(
-        property: SubjectHolder<T>.() -> DT,
-        constraint: Constraint<DT>.() -> Unit
+        target: SubjectHolder<T>.() -> DT,
+        validations: Constraint<DT>.() -> Unit
     ) = validation {
         ScopedConstraintBuilder<DT>()
-            .apply(constraint)
-            .matchesAll(property.invoke(this))
+            .apply(validations)
+            .matchesAll(target.invoke(this))
     }
 
     override fun <DT> on(
-        property: KProperty0<DT>,
-        constraint: Constraint<DT>.() -> Unit
-    ) = validation {
-        ScopedConstraintBuilder<DT>()
-            .apply(constraint)
-            .matchesAll(property.get())
+        target: Lazy<T, DT>,
+        validations: Constraint<DT>.() -> Unit
+    ) {
+        on({ target.get() }, validations)
     }
 
     override fun <DT> on(
-        property: KProperty1<T, DT>,
-        constraint: Constraint<DT>.() -> Unit
+        target: KProperty0<DT>,
+        validations: Constraint<DT>.() -> Unit
     ) = validation {
         ScopedConstraintBuilder<DT>()
-            .apply(constraint)
-            .matchesAll(property.get(subject))
+            .apply(validations)
+            .matchesAll(target.get())
+    }
+
+    override fun <DT> on(
+        target: KProperty1<T, DT>,
+        validations: Constraint<DT>.() -> Unit
+    ) = validation {
+        ScopedConstraintBuilder<DT>()
+            .apply(validations)
+            .matchesAll(target.get(subject))
     }
 
     override fun <DT : Any> on(
-        property: SubjectHolder<T>.() -> DT?
+        target: SubjectHolder<T>.() -> DT?
     ): NullablePropertyScopedConstraint<T, DT> {
-        return NullablePropertyScopedConstraint(property)
+        return NullablePropertyScopedConstraint(target)
+    }
+
+    override fun <DT1 : Any> on(
+        target: Lazy<T, DT1?>
+    ): NullablePropertyScopedConstraint<T, DT1> {
+        return on { target.get() }
     }
 
     override fun <DT : Any> on(
-        property: KProperty0<DT?>
+        target: KProperty0<DT?>
     ): NullablePropertyScopedConstraint<T, DT> {
-        return on { property.get() }
+        return on { target.get() }
     }
 
     override fun <DT : Any> on(
-        property: KProperty1<T, DT?>
+        target: KProperty1<T, DT?>
     ): NullablePropertyScopedConstraint<T, DT> {
-        return on { property.get(subject) }
+        return on { target.get(subject) }
     }
 
     override infix fun <DT : Any> NullablePropertyScopedConstraint<T, DT>.ifExists(
@@ -221,48 +241,61 @@ class ScopedConstraintBuilder<DT> : Constraint<DT> {
     }
 
     override fun <DT1> on(
-        property: SubjectHolder<DT>.() -> DT1,
-        constraint: Constraint<DT1>.() -> Unit
+        target: SubjectHolder<DT>.() -> DT1,
+        validations: Constraint<DT1>.() -> Unit
     ) = validation {
         ScopedConstraintBuilder<DT1>()
-            .apply(constraint)
-            .matchesAll(property.invoke(this))
+            .apply(validations)
+            .matchesAll(target.invoke(this))
     }
 
     override fun <DT1> on(
-        property: KProperty0<DT1>,
-        constraint: Constraint<DT1>.() -> Unit
-    ) = validation {
-        ScopedConstraintBuilder<DT1>()
-            .apply(constraint)
-            .matchesAll(property.get())
+        target: Lazy<DT, DT1>,
+        validations: Constraint<DT1>.() -> Unit
+    ) {
+        on({ target.get() }, validations)
     }
 
     override fun <DT1> on(
-        property: KProperty1<DT, DT1>,
-        constraint: Constraint<DT1>.() -> Unit
+        target: KProperty0<DT1>,
+        validations: Constraint<DT1>.() -> Unit
     ) = validation {
         ScopedConstraintBuilder<DT1>()
-            .apply(constraint)
-            .matchesAll(property.get(subject))
+            .apply(validations)
+            .matchesAll(target.get())
+    }
+
+    override fun <DT1> on(
+        target: KProperty1<DT, DT1>,
+        validations: Constraint<DT1>.() -> Unit
+    ) = validation {
+        ScopedConstraintBuilder<DT1>()
+            .apply(validations)
+            .matchesAll(target.get(subject))
     }
 
     override fun <DT1 : Any> on(
-        property: SubjectHolder<DT>.() -> DT1?
+        target: SubjectHolder<DT>.() -> DT1?
     ): NullablePropertyScopedConstraint<DT, DT1> {
-        return NullablePropertyScopedConstraint(property)
+        return NullablePropertyScopedConstraint(target)
     }
 
     override fun <DT1 : Any> on(
-        property: KProperty0<DT1?>
+        target: Lazy<DT, DT1?>
     ): NullablePropertyScopedConstraint<DT, DT1> {
-        return on { property.get() }
+        return on { target.get() }
     }
 
     override fun <DT1 : Any> on(
-        property: KProperty1<DT, DT1?>
+        target: KProperty0<DT1?>
     ): NullablePropertyScopedConstraint<DT, DT1> {
-        return on { property.get(subject) }
+        return on { target.get() }
+    }
+
+    override fun <DT1 : Any> on(
+        target: KProperty1<DT, DT1?>
+    ): NullablePropertyScopedConstraint<DT, DT1> {
+        return on { target.get(subject) }
     }
 
     override infix fun <DT1 : Any> NullablePropertyScopedConstraint<DT, DT1>.ifExists(
@@ -289,6 +322,10 @@ class ScopedConstraintBuilder<DT> : Constraint<DT> {
         } else {
             false
         }
+    }
+
+    fun ScopedConstraintBuilder<DT>.asValidation() = this@ScopedConstraintBuilder.validation {
+        this@asValidation.matchesAll(subject)
     }
 
     fun matchesAll(item: DT): Boolean {
@@ -348,9 +385,9 @@ class InclusionMetadata<T : Any, T1 : Any>(
 // The receiver is needed to ensure dsl integrity
 // This lives outside of the interface to prevent overriding it
 fun <T : Any> Validator<T>.describe(
-    description: ConstraintsBuilder<T>.() -> Unit
+    constraints: ConstraintsBuilder<T>.() -> Unit
 ): kotlin.Lazy<ValidatorDescriptor<T>> {
-    return lazy { ConstraintsBuilder<T>().apply(description).build() }
+    return lazy { ConstraintsBuilder<T>().apply(constraints).build() }
 }
 
 fun <T> validator(
