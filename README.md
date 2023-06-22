@@ -17,7 +17,7 @@ nameValidator.matchesAll("") //false
 ```
 ### Type Validators
 #### Constraints
-You can define the domain rules for any type by implementing the `Validator` interface and creating a `constraint` for each rule:
+You can define the domain rules for any type by implementing the `Validator` interface:
 ```kotlin
 object PasswordValidator : Validator<String> {
     override val constraints by describe {
