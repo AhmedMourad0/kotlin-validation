@@ -42,7 +42,7 @@ class PasswordValidator(
             meta("min") { minUpperCaseLettersCount }
             meta("actual", count)
             if (minUpperCaseLettersCount != null) {
-                validator { count.get() >= minUpperCaseLettersCount }
+                validation { count.get() >= minUpperCaseLettersCount }
             }
         }
         constraint(violation = "FewLowerCaseLetters") {
@@ -50,7 +50,7 @@ class PasswordValidator(
             meta("min") { minLowerCaseLettersCount }
             meta("actual", count)
             if (minLowerCaseLettersCount != null) {
-                validator { count.get() >= minLowerCaseLettersCount }
+                validation { count.get() >= minLowerCaseLettersCount }
             }
         }
         constraint(violation = "FewDigits") {
@@ -58,7 +58,7 @@ class PasswordValidator(
             meta("min") { minDigitsCount }
             meta("actual", count)
             if (minDigitsCount != null) {
-                validator { count.get() >= minDigitsCount }
+                validation { count.get() >= minDigitsCount }
             }
         }
         constraint(violation = "FewSymbols") {
@@ -66,7 +66,7 @@ class PasswordValidator(
             meta("min") { minSymbolsCount }
             meta("actual", count)
             if (minSymbolsCount != null) {
-                validator { count.get() >= minSymbolsCount }
+                validation { count.get() >= minSymbolsCount }
             }
         }
         constraint(violation = "FewDistinctCharacters") {
@@ -74,7 +74,7 @@ class PasswordValidator(
             meta("min") { minDistinctCount }
             meta("actual", count)
             if (minDistinctCount != null) {
-                validator { count.get() >= minDistinctCount }
+                validation { count.get() >= minDistinctCount }
             }
         }
         constraint(violation = "OnlySequentialCharactersOrDigits") {

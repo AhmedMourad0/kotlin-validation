@@ -35,11 +35,20 @@ data class IncludedValidatorDescriptor<T : Any, T1 : Any, C : Validator<T1>>(
 ) {
 
     @InternalValidationApi
-    fun getBinding(item: T) = binding.invoke(SubjectHolder(item))
+    fun getBinding(item: T) = getBinding(SubjectHolder(item))
+
+    @InternalValidationApi
+    fun getBinding(item: SubjectHolder<T>) = binding.invoke(item)
 
     @InternalValidationApi
     inline fun isValid(
         item: T,
+        crossinline isValid: C.(T1) -> Boolean
+    ): Boolean = isValid(SubjectHolder(item), isValid)
+
+    @InternalValidationApi
+    inline fun isValid(
+        item: SubjectHolder<T>,
         crossinline isValid: C.(T1) -> Boolean
     ): Boolean {
         val (target, validator) = getBinding(item)
@@ -51,6 +60,12 @@ data class IncludedValidatorDescriptor<T : Any, T1 : Any, C : Validator<T1>>(
     @InternalValidationApi
     inline fun <V : Any> findViolations(
         item: T,
+        crossinline validate: C.(T1) -> Case<Set<V>, T1>
+    ): Set<V> = findViolations(SubjectHolder(item), validate)
+
+    @InternalValidationApi
+    inline fun <V : Any> findViolations(
+        item: SubjectHolder<T>,
         crossinline validate: C.(T1) -> Case<Set<V>, T1>
     ): Set<V> {
         val (target, validator) = getBinding(item)
@@ -66,11 +81,13 @@ data class MetadataDescriptor<T : Any, P> internal constructor(
     val name: String,
     private val get: SubjectHolder<T>.() -> P
 ) {
-    fun get(item: T) = get.invoke(SubjectHolder(item))
+    fun get(item: T) = get(SubjectHolder(item))
+    fun get(item: SubjectHolder<T>) = get.invoke(item)
 }
 
 data class ValidationDescriptor<DT> internal constructor(
     private val validate: SubjectHolder<DT>.() -> Boolean
 ) {
-    fun validate(item: DT) = validate.invoke(SubjectHolder(item))
+    fun validate(item: DT) = validate(SubjectHolder(item))
+    fun validate(item: SubjectHolder<DT>) = validate.invoke(item)
 }

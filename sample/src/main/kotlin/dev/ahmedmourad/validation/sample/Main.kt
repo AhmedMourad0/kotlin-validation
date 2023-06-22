@@ -5,6 +5,47 @@ import dev.ahmedmourad.validation.core.validations.*
 
 //import dev.ahmedmourad.validation.sample.validations.*
 
+object PasswordValidator : Validator<String> {
+    override val constraints by describe {
+        constraint("TooShort") {
+            minLength(7)
+        }
+        constraint("NoSymbols") {
+            listOf('@', '!', '^').forEach { char ->
+                doesNotContainChar(char)
+            }
+        }
+    }
+}
+
+data class Employee(
+    val name: String,
+    val age: Int
+) {
+    companion object : Validator<Employee> {
+        override val constraints by describe {
+            constraint("ShortName") {
+                on(Employee::name) {
+                    minLength(5)
+                }
+            }
+            constraint("NameContainsSymbols") {
+                on(Employee::name) {
+                    listOf('@', '!', '^').forEach { char ->
+                        containsChar(char)
+                    }
+                }
+            }
+            constraint("NegativeAge") {
+                validation { subject.age < 0 }
+                on(Employee::age) {
+                    validation { subject < 0 }
+                }
+            }
+        }
+    }
+}
+
 fun main() {
 //    Model.validate {
 //        Model(
@@ -12,9 +53,9 @@ fun main() {
 //        ).copy()
 //    }
 
-    val x = validator<String> {
+    val nameValidator = validator<String> {
         isNotBlank()
-        maxLength(17)
+        lengthIn(5..20)
     }
 
     validator<String> {

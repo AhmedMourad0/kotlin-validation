@@ -8,7 +8,9 @@ import dev.ahmedmourad.validation.compiler.utils.fqNameCase
 import dev.ahmedmourad.validation.compiler.utils.fqNameConstraintDescriptor
 import dev.ahmedmourad.validation.compiler.utils.fqNameIllegalFun
 import dev.ahmedmourad.validation.compiler.utils.fqNameLegalFun
-import dev.ahmedmourad.validation.compiler.utils.fqNameValidation
+import dev.ahmedmourad.validation.compiler.utils.fqNameValidationDescriptor
+import org.jetbrains.kotlin.descriptors.ConstructorDescriptor
+import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 
 //TODO: only generate copy and factory when annotated
 //TODO: inline??
@@ -21,10 +23,11 @@ internal class FunctionsGenerator : CodeSectionGenerator {
         fqNameSwapFun.asString(),
         fqNameOrElseFun.asString(),
         fqNameConstraintDescriptor.asString(),
-        fqNameValidation.asString(),
-        fqNameConstraintsDescriptor.asString(),
-        fqNameIncludedValidator.asString(),
-        fqNameInternalValidationApi.asString()
+        fqNameValidationDescriptor.asString(),
+        fqNameValidatorDescriptor.asString(),
+        fqNameIncludedValidatorDescriptor.asString(),
+        fqNameInternalValidationApi.asString(),
+        fqNameSubjectHolder.asString()
     ) + validatorDescriptor.violations.flatMap { violation ->
         violation.metas.flatMap { meta ->
             meta.includedValidator
@@ -37,12 +40,12 @@ internal class FunctionsGenerator : CodeSectionGenerator {
         validatorDescriptor: ValidatorDescriptor
     ): Set<String> {
         return setOfNotNull(
-            generateFactory(validatorDescriptor = validatorDescriptor),
-            generateIsValid(validatorDescriptor = validatorDescriptor),
-            generateValidate(validatorDescriptor = validatorDescriptor),
-            generateFindViolatedConstraints(validatorDescriptor = validatorDescriptor),
-            generateValidateNestedConstraints(validatorDescriptor = validatorDescriptor),
-            generateToViolation(validatorDescriptor = validatorDescriptor)
+            *generateFactories(validatorDescriptor).toTypedArray(),
+            generateIsValid(validatorDescriptor),
+            generateValidate(validatorDescriptor),
+            generateFindViolatedConstraints(validatorDescriptor),
+            generateValidateNestedConstraints(validatorDescriptor),
+            generateToViolation(validatorDescriptor)
         )
     }
 
@@ -67,12 +70,8 @@ internal class FunctionsGenerator : CodeSectionGenerator {
             |fun $validatorTypeParams$validatorFqName.isValid(
             |    createItem: $validationContext$validatorTypeParamsAsTypeArgs.() -> $subjectFqName
             |): Boolean {
-            |
-            |    val item = lazy {
-            |        createItem($validationContextInstantiation)
-            |    }
-            |
-            |    return findViolatedConstraints(item).isNotEmpty()
+            |    val holder = SubjectHolder(createItem($validationContextInstantiation))
+            |    return findViolatedConstraints(holder).isNotEmpty()
             |}
         """.trimMargin()
     }
@@ -99,24 +98,37 @@ internal class FunctionsGenerator : CodeSectionGenerator {
             |fun $validatorTypeParams$validatorFqName.validate(
             |    createItem: $validationContext$validatorTypeParamsAsTypeArgs.() -> $subjectFqName
             |): Case<Set<$violationsParent>, $subjectFqName> {
-            |
-            |    val item = lazy {
-            |        createItem($validationContextInstantiation)
-            |    }
-            |    
-            |    return findViolatedConstraints(item).map { it.toViolation$validatorTypeParamsAsTypeArgs(item) }
+            |    val holder = SubjectHolder(createItem($validationContextInstantiation))
+            |    return findViolatedConstraints(holder)
+            |        .map { it.toViolation$validatorTypeParamsAsTypeArgs(holder) }
             |        .toSet()
             |        .takeIf(Set<$violationsParent>::isNotEmpty)
-            |        ?.illegal() ?: item.value.legal()
+            |        ?.illegal() ?: holder.subject.legal()
             |}
         """.trimMargin()
     }
 
-    //TODO: generate a factory for each constructor (be careful with their visibility)
     //TODO: only generate factories for @MustBeValid annotated classes that live in the same module
-    private fun generateFactory(validatorDescriptor: ValidatorDescriptor): String? {
+    private fun generateFactories(
+        validatorDescriptor: ValidatorDescriptor
+    ): List<String> {
+        return validatorDescriptor.subjectClass
+            ?.constructors
+            ?.filter {
+                it.visibility in arrayOf(DescriptorVisibilities.INTERNAL, DescriptorVisibilities.PUBLIC)
+            }?.map {
+                generateFactoryForConstructor(validatorDescriptor, it)
+            }.orEmpty()
+    }
 
-        val subjectParams = validatorDescriptor.subjectParams ?: return null
+    private fun generateFactoryForConstructor(
+        validatorDescriptor: ValidatorDescriptor,
+        constructor: ConstructorDescriptor
+    ): String {
+
+        val visibility = constructor.visibility.name
+
+        val subjectParams = constructor.valueParameters
         val subjectFqName = validatorDescriptor.subjectFqName
         val subjectSimpleName = validatorDescriptor.subjectType.simpleName()
 
@@ -134,7 +146,7 @@ internal class FunctionsGenerator : CodeSectionGenerator {
         }
 
         return """
-            |fun $validatorTypeParams$validationContext$validatorTypeParamsAsTypeArgs.$subjectSimpleName(
+            |$visibility fun $validatorTypeParams$validationContext$validatorTypeParamsAsTypeArgs.$subjectSimpleName(
             |    $params
             |): $subjectFqName {
             |    return $subjectFqName(
@@ -157,12 +169,12 @@ internal class FunctionsGenerator : CodeSectionGenerator {
 
         return """
             |private fun $validatorTypeParams$validatorFqName.findViolatedConstraints(
-            |    item: kotlin.Lazy<$subjectFqName>
+            |    holder: SubjectHolder<$subjectFqName>
             |): Set<ConstraintDescriptor<$subjectFqName>> {
             |    return this.constraints.filterNot { constraint ->
             |        constraint.validations.all { validation ->
-            |            validation.validate(item.value)
-            |        } && constraint.validateNestedConstraints$validatorTypeParamsAsTypeArgs(item)
+            |            validation.validate(holder)
+            |        } && constraint.validateNestedConstraints$validatorTypeParamsAsTypeArgs(holder)
             |    }.toSet()
             |}
         """.trimMargin()
@@ -190,8 +202,8 @@ internal class FunctionsGenerator : CodeSectionGenerator {
                     val valName = "${param.name}Descriptor"
 
                     """
-                    |val $valName = this.includedValidators[$index] as ${fqNameIncludedValidator.asString()}$includedValidatorTypeArgs
-                    |val ${param.name} = $valName.isValid(item.value) {
+                    |val $valName = this.includedValidators[$index] as ${fqNameIncludedValidatorDescriptor.asString()}$includedValidatorTypeArgs
+                    |val ${param.name} = $valName.isValid(holder) {
                     |    this.isValid { it }
                     |}
                     """.trimMargin()
@@ -213,10 +225,10 @@ internal class FunctionsGenerator : CodeSectionGenerator {
         }
 
         return """
-            |@Suppress("UNCHECKED_CAST")
+            |@Suppress("UNCHECKED_CAST", "UNUSED_PARAMETER")
             |@OptIn(InternalValidationApi::class)
             |private fun ${validatorTypeParams}ConstraintDescriptor<$subjectFqName>.validateNestedConstraints(
-            |    item: kotlin.Lazy<$subjectFqName>
+            |    holder: SubjectHolder<$subjectFqName>
             |): Boolean {
             |    return when (this.violation) {
             |    
@@ -249,7 +261,7 @@ internal class FunctionsGenerator : CodeSectionGenerator {
             } else {
 
                 val regularArgs = violation.regularMetas.mapIndexed { index, arg ->
-                    "${arg.name} = this.metadata[$index].get(item.value) as ${arg.typeFqName}"
+                    "${arg.name} = this.metadata[$index].get(holder) as ${arg.typeFqName}"
                 }
 
                 val inclusionArgsList = violation.inclusionMetas
@@ -266,8 +278,8 @@ internal class FunctionsGenerator : CodeSectionGenerator {
                     val valName = "${arg.name}Descriptor"
 
                     """
-                    |val $valName = this.includedValidators[$index] as ${fqNameIncludedValidator.asString()}$includedValidatorTypeArgs
-                    |val ${arg.name} = $valName.findViolations(item.value) {
+                    |val $valName = this.includedValidators[$index] as ${fqNameIncludedValidatorDescriptor.asString()}$includedValidatorTypeArgs
+                    |val ${arg.name} = $valName.findViolations(holder) {
                     |    this.validate { it }
                     |}
                     """.trimMargin()
@@ -293,10 +305,10 @@ internal class FunctionsGenerator : CodeSectionGenerator {
         }
 
         return """
-            |@Suppress("UNCHECKED_CAST")
+            |@Suppress("UNCHECKED_CAST", "UNUSED_PARAMETER")
             |@OptIn(InternalValidationApi::class)
             |private fun ${validatorTypeParams}ConstraintDescriptor<$subjectFqName>.toViolation(
-            |    item: kotlin.Lazy<$subjectFqName>
+            |    holder: SubjectHolder<$subjectFqName>
             |): $violationsParent {
             |    return when (this.violation) {
             |    

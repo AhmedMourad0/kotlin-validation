@@ -6,8 +6,8 @@ import dev.ahmedmourad.validation.compiler.utils.*
 import org.jetbrains.kotlin.descriptors.ClassConstructorDescriptor
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.resolve.BindingContext
-import org.jetbrains.kotlin.resolve.calls.callUtil.getResolvedCall
-import org.jetbrains.kotlin.resolve.calls.callUtil.getValueArgumentsInParentheses
+import org.jetbrains.kotlin.resolve.calls.util.getResolvedCall
+import org.jetbrains.kotlin.resolve.calls.util.getValueArgumentsInParentheses
 import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
@@ -39,20 +39,12 @@ internal class ConstraintsAnalyser(
                     ?.containingDeclaration
                     ?.hasAnnotation(fqNameMustBeValid) == true
             }.toMutableList()
-//        throw RuntimeException(projectFiles.asSequence().flatMap {
-//            it.classesAndInnerClasses().map {
-//                it.superTypeListEntries.map {
-//                    it.typeReference?.kotlinType(bindingContext)
-//                }.toString()
-//            }
-//        }.toList().toString())
+
         val constraintsDescriptors = projectFiles.asSequence().flatMap {
             it.classesAndInnerClasses().filter { classOrObject ->
                 classOrObject.hasSuperType(bindingContext, fqNameValidator)
             }
-        }/*.also {
-            throw RuntimeException("XXXXXXXXXXXX${it.count()}")
-        }*/.mapNotNull { validator ->
+        }.mapNotNull { validator ->
 
             dslValidator.reportError(validator.nameAsSafeName.asString(), null)
 
@@ -84,7 +76,9 @@ internal class ConstraintsAnalyser(
 
             val subjectType = findSubjectType(validator) ?: return@mapNotNull null
 
-            val violationsDescriptors = constraintCalls.mapNotNull innerMap@{ violationResolvedCall ->
+            val violationsDescriptors = constraintCalls.also {
+                dslValidator.reportError(it.size.toString(), null)
+            }.mapNotNull innerMap@{ violationResolvedCall ->
                 val (name, nameExpression) = findViolationName(violationResolvedCall) ?: return@innerMap null
                 val metas = findAllMetas(violationResolvedCall) ?: return@innerMap null
                 ViolationDescriptor(
@@ -92,6 +86,8 @@ internal class ConstraintsAnalyser(
                     nameExpression,
                     metas
                 )
+            }.also {
+                dslValidator.reportError(it.size.toString(), null)
             }
 
             dslValidator.verifyNoDuplicateViolations(
@@ -105,7 +101,7 @@ internal class ConstraintsAnalyser(
             )
         }.onEach { descriptor ->
             unverifiedConstructorCalls.removeIf {
-                dslValidator.isConstructorCallIsAllowed(descriptor, it)
+                dslValidator.isConstructorCallAllowed(descriptor, it)
             }
         }
 
@@ -120,6 +116,8 @@ internal class ConstraintsAnalyser(
                 call.call.callElement
             )
         }
+
+        dslValidator.reportError("xxxxxxxxxxxxxxxxxx", null)
 
         return constraintsDescriptors
     }

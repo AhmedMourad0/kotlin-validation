@@ -29,7 +29,7 @@ open class ValidationSyntheticResolveExtension(
             val generatedCopyMethodIndex = result.findGeneratedCopyMethodIndex(thisDescriptor)
 
             if (generatedCopyMethodIndex == null) {
-                messageCollector?.error("Cannot find generated copy method!", thisDescriptor.findPsi())
+                messageCollector?.error("Cannot find generated copy method!", null)
                 return
             }
 

@@ -11,11 +11,11 @@ repositories {
 
 kotlin {
     jvm()
-    js {
-        browser()
-        nodejs()
-    }
-    ios()
+//    js(IR) {
+//        browser()
+//        nodejs()
+//    }
+//    ios()
     sourceSets {
         val commonMain by getting {
             dependencies {

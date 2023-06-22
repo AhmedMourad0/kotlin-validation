@@ -13,13 +13,14 @@ dependencies {
     compileOnly(kotlin("stdlib"))
     compileOnly(kotlin("compiler-embeddable"))
 
-    implementation("org.jetbrains.kotlin:kotlin-script-util:1.5.0") {
+    implementation("org.jetbrains.kotlin:kotlin-script-util:1.7.10") {
         exclude("org.jetbrains.kotlin", "kotlin-stdlib")
         exclude("org.jetbrains.kotlin", "kotlin-compiler")
         exclude("org.jetbrains.kotlin", "kotlin-compiler-embeddable")
     }
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.5.0")
-    implementation("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.5.0")
+    implementation("org.jetbrains.kotlin:kotlin-compiler:1.7.10")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.7.10")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.7.10")
 
     testImplementation(kotlin("stdlib"))
     testImplementation(kotlin("compiler-embeddable"))

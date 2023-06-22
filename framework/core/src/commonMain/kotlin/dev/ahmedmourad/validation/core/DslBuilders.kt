@@ -3,6 +3,7 @@ package dev.ahmedmourad.validation.core
 import kotlin.annotation.AnnotationRetention.*
 import kotlin.annotation.AnnotationTarget.*
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.jvm.JvmName
 import kotlin.reflect.KProperty0
 import kotlin.reflect.KProperty1
 
@@ -102,6 +103,7 @@ class ConstraintBuilder<T : Any> internal constructor(
         meta(name) { value.get() }
     }
 
+    @JvmName("include")
     @Meta
     @OverloadResolutionByLambdaReturnType
     fun <T1 : Any, @InclusionType @MetaType C : Validator<T1>> include(
@@ -114,6 +116,7 @@ class ConstraintBuilder<T : Any> internal constructor(
         ))
     }
 
+    @JvmName("include1")
     @Meta
     @OverloadResolutionByLambdaReturnType
     fun <T1 : Any, @InclusionType @MetaType C : Validator<T1>> include(
@@ -126,6 +129,7 @@ class ConstraintBuilder<T : Any> internal constructor(
         }
     }
 
+    @JvmName("include2")
     @Meta
     @OverloadResolutionByLambdaReturnType
     fun <T1 : Any, @InclusionType @MetaType C : Validator<T1>> include(
@@ -329,15 +333,15 @@ class ScopedConstraintBuilder<DT> : Constraint<DT> {
     }
 
     fun matchesAll(item: DT): Boolean {
-        return validations.all { it.validate(item) }
+        return validations.all { it.validate(SubjectHolder(item)) }
     }
 
-    fun matchesAtLeastOne(item: DT): Boolean {
-        return validations.any { it.validate(item) }
+    fun matchesAny(item: DT): Boolean {
+        return validations.any { it.validate(SubjectHolder(item)) }
     }
 
     fun matchesNone(item: DT): Boolean {
-        return validations.none { it.validate(item) }
+        return validations.none { it.validate(SubjectHolder(item)) }
     }
 }
 
@@ -390,6 +394,7 @@ fun <T : Any> Validator<T>.describe(
     return lazy { ConstraintsBuilder<T>().apply(constraints).build() }
 }
 
+//TODO: this exposes too many functions
 fun <T> validator(
     validations: ScopedConstraintBuilder<T>.() -> Unit
 ): ScopedConstraintBuilder<T> {

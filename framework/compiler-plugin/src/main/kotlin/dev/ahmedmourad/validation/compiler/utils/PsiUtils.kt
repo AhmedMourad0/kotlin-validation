@@ -45,7 +45,7 @@ internal fun Annotated.findAnnotation(fqName: FqName): AnnotationDescriptor? {
 }
 
 internal fun DeclarationDescriptor.ktFile(): KtFile? {
-    return findPsi()?.containingFile.safeAs()
+    return findPsi()?.containingFile.safeAs<KtFile>()
 }
 
 internal val KotlinType.fqNameSafe

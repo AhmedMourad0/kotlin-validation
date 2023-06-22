@@ -8,8 +8,8 @@ import dev.ahmedmourad.validation.compiler.utils.simpleName
 import dev.ahmedmourad.validation.compiler.dsl.DslValidator
 import org.jetbrains.kotlin.descriptors.ConstructorDescriptor
 import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
-import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.lazy.descriptors.LazyClassDescriptor
 import org.jetbrains.kotlin.types.KotlinType
@@ -42,12 +42,6 @@ internal class ValidatorDescriptor(
             .orEmpty()
     }
 
-    val subjectParams: List<ValueParameterDescriptor>? by lazy {
-        subjectClass?.constructors
-            ?.firstOrNull(ConstructorDescriptor::isPrimary)
-            ?.valueParameters
-    }
-
     val subjectFqName by lazy {
         subjectType
             .fqNameSafe
@@ -57,12 +51,11 @@ internal class ValidatorDescriptor(
 
     private val subjectAlias by lazy {
 
-        val (annotation, entry) = validatorClassOrObject.annotationEntries
-            .mapNotNull { annotationEntry ->
-                bindingContext.get(BindingContext.ANNOTATION, annotationEntry).takeIf {
-                    it?.fqName == fqNameValidatorConfig
-                } to annotationEntry
-            }.firstOrNull() ?: null to null
+        val (annotation, entry) = validatorClassOrObject.annotationEntries.firstNotNullOfOrNull { annotationEntry ->
+            bindingContext.get(BindingContext.ANNOTATION, annotationEntry).takeIf {
+                it?.fqName == fqNameValidatorConfig
+            } to annotationEntry
+        } ?: (null to null)
 
             annotation?.allValueArguments
             ?.get(paramSubjectAlias)

@@ -1,5 +1,6 @@
 package dev.ahmedmourad.validation.compiler.dsl
 
+import com.intellij.psi.PsiElement
 import dev.ahmedmourad.validation.compiler.descriptors.ValidatorDescriptor
 import dev.ahmedmourad.validation.compiler.descriptors.MetaDescriptor
 import dev.ahmedmourad.validation.compiler.utils.fqNameConstraintFun
@@ -9,14 +10,13 @@ import dev.ahmedmourad.validation.compiler.utils.simpleName
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.common.messages.MessageUtil
-import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.kotlin.psi.psiUtil.isIdentifier
 import org.jetbrains.kotlin.resolve.BindingContext
-import org.jetbrains.kotlin.resolve.calls.callUtil.getParentCall
-import org.jetbrains.kotlin.resolve.calls.callUtil.getResolvedCall
+import org.jetbrains.kotlin.resolve.calls.util.getParentCall
+import org.jetbrains.kotlin.resolve.calls.util.getResolvedCall
 import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
@@ -29,7 +29,7 @@ internal class DslValidator(
     private val messageCollector: MessageCollector
 ) {
 
-    internal fun isConstructorCallIsAllowed(
+    internal fun isConstructorCallAllowed(
         validatorDescriptor: ValidatorDescriptor,
         constructorResolvedCall: ResolvedCall<*>
     ): Boolean {
@@ -143,6 +143,7 @@ internal class DslValidator(
         nonStringLiteralMessage: String
     ): Pair<String, KtExpression>? {
         return try {
+            System.setProperty("kotlin.script.classpath", "kotlin-scripting-jsr223")
             val evaluated = KotlinJsr223JvmLocalScriptEngineFactory().scriptEngine.eval(nameExpression.text) as String
             if (evaluated.isIdentifier()) {
                 evaluated to nameExpression
@@ -153,6 +154,7 @@ internal class DslValidator(
                 )
             }
         } catch (e: Exception) {
+            throw e
             reportError(
                 nonStringLiteralMessage,
                 nameExpression

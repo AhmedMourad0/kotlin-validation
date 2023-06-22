@@ -16,14 +16,14 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     implementation("dev.ahmedmourad.validation:validation-core")
-    implementation("dev.ahmedmourad.validation:validation-validators")
-    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-script-util:1.5.0") {
+    implementation(project(":validators"))
+    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-script-util:1.7.10") {
         exclude("org.jetbrains.kotlin", "kotlin-stdlib")
         exclude("org.jetbrains.kotlin", "kotlin-compiler")
         exclude("org.jetbrains.kotlin", "kotlin-compiler-embeddable")
     }
-    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.5.0")
-    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.5.0")
+    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.7.10")
+    kotlinCompilerClasspath("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.7.10")
 //    kotlinCompilerClasspath("dev.ahmedmourad.validation:validation-core")
 }
 

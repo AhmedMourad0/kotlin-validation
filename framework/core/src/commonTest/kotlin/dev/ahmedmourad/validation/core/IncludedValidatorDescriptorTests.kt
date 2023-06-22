@@ -28,12 +28,12 @@ class IncludedValidatorDescriptorTests {
         }
     }
 
-    lateinit var includedValidator: IncludedValidatorDescriptor<String, Int, Validator<Int>>
+    private lateinit var includedValidator: IncludedValidatorDescriptor<String, Int, Validator<Int>>
 
     @BeforeTest
     fun setup() {
-        includedValidator = IncludedValidatorDescriptor("lengthViolations", String::length) { _, _ ->
-            IntValidator
+        includedValidator = IncludedValidatorDescriptor("lengthViolations") {
+            subject.length to IntValidator
         }
     }
 

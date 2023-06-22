@@ -118,17 +118,17 @@ class ScopedConstraintBuilderTests {
             isEven()
         }
 
-        assertTrue(constraint.matchesAtLeastOne(-2))
-        assertTrue(constraint.matchesAtLeastOne(-1))
-        assertTrue(constraint.matchesAtLeastOne(0))
-        assertTrue(constraint.matchesAtLeastOne(1))
-        assertTrue(constraint.matchesAtLeastOne(2))
-        assertTrue(constraint.matchesAtLeastOne(3))
-        assertTrue(constraint.matchesAtLeastOne(4))
-        assertTrue(constraint.matchesAtLeastOne(6))
-        assertFalse(constraint.matchesAtLeastOne(5))
-        assertFalse(constraint.matchesAtLeastOne(7))
-        assertFalse(constraint.matchesAtLeastOne(9))
+        assertTrue(constraint.matchesAny(-2))
+        assertTrue(constraint.matchesAny(-1))
+        assertTrue(constraint.matchesAny(0))
+        assertTrue(constraint.matchesAny(1))
+        assertTrue(constraint.matchesAny(2))
+        assertTrue(constraint.matchesAny(3))
+        assertTrue(constraint.matchesAny(4))
+        assertTrue(constraint.matchesAny(6))
+        assertFalse(constraint.matchesAny(5))
+        assertFalse(constraint.matchesAny(7))
+        assertFalse(constraint.matchesAny(9))
     }
 
     @Test

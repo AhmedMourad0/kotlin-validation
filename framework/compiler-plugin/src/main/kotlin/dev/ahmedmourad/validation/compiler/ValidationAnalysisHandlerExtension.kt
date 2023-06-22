@@ -1,17 +1,17 @@
 package dev.ahmedmourad.validation.compiler
 
+import com.intellij.openapi.project.Project
 import dev.ahmedmourad.validation.compiler.codegen.CodeGenerator
 import dev.ahmedmourad.validation.compiler.dsl.DslValidator
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.com.intellij.openapi.project.Project
 import org.jetbrains.kotlin.container.ComponentProvider
 import org.jetbrains.kotlin.context.ProjectContext
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.BindingTrace
-import org.jetbrains.kotlin.resolve.jvm.extensions.AnalysisHandlerExtension
+import org.jetbrains.kotlin.resolve.extensions.AnalysisHandlerExtension
 
 internal fun interface CodeGeneratorFactory {
     fun create(bindingContext: BindingContext, dslValidator: DslValidator): CodeGenerator
