@@ -1,5 +1,5 @@
 # Kotlin-Validation
-#### *(Under Development)*
+#### *Under Development*
 A multiplatform, declarative, flexible and type-safe Kotlin validation framework.
 
 ## Motivation
