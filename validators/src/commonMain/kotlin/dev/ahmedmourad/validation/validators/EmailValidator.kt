@@ -4,7 +4,7 @@ import dev.ahmedmourad.validation.core.*
 import dev.ahmedmourad.validation.core.validations.*
 
 @ValidatorConfig(subjectAlias = "Email")
-class EmailValidator : Validator<String> {
+object EmailValidator : Validator<String> {
     override val constraints by describe {
         val elements = evaluate { subject.split('@') }
         constraint(violation = "MalformedEmail") {

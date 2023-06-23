@@ -108,7 +108,8 @@ internal class FunctionsGenerator : CodeSectionGenerator {
         """.trimMargin()
     }
 
-    //TODO: only generate factories for @MustBeValid annotated classes that live in the same module
+    //TODO: must only generate factories for @MustBeValid annotated classes
+    // will have to make sure to import the subject class if it doesn't have a factory
     private fun generateFactories(
         validatorDescriptor: ValidatorDescriptor
     ): List<String> {

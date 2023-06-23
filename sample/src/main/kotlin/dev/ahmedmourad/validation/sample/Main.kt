@@ -18,6 +18,33 @@ object PasswordValidator : Validator<String> {
     }
 }
 
+object Email
+object Password
+
+object EmailValidator : Validator<Email> {
+    //...
+}
+
+class PasswordValidator(private val minLength: Int, /*..*/) : Validator<Password> {
+    //...
+}
+
+data class User(val email: Email, val password: Password)
+object UserValidator : Validator<User> {
+    override val constraints by describe {
+        constraint("InvalidEmail") {
+            include("violations") {
+                User::email to EmailValidator
+            }
+        }
+        constraint("InvalidPassword") {
+            include("violations") {
+                User::password to PasswordValidator(minLength = 6)
+            }
+        }
+    }
+}
+
 data class Employee(
     val name: String,
     val age: Int
@@ -196,9 +223,33 @@ data class Model internal constructor(
     }
 }
 
+data class Person(
+    val name: String?,
+    val age: Int?
+) {
+    companion object : Validator<Person> {
+        override val constraints by describe {
+            constraint("NameBlankOrNull") {
+                //constraint is violated if name is null
+                on(Person::name) {
+                    mustExist {
+                        isNotBlank()
+                    }
+                }
+            }
+            constraint("NegativeAge") {
+                //age is only validated if it's not null
+                on(Person::age) ifExists {
+                    isNegative(orZero = false)
+                }
+            }
+        }
+    }
+}
+
 //Custom validations
-fun <T : List<*>> Constraint<List<T>>.customValidation() = validation {
-    subject.size > 5
+fun Constraint<List<Int>>.hasEvenSum() = validation {
+    subject.sum() % 2 == 0
 }
 
 //Dealing with type parameters or extra parameters
@@ -209,15 +260,16 @@ class RandValidator<T : List<*>, M>(val x: String, val m: T, val c: List<T>, d: 
 //            meta<M>("m") { throw RuntimeException() }
 //            meta<T>("t") { throw RuntimeException() }
             on(Rand<T>::v) ifExists {
-                customValidation()
+//                customValidation()
             }
         }
     }
 }
 
-//Custom scripts
-fun ConstraintBuilder<VSauce>.customScript() = validation {
-    subject.v.length > 44
+fun ConstraintBuilder<VSauce>.customScript() {
+    on(VSauce::v) {
+        isNotBlank()
+    }
 }
 
 data class VSauce(val v: String) {
