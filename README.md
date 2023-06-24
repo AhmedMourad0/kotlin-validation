@@ -5,7 +5,7 @@ A multiplatform, declarative, flexible and type-safe Kotlin validation framework
 ## Motivation
 Kotlin is a fantastic language, however, it becomes quite challenging when it comes to creating robust domain models that follow strict domain rules, and it turns into pure boilerplate when you decide to compose those models.
 
-Other available validation libraries rely on string matching which is a no-go if you seek type safety.
+Other available validation libraries rely on string matching which is a no-go if you seek type-safety.
 
 ## Terminology
 - **Validation:** A single type-specific check, such as `maxLength` or `isNotBlank`
