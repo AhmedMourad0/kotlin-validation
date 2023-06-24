@@ -74,7 +74,7 @@ object PasswordValidator : Validator<String> {
     override val constraints by describe {
         constraint("TooShort") {
             meta("min") { 7 }
-            meta("actual") { subject.length } //subject refers to the instance being validated
+            meta("actual") { subject.length } //subject refers to the item being validated
             minLength(7)
         }
         //...
