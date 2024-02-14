@@ -2,7 +2,8 @@ package dev.ahmedmourad.validation.sample
 
 import dev.ahmedmourad.validation.core.*
 import dev.ahmedmourad.validation.core.validations.*
-
+import dev.ahmedmourad.validation.validators.EmailValidator
+import dev.ahmedmourad.validation.validators.PasswordValidator
 //import dev.ahmedmourad.validation.sample.validations.*
 
 object PasswordValidator : Validator<String> {
@@ -11,25 +12,16 @@ object PasswordValidator : Validator<String> {
             minLength(7)
         }
         constraint("NoSymbols") {
-            listOf('@', '!', '^').forEach { char ->
-                doesNotContainChar(char)
+            noneOf {
+                listOf('@', '!', '^').forEach { char ->
+                    containsChar(char)
+                }
             }
         }
     }
 }
 
-object Email
-object Password
-
-object EmailValidator : Validator<Email> {
-    //...
-}
-
-class PasswordValidator(private val minLength: Int, /*..*/) : Validator<Password> {
-    //...
-}
-
-data class User(val email: Email, val password: Password)
+data class User(val email: String, val password: String)
 object UserValidator : Validator<User> {
     override val constraints by describe {
         constraint("InvalidEmail") {
@@ -74,6 +66,7 @@ data class Employee(
 }
 
 fun main() {
+
 //    Model.validate {
 //        Model(
 //            "", null, emptyArray(), emptyList(), object : X {}
@@ -85,8 +78,11 @@ fun main() {
         lengthIn(5..20)
     }
 
-    validator<String> {
-        x.asValidation()
+    nameValidator.matchesAll("Hello")
+
+    validator {
+        contains(portion = "Hello")
+        nameValidator.asValidation()
     }
 }
 
@@ -102,7 +98,6 @@ object SomeValidator : Validator<Int> {
     override val constraints by describe {
         constraint("Something") {
             meta("name") { "Ahmed" }
-//            meta("name1") { "Ahmed" }
             meta("country") { "Egypt" }
             include("ageViolations") { 22 to IntValidator }
             include("heightViolations") { 185 to IntValidator }
